@@ -3,44 +3,46 @@
 using JuMP 
 using Gurobi
 using DataFrames
-
+using Mosek 
+using MosekTools
 include("utility.jl")
 
-P = ["pv", "gas", "wind", "coal"]
+# %%
+begin 
+    plants = DataFrame(
+        P = ["pv", "gas", "wind", "coal"],
+        mc = [0, 50, 0, 30],
+        gmax = [80, 150, 120, 300],
+        node = ["N1", "N1", "N2", "N3"]
+    );
 
-plants = DataFrame(
-    P = ["pv", "gas", "wind", "coal"],
-    mc = [0, 50, 0, 30],
-    gmax = [80, 150, 120, 300],
-    node = ["N1", "N1", "N2", "N3"]
-);
+    nodes = DataFrame(
+        N = ["N1", "N2", "N3"],
+        demand = [150, 30, 200],
+        slack = [false, false, true]
+    );
 
-nodes = DataFrame(
-    N = ["N1", "N2", "N3"],
-    demand = [150, 30, 200],
-    slack = [false, false, true]
-);
+    lines = DataFrame(
+        L = ["L1", "L2", "L3"],
+        from = ["N2", "N3", "N2"],
+        to = ["N1", "N1", "N3"],
+        fmax = [40, 100, 100],
+        susceptance = [1, 1, 2]
 
-lines = DataFrame(
-    L = ["L1", "L2", "L3"],
-    from = ["N2", "N3", "N2"],
-    to = ["N1", "N1", "N3"],
-    fmax = [40, 100, 100],
-    susceptance = [1, 1, 2]
+    );
 
-);
+    P = plants[:, :P]
+    N = nodes[:, :N]
+    L = lines[:, :L]
 
-P = plants[:, :P]
-N = nodes[:, :N]
-L = lines[:, :L]
+    mc = Dict(k => v for (k,v) in eachrow(plants[:, [:P, :mc]]))
+    gmax = Dict(k => v for (k,v) in  eachrow(plants[:, [:P, :gmax]]))
+    map_np = Dict(k => v for (k,v) in eachrow(plants[:, [:P, :node]]))
+    map_pn = Dict(n => filter(row -> row.node == n, plants)[:, :P] for n in N)
+    demand =  Dict(k => v for (k,v) in eachrow(nodes[:, [:N, :demand]]))
 
-mc = Dict(k => v for (k,v) in eachrow(plants[:, [:P, :mc]]))
-gmax = Dict(k => v for (k,v) in  eachrow(plants[:, [:P, :gmax]]))
-map_np = Dict(k => v for (k,v) in eachrow(plants[:, [:P, :node]]))
-map_pn = Dict(n => filter(row -> row.node == n, plants)[:, :P] for n in N)
-demand =  Dict(k => v for (k,v) in eachrow(nodes[:, [:N, :demand]]))
-
-ptdf = calculate_ptdf(nodes, lines)
+    ptdf = calculate_ptdf(nodes, lines)
+end
 
 # Dispatch 
 dispatch = Model(with_optimizer(Gurobi.Optimizer))
@@ -74,41 +76,59 @@ function subproblem(g, G_prev, lambda)
     set_silent(sub)
     @variable(sub, 0 <= G <= gmax[g]);
     @expression(sub, penalty_term, 
-        ((sum(values(demand)) - G - sum(G_prev[p] for p in setdiff(P, [g])))^2)
+        ( G + sum(G_prev[p] for p in setdiff(P, [g])) - sum(values(demand)))^2
     );
     @objective(sub, Min, mc[g] * G - lambda * G + gamma/2 * penalty_term)
     optimize!(sub)
     return value.(G)
 end
 
-G_prev = Dict(k => v for (k,v) in zip(P, [0. 0. 100. 100.]))
-# G_prev = Dict(k => v for (k,v) in zip(P, [80. 0. 120. 180.]))
-lambda = [10.]
-gamma = 0.2
-for i in 1:100
-    # i = 1
-    G_new = Dict(k => v for (k,v) in zip(P, [0. 0. 0. 0.]))
-    println("Iteration $(i) with lambda $(lambda[end])")
-    for p in P
-        G_new[p] = subproblem(p, G_prev, lambda[end])
-        print("$(p): old  $(G_prev[p]) - new $(G_new[p]). ")
+function subproblem(g, G_prev, lambda)
+    sub = Model(with_optimizer(Mosek.Optimizer))
+    set_silent(sub)
+    @variable(sub, 0 <= G <= gmax[g]);
+    @variable(sub, T >= 0)
+
+    @constraint(sub, penalty_term, 
+        [T, sum(values(demand)) - G - sum(G_prev[p] for p in setdiff(P, [g]))] in SecondOrderCone()
+    );
+    @objective(sub, Min, mc[g] * G - lambda * G + gamma/2 * T);
+
+    optimize!(sub)
+    return value.(G)
+end
+
+begin
+    G_prev = Dict(k => v for (k,v) in zip(P, [80. 0. 100. 100.]))
+    G_prev = Dict(k => v for (k,v) in zip(P, [80. 0. 120. 180.]))
+    lambda = [10.]
+    gamma = 0.3
+    rho = 0.1
+    for i in 1:200
+        G_new = Dict(k => v for (k,v) in zip(P, [0. 0. 0. 0.]))
+        for p in P
+            G_new[p] = subproblem(p, G_prev, lambda[end])
+        end
+        G_prev = G_new
+        lambda_new = lambda[end] + rho * gamma * (sum(values(demand)) - sum(values(G_new)))
+        push!(lambda, lambda_new)
     end
-    print("\n")
-    G_prev = G_new
-    lambda_new = lambda[end] + 0.5 * gamma * (sum(values(demand)) - sum(values(G_new)))
-    push!(lambda, lambda_new)
+    result = copy(plants)
+    result[!, :G_admm] = [G_prev[p] for p in P]
+    println(result)
+    println("Total Demand: ", sum(values(demand)))
+    println("Total Generation: ", sum(values(G_prev)))
 end
 
 lambda
 plants
 G_prev
 
+
+
+# ADMM OPF Generators
 T = Dict(k => v for (k,v) in zip(N, ptdf[1, :]))
 fmax = 40
-
-# ADMM Nodes
-# ADMM Generators
-
 function subproblem(g, G_prev, R_ref_prev, R_cref_prev, lambda, mu_ref, mu_cref)
     sub = Model(with_optimizer(Gurobi.Optimizer))
     set_silent(sub)
