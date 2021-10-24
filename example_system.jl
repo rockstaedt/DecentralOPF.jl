@@ -1,7 +1,5 @@
 using DataFrames
 
-include("utility.jl")
-
 P = ["pv", "gas", "wind", "coal"]
 
 plants = DataFrame(
