@@ -30,7 +30,7 @@ function subproblem(g, lambda, G_mean, G_old)
     @variable(sub, 0 <= G <= gmax[g]);
     @expression(sub, penalty_term, 
         (G + (length(P)*G_mean - G_old) - demand)^2
-    );
+    )
     @objective(sub, Min, G * mc[g] + lambda * G + gamma/2 * penalty_term)
     optimize!(sub)
     return value.(G)
