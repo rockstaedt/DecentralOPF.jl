@@ -8,7 +8,7 @@ include("example_system_ESR.jl")
 
 # Dispatch 
 
-demand = [0, 50, 80, 250, 600]
+demand = [50, 80, 250, 600]
 
 # Using first element in T as initialization!
 T = collect(1:length(demand))
@@ -26,11 +26,6 @@ dispatch = Model(with_optimizer(Gurobi.Optimizer, gurobi_env))
     + sum(G_S[s, t] * mc[s] for s in S, t in T)
 )
 
-# Set init values for variables
-@constraint(dispatch, Init_G[p=P], G[p, 1] == 0)
-@constraint(dispatch, Init_G_S[s=S], G_S[s, 1] == 0)
-@constraint(dispatch, Init_storage_level[s=S], storage_level[s, 1] == 0)
-
 @constraint(
     dispatch,
     EnergyBalance[t=T],
@@ -38,8 +33,8 @@ dispatch = Model(with_optimizer(Gurobi.Optimizer, gurobi_env))
 )
 @constraint(
     dispatch,
-    StorageBalance[s=S, t=T[2:end]],
-    storage_level[s, t] == storage_level[s, t-1] - G_S[s, t]
+    StorageBalance[s=S, t=T],
+    storage_level[s, t] == (t == 1 ? 0 : storage_level[s, t-1]) - G_S[s, t]
 )
 
 optimize!(dispatch)
