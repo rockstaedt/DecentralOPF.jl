@@ -35,7 +35,7 @@ function subproblem(g, lambda, G_mean, G_old)
         Min,
         sum(
             G[t] * mc[g] + lambda[t] * G[t]
-            + gamma/2 * ((G[t] + (G_mean[t] - G_old[t]) - demand[t])^2)
+            + gamma/2 * ((G[t] + (length(P)*G_mean[t] - G_old[t]) - demand[t])^2)
             for t in T
         )
     )
