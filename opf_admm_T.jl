@@ -70,7 +70,7 @@ function check_convergence(lambda)
 end
 
 begin
-    gamma = 0.3
+    gamma = 0.16
     lambda = [[3., 3., 3., 3.]]
     results = []
     G_mean = []
