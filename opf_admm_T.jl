@@ -45,6 +45,7 @@ function subproblem(g, lambda, G_mean, G_old)
         )
     )
     optimize!(sub)
+    println("$(g): $(value.(penalty_term).data)")
     return value.(G).data
 end
 
@@ -91,6 +92,7 @@ begin
                 zeros(Float64, length(T))
             ])
         )
+        println("Penalty term:")
         for p in P
             if i == 1
                 G_new[p] = subproblem(p, lambda[end], [0,0,0,0], [0,0,0,0])
