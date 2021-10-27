@@ -54,7 +54,7 @@ function check_convergence(lambda)
 end
 
 begin
-    gamma = 0.3
+    gamma = 0.03
     lambda = [3.]
     results = []
     G_mean = []
