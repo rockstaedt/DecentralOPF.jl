@@ -30,12 +30,17 @@ function subproblem(g, lambda, G_mean, G_old)
     sub = Model(with_optimizer(Gurobi.Optimizer, gurobi_env))
     set_silent(sub)
     @variable(sub, 0 <= G[t=T] <= gmax[g])
+    @expression(
+        sub,
+        penalty_term[t=T], 
+        (G[t] + (length(P)*G_mean[t] - G_old[t]) - demand[t])^2
+    )
     @objective(
         sub,
         Min,
         sum(
             G[t] * mc[g] + lambda[t] * G[t]
-            + gamma/2 * ((G[t] + (length(P)*G_mean[t] - G_old[t]) - demand[t])^2)
+            + gamma/2 * penalty_term[t]
             for t in T
         )
     )
