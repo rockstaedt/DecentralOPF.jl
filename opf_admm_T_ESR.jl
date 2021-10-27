@@ -36,6 +36,12 @@ dispatch = Model(with_optimizer(Gurobi.Optimizer, gurobi_env))
     StorageBalance[s=S, t=T],
     storage_level[s, t] == (t == 1 ? 0 : storage_level[s, t-1]) - G_S[s, t]
 )
+@constraint(
+    dispatch,
+    empty_storage[s=S],
+    storage_level[s,
+    length(T)-1] == G_S[s, length(T)]
+)
 
 optimize!(dispatch)
 objective_value(dispatch)
