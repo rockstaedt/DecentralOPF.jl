@@ -8,7 +8,7 @@ include("example_system_ESR.jl")
 
 # Dispatch 
 
-demand = [350, 370, 220, 250]
+demand = [100, 370, 150, 570]
 
 # Using first element in T as initialization!
 T = collect(1:length(demand))
@@ -16,37 +16,40 @@ T = collect(1:length(demand))
 dispatch = Model(with_optimizer(Gurobi.Optimizer, gurobi_env))
 
 @variable(dispatch, 0 <= G[p=P, t=T] <= gmax[p])
-@variable(dispatch, -gmax[s] <= G_S[s=S, t=T] <= gmax[s])
+@variable(dispatch, 0 <= G_S_d[s=S, t=T] <= gmax[s])
+@variable(dispatch, 0 <= G_S_c[s=S, t=T] <= gmax[s])
 @variable(dispatch, 0 <= storage_level[s=S, t=T] <= capa[s])
 
 @objective(
     dispatch,
     Min,
     sum(G[p, t] * mc[p] for p in P, t in T)
-    + sum(G_S[s, t] * mc[s] for s in S, t in T)
+    + sum(G_S_d[s, t] * mc[s] + G_S_c[s, t] * mc[s] for s in S, t in T)
 )
 
 @constraint(
     dispatch,
     EnergyBalance[t=T],
-    demand[t] == sum(G[p, t] for p in P) + sum(G_S[s, t] for s in S)
+    demand[t] == sum(G[p, t] for p in P) + sum(G_S_d[s, t] for s in S) 
+                    - sum(sum(G_S_c[s, t] for s in S)) 
 )
 @constraint(
     dispatch,
     StorageBalance[s=S, t=T],
-    storage_level[s, t] == (t == 1 ? 0 : storage_level[s, t-1]) - G_S[s, t]
+    storage_level[s, t] == (t == 1 ? 0 : storage_level[s, t-1])
+                            + G_S_c[s, t] - G_S_d[s, t]
 )
 @constraint(
     dispatch,
     empty_storage[s=S],
-    storage_level[s,
-    length(T)-1] == G_S[s, length(T)]
+    storage_level[s, length(T)] == 0
 )
 
 optimize!(dispatch)
 objective_value(dispatch)
 value.(G)
-value.(G_S)
+value.(G_S_d)
+value.(G_S_c)
 value.(storage_level)
 
 # Augmented Lagrangian relaxation with ADMM
@@ -220,7 +223,7 @@ begin
         push!(lambda, lambda_new)
         not_converged = !check_convergence(lambda)
         i += 1
-        if i > 100
+        if i > 10
             break
         end
     end
