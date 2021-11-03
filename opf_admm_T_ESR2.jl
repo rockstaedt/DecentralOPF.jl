@@ -90,7 +90,7 @@ function subproblem_G_S(s,lambda, G_S_d_mean, G_S_d_old, G_S_c_mean, G_S_c_old, 
         (
             length(P) * G_mean[t]
             + G_S_d[t] + (length(S) * G_S_d_mean[t] - G_S_d_old[t])
-            - G_S_c[t] + (length(S) * G_S_c_mean[t] - G_S_c_old[t])
+            - (G_S_c[t] + (length(S) * G_S_c_mean[t] - G_S_c_old[t]))
             - D[t]
         )^2
     )
