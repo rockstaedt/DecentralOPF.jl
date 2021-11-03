@@ -8,9 +8,9 @@ include("example_system.jl")
 
 # Dispatch 
 
-demand = [200, 300, 650, 420]
+D = [200, 300, 650, 420]
 
-T = collect(1:length(demand))
+T = collect(1:length(D))
 
 dispatch = Model(with_optimizer(Gurobi.Optimizer, gurobi_env))
 
@@ -18,7 +18,7 @@ dispatch = Model(with_optimizer(Gurobi.Optimizer, gurobi_env))
 
 @objective(dispatch, Min, sum(G[p, t] * mc[p] for p in P, t in T));
 
-@constraint(dispatch, EnergyBalance[t=T], demand[t] == sum(G[p, t] for p in P));
+@constraint(dispatch, EnergyBalance[t=T], D[t] == sum(G[p, t] for p in P));
 
 optimize!(dispatch)
 objective_value(dispatch)
@@ -33,7 +33,7 @@ function subproblem(g, lambda, G_mean, G_old)
     @expression(
         sub,
         penalty_term[t=T], 
-        (G[t] + (length(P)*G_mean[t] - G_old[t]) - demand[t])^2
+        (G[t] + (length(P)*G_mean[t] - G_old[t]) - D[t])^2
     )
     @objective(
         sub,
@@ -54,7 +54,7 @@ function update_lambda(lambda, G_new)
     for t in T
         push!(
             values,
-            lambda[t] + gamma * (sum(G_new[p][t] for p in P) - demand[t])
+            lambda[t] + gamma * (sum(G_new[p][t] for p in P) - D[t])
         )
     end
     return values
