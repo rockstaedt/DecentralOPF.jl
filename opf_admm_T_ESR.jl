@@ -8,10 +8,10 @@ include("example_system_ESR.jl")
 
 # Dispatch 
 
-demand = [100, 370, 150, 570]
+D = [220, 370, 220, 570]
 
 # Using first element in T as initialization!
-T = collect(1:length(demand))
+T = collect(1:length(D))
 
 dispatch = Model(with_optimizer(Gurobi.Optimizer, gurobi_env))
 
@@ -30,7 +30,7 @@ dispatch = Model(with_optimizer(Gurobi.Optimizer, gurobi_env))
 @constraint(
     dispatch,
     EnergyBalance[t=T],
-    demand[t] == sum(G[p, t] for p in P) + sum(G_S_d[s, t] for s in S) 
+    D[t] == sum(G[p, t] for p in P) + sum(G_S_d[s, t] for s in S) 
                     - sum(sum(G_S_c[s, t] for s in S)) 
 )
 @constraint(
@@ -61,7 +61,7 @@ function subproblem_G(g, lambda, G_mean, G_old, G_S_mean)
     @expression(
         sub,
         penalty_term[t=T], 
-        (G[t]+(length(P)*G_mean[t]-G_old[t])+length(S)*G_S_mean[t]-demand[t])^2
+        (G[t]+(length(P)*G_mean[t]-G_old[t])+length(S)*G_S_mean[t]-D[t])^2
     )
     @objective(
         sub,
@@ -84,7 +84,7 @@ function subproblem_G_S(s, lambda, G_S_mean, G_S_old, G_mean)
         (
             length(P) * G_mean[t]
             + G_S[t] + (length(S) * G_S_mean[t] - G_S_old[t])
-            -demand[t]
+            -D[t]
         )^2
     )
     @objective(
@@ -100,21 +100,21 @@ function subproblem_G_S(s, lambda, G_S_mean, G_S_old, G_mean)
     @constraint(
         sub,
         empty_storage,
-        storage_level[length(T)-1] == G_S[length(T)]
+        storage_level[length(T)] == 0
     )  
     optimize!(sub)
     println("$(s): $(value.(penalty_term).data)")
     return value.(G_S).data, value.(storage_level).data
 end
 
-function update_lambda(lambda, G_new, S_new)
+function update_lambda(lambda, G_new, G_S_new)
     values = []
     for t in T
         push!(
             values,
             lambda[t] + gamma * (
                 sum(G_new[p][t] for p in P) + sum(G_S_new[s][t] for s in S)
-                - demand[t]
+                - D[t]
             )
         )
     end
@@ -223,7 +223,7 @@ begin
         push!(lambda, lambda_new)
         not_converged = !check_convergence(lambda)
         i += 1
-        if i > 10
+        if i > 500
             break
         end
     end
