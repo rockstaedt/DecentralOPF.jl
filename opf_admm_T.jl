@@ -8,7 +8,7 @@ include("example_system.jl")
 
 # Dispatch 
 
-D = [200, 300, 650, 420]
+D = [220, 370, 220, 570]
 
 T = collect(1:length(D))
 
@@ -76,7 +76,7 @@ function check_convergence(lambda)
 end
 
 begin
-    gamma = 0.16
+    gamma = 0.1
     lambda = [[3., 3., 3., 3.]]
     results = []
     G_mean = []
