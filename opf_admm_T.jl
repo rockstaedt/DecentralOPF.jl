@@ -8,7 +8,7 @@ include("example_system.jl")
 
 # Dispatch 
 
-D = [220, 370, 220, 570]
+D = [180, 370, 70, 570]
 
 T = collect(1:length(D))
 
