@@ -75,6 +75,15 @@ function check_convergence(lambda)
     return sum(abs.(lambda[end]-lambda[length(lambda)-1]).<epsilon) == length(T)
 end
 
+function calculate_costs(G)
+    sum = 0
+    for (generator, generations) in G
+        for generation in generations
+            sum += generation * mc[generator]
+        end
+    end
+    return sum
+end
 begin
     gamma = 0.1
     lambda = [[3., 3., 3., 3.]]
