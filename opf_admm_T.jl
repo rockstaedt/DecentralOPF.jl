@@ -116,6 +116,7 @@ begin
             end
         end
         println(G_new)
+        println("Generation costs: $(calculate_costs(G_new))")
         push!(results, G_new)
         push!(G_mean, calc_G_mean(i))
 
