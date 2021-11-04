@@ -6,7 +6,7 @@ P = ["pv", "gas", "wind", "coal"]
 
 plants = DataFrame(
     P = ["pv", "gas", "wind", "coal"],
-    mc = [0, 50, 0, 30],
+    mc = [1, 50, 2, 30],
     gmax = [80, 150, 120, 300],
     node = ["N1", "N1", "N2", "N3"]
 );
