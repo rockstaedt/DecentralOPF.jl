@@ -16,7 +16,7 @@ plants = DataFrame(
 storages = DataFrame(
     P = ["esr"],
     mc = [2],
-    gmax = [10],
+    gmax = [50],
     capa = [50],
 );
 
