@@ -86,13 +86,13 @@ function calculate_costs(G)
 end
 
 begin
-    gamma = 0.1
+    gamma = 0.01
     lambda = [[3., 3., 3., 3.]]
     results = []
     G_mean = []
     not_converged = true
     i = 1
-    while not_converged
+    while true
         println("Iteration $(i) with lambda $(lambda[end])")
         global G_new = Dict(
             k => v for (k,v) in zip(P, [
@@ -124,6 +124,9 @@ begin
         println("Updated lambda to $(lambda_new)")
         println()
         push!(lambda, lambda_new)
+        if !not_converged
+            break
+        end
         not_converged = !check_convergence(lambda)
         i += 1
     end
