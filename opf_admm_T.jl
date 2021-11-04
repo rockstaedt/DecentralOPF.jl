@@ -84,6 +84,7 @@ function calculate_costs(G)
     end
     return sum
 end
+
 begin
     gamma = 0.1
     lambda = [[3., 3., 3., 3.]]
