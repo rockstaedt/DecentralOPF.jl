@@ -31,7 +31,7 @@ dispatch = Model(with_optimizer(Gurobi.Optimizer, gurobi_env))
     dispatch,
     EnergyBalance[t=T],
     D[t] == sum(G[p, t] for p in P) + sum(G_S_d[s, t] for s in S) 
-                    - sum(sum(G_S_c[s, t] for s in S)) 
+                    - sum(G_S_c[s, t] for s in S)
 )
 @constraint(
     dispatch,
