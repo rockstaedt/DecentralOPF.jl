@@ -8,14 +8,14 @@ S = ["esr"]
 
 plants = DataFrame(
     P = ["pv", "gas", "wind", "coal"],
-    mc = [1, 50, 2, 30],
+    mc = [2, 50, 3, 30],
     gmax = [80, 150, 120, 300],
     node = ["N1", "N1", "N2", "N3"]
 );
 
 storages = DataFrame(
     P = ["esr"],
-    mc = [2],
+    mc = [1],
     gmax = [50],
     capa = [50],
 );
