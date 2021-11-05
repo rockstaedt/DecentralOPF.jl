@@ -1,5 +1,6 @@
 using JuMP
 using Gurobi
+using Plots
 
 # Trick to avoid multiple license printing
 gurobi_env = Gurobi.Env()
@@ -8,7 +9,7 @@ include("example_system_ESR.jl")
 
 # Dispatch 
 
-D = [220, 370, 220, 570]
+D = [170, 200, 200, 250]
 
 # Using first element in T as initialization!
 T = collect(1:length(D))
@@ -75,7 +76,7 @@ function subproblem_G(g, lambda, G_mean, G_old, G_S_d_mean, G_S_c_mean)
     )
     optimize!(sub)
     println("$(g): $(value.(penalty_term).data)")
-    return value.(G).data
+    return value.(G).data, value.(penalty_term).data
 end
 
 function subproblem_G_S(s,lambda, G_S_d_mean, G_S_d_old, G_S_c_mean, G_S_c_old, G_mean)
@@ -117,7 +118,7 @@ function subproblem_G_S(s,lambda, G_S_d_mean, G_S_d_old, G_S_c_mean, G_S_c_old, 
     )  
     optimize!(sub)
     println("$(s): $(value.(penalty_term).data)")
-    return value.(G_S_d).data, value.(G_S_c).data, value.(storage_level).data
+    return value.(G_S_d).data, value.(G_S_c).data, value.(storage_level).data, value.(penalty_term).data
 end
 
 function update_lambda(lambda, G_new, G_S_d_new, G_S_c_new)
@@ -151,8 +152,9 @@ function check_convergence(lambda)
 end
 
 begin
-    gamma = 0.01
+    gamma = 0.08
     lambda = [[3., 3., 3., 3.]]
+    penalty_term = []
     results = Dict(
         "G" => [],
         "G_S_d" => [],
@@ -164,8 +166,9 @@ begin
     G_S_c_mean = []
     not_converged = true
     i = 1
-    while not_converged
+    while true
         println("Iteration $(i) with lambda $(lambda[end])")
+        penalties_unit = []
         global G_new = Dict(
             k => v for (k,v) in zip(P, [
                 zeros(Float64, length(T)),
@@ -196,7 +199,7 @@ begin
         println("Penalty term:")
         for p in P
             if i == 1
-                G_new[p] = subproblem_G(
+                G_new[p], penalties = subproblem_G(
                     p,
                     lambda[end],
                     zeros(Float64, length(T)),
@@ -205,7 +208,7 @@ begin
                     zeros(Float64, length(T))
                 )
             else
-                G_new[p] = subproblem_G(
+                G_new[p], penalties = subproblem_G(
                     p,
                     lambda[end],
                     G_mean[end],
@@ -214,10 +217,11 @@ begin
                     G_S_c_mean[end]
                 )
             end
+            push!(penalties_unit, penalties)
         end
         for s in S
             if i == 1
-                G_S_d_new[s], G_S_c_new[s], stor_level[s] = subproblem_G_S(
+                G_S_d_new[s], G_S_c_new[s], stor_level[s], penalties = subproblem_G_S(
                     s,
                     lambda[end],
                     zeros(Float64, length(T)),
@@ -226,8 +230,9 @@ begin
                     zeros(Float64, length(T)),
                     zeros(Float64, length(T))
                 )
+                push!(penalty_term, penalties)
             else
-                G_S_d_new[s], G_S_c_new[s], stor_level[s] = subproblem_G_S(
+                G_S_d_new[s], G_S_c_new[s], stor_level[s], penalties = subproblem_G_S(
                     s,
                     lambda[end],
                     G_S_d_mean[end],
@@ -237,7 +242,15 @@ begin
                     G_mean[end]
                 )
             end
+            push!(penalties_unit, penalties)
         end
+        penalty_sum = [0., 0., 0., 0.]
+        for penalties in penalties_unit
+            for t in T
+                penalty_sum[t] += penalties[t]
+            end
+        end
+        push!(penalty_term, penalty_sum)
         println("Generation results:")
         println(G_new)
         push!(results["G"], G_new)
@@ -256,13 +269,75 @@ begin
         push!(G_S_c_mean, calc_G_mean(results["G_S_c"][i], length(S)))
 
         lambda_new = update_lambda(lambda[i], G_new, G_S_d_new, G_S_c_new)
+        # if lambda_new[4] < -30.
+        #     gamma = 0.025
+        # end
         println("Updated lambda to $(lambda_new)")
         println()
         push!(lambda, lambda_new)
+        if !not_converged
+            break
+        end
         not_converged = !check_convergence(lambda)
         i += 1
-        if i > 200
+        if i > 500
             break
         end
     end
 end
+
+result_type = "G_S_c"
+unit = "esr"
+x = []
+y = []
+for t in T
+    push!(x, 1:i-1)
+    push!(y, [])
+end
+for iteration in 1:i-1
+    for t in T
+        push!(y[t], results[result_type][iteration][unit][t])
+    end
+end
+plot(x, y, labels=["t1" "t2" "t3" "t4"], titles=result_type * " - " * unit)
+
+result_type = "G_S_d"
+unit = "esr"
+x = []
+y = []
+for t in T
+    push!(x, 1:i-1)
+    push!(y, [])
+end
+for iteration in 1:i-1
+    for t in T
+        push!(y[t], results[result_type][iteration][unit][t])
+    end
+end
+plot(x, y, labels=["t1" "t2" "t3" "t4"], titles=result_type * " - " * unit)
+
+x = []
+y = []
+for t in T
+    push!(x, 1:i-1)
+    push!(y, [])
+end
+for iteration in 1:i-1
+    for t in T
+        push!(y[t], lambda[iteration][t])
+    end
+end
+plot(x, y, labels=["t1" "t2" "t3" "t4"], titles="lambda")
+
+x = []
+y = []
+for t in T
+    push!(x, 1:i-1)
+    push!(y, [])
+end
+for iteration in 1:i-1
+    for t in T
+        push!(y[t], penalty_term[iteration][t])
+    end
+end
+plot(x, y, labels=["t1" "t2" "t3" "t4"], titles="penalty_term")
