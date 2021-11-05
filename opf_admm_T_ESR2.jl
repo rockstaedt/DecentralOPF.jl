@@ -99,7 +99,7 @@ function subproblem_G_S(s,lambda, G_S_d_mean, G_S_d_old, G_S_c_mean, G_S_c_old, 
         Min,
         sum(
             mc[s] * (G_S_d[t] + G_S_c[t])
-            + lambda[t] * (G_S_d[t] + G_S_c[t]) 
+            + lambda[t] * (G_S_d[t] - G_S_c[t]) 
             + gamma/2 * penalty_term[t]
             for t in T
         )
