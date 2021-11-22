@@ -9,7 +9,7 @@ include("example_system_ESR.jl")
 
 # Dispatch 
 
-D = [170, 200, 200, 250]
+D = [170, 190, 195, 250]
 
 # Using first element in T as initialization!
 T = collect(1:length(D))
@@ -40,11 +40,11 @@ dispatch = Model(with_optimizer(Gurobi.Optimizer, gurobi_env))
     storage_level[s, t] == (t == 1 ? 0 : storage_level[s, t-1])
                             + G_S_c[s, t] - G_S_d[s, t]
 )
-@constraint(
-    dispatch,
-    empty_storage[s=S],
-    storage_level[s, length(T)] == 0
-)
+# @constraint(
+#     dispatch,
+#     empty_storage[s=S],
+#     storage_level[s, length(T)] == 0
+# )
 
 optimize!(dispatch)
 objective_value(dispatch)
@@ -52,6 +52,7 @@ value.(G)
 value.(G_S_d)
 value.(G_S_c)
 value.(storage_level)
+dual.(EnergyBalance)
 
 # Augmented Lagrangian relaxation with ADMM
 
@@ -111,11 +112,11 @@ function subproblem_G_S(s,lambda, G_S_d_mean, G_S_d_old, G_S_c_mean, G_S_c_old, 
         storage_level[t] == (t == 1 ? 0 : storage_level[t-1]) 
                             + G_S_c[t] - G_S_d[t]
     )
-    @constraint(
-        sub,
-        empty_storage,
-        storage_level[length(T)] == 0
-    )  
+    # @constraint(
+    #     sub,
+    #     empty_storage,
+    #     storage_level[length(T)] == 0
+    # )  
     optimize!(sub)
     println("$(s): $(value.(penalty_term).data)")
     return value.(G_S_d).data, value.(G_S_c).data, value.(storage_level).data, value.(penalty_term).data
@@ -153,7 +154,7 @@ end
 
 begin
     gamma = 0.08
-    lambda = [[3., 3., 3., 3.]]
+    lambda = [[-28.1, -28.1, -28.1, -30.1]]
     penalty_term = []
     results = Dict(
         "G" => [],
@@ -202,7 +203,7 @@ begin
                 G_new[p], penalties = subproblem_G(
                     p,
                     lambda[end],
-                    zeros(Float64, length(T)),
+                    D ./ length(P),
                     zeros(Float64, length(T)),
                     zeros(Float64, length(T)),
                     zeros(Float64, length(T))
@@ -219,6 +220,9 @@ begin
             end
             push!(penalties_unit, penalties)
         end
+        println("Generation results:")
+        println(G_new)
+        push!(results["G"], G_new)
         for s in S
             if i == 1
                 G_S_d_new[s], G_S_c_new[s], stor_level[s], penalties = subproblem_G_S(
@@ -228,7 +232,7 @@ begin
                     zeros(Float64, length(T)),
                     zeros(Float64, length(T)),
                     zeros(Float64, length(T)),
-                    zeros(Float64, length(T))
+                    D ./ length(P)
                 )
                 push!(penalty_term, penalties)
             else
@@ -251,9 +255,6 @@ begin
             end
         end
         push!(penalty_term, penalty_sum)
-        println("Generation results:")
-        println(G_new)
-        push!(results["G"], G_new)
         println("Storage discharge results:")
         println(G_S_d_new)
         push!(results["G_S_d"], G_S_d_new)
@@ -280,7 +281,7 @@ begin
         end
         not_converged = !check_convergence(lambda)
         i += 1
-        if i > 500
+        if i > 200
             break
         end
     end
