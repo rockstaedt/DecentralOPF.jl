@@ -267,7 +267,6 @@ end
 begin
     demand = [170, 230, 180, 220]
     admm = ADMM(0.08, demand, generators, storages)
-    admm.lambdas = [[3., 3., 3., 3.]]
 
     for i in 1:2000
         calculate_iteration()
