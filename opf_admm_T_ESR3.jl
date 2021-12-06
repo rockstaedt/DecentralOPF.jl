@@ -1,7 +1,6 @@
 using JuMP
 using Gurobi
 using PlotlyJS
-using Plots
 
 include("data.jl")
 
@@ -287,4 +286,5 @@ end
 
 plot_lambdas()
 plot_sum_penalty()
+using Plots
 plot_generation()
