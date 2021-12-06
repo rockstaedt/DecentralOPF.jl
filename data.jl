@@ -119,14 +119,14 @@ function getIterationResults(unit::Union{Generator, Storage}, iteration::Int)
             return empty_vector
         end
     else
-        previous_results = admm.results[iteration]
+        iteration_results = admm.results[iteration]
         if typeof(unit) == Storage 
             return (
-                previous_results.unit_to_result[unit].discharge,
-                previous_results.unit_to_result[unit].charge
+                iteration_results.unit_to_result[unit].discharge,
+                iteration_results.unit_to_result[unit].charge
             )
         else
-            return previous_results.unit_to_result[unit].generation
+            return iteration_results.unit_to_result[unit].generation
         end
     end
 end
