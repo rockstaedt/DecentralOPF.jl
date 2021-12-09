@@ -47,9 +47,9 @@ end
 
 mutable struct Result
     unit_to_result::Dict
-    node_to_sum_G_t::Dict{Node, Vector{Float64}}
-    node_to_sum_S_d_t::Dict{Node, Vector{Float64}}
-    node_to_sum_S_c_t::Dict{Node, Vector{Float64}}
+    sum_G_t::Vector{Float64}
+    sum_S_d_t::Vector{Float64}
+    sum_S_c_t::Vector{Float64}
     node_to_sum_penalty_t::Dict{Node, Vector{Float64}}
     total_costs::Float64
     sum_penalty_t::Vector{Float64}
@@ -59,14 +59,12 @@ mutable struct Result
 
         result.unit_to_result = unit_to_result
 
-        result.node_to_sum_G_t = Dict()
-        result.node_to_sum_S_d_t = Dict()
-        result.node_to_sum_S_c_t = Dict()
+        result.sum_G_t = zeros(Float64, length(admm.T))
+        result.sum_S_d_t = zeros(Float64, length(admm.T))
+        result.sum_S_c_t = zeros(Float64, length(admm.T))
+
         result.node_to_sum_penalty_t = Dict()
         for node in admm.nodes
-            result.node_to_sum_G_t[node] = zeros(Float64, length(admm.T))
-            result.node_to_sum_S_d_t[node] = zeros(Float64, length(admm.T))
-            result.node_to_sum_S_c_t[node] = zeros(Float64, length(admm.T))
             result.node_to_sum_penalty_t[node] = zeros(Float64, length(admm.T))
         end
 
@@ -78,13 +76,13 @@ mutable struct Result
             result.node_to_sum_penalty_t[unit.node] += result_unit.penalty_term
 
             if typeof(unit) == Storage
-                result.node_to_sum_S_d_t[unit.node] += result_unit.discharge
-                result.node_to_sum_S_c_t[unit.node] += result_unit.charge
+                result.sum_S_d_t += result_unit.discharge
+                result.sum_S_c_t += result_unit.charge
                 result.total_costs += result_unit.storage.marginal_costs * (
                     sum(result_unit.discharge + result_unit.charge)
                 )
             elseif typeof(unit) == Generator
-                result.node_to_sum_G_t[unit.node] += result_unit.generation
+                result.sum_G_t += result_unit.generation
                 result.total_costs += (
                     sum(result_unit.generation)
                     * result_unit.generator.marginal_costs
@@ -152,15 +150,15 @@ mutable struct ADMM
     end
 end
 
-function getSumOfIterationResults(iteration::Int, node::Node)
+function getSumOfIterationResults(iteration::Int)
     if length(admm.results) == 0
         empty_vector = zeros(Float64, length(admm.T))
         return empty_vector, empty_vector, empty_vector
     else
         return (
-            admm.results[iteration].node_to_sum_G_t[node], 
-            admm.results[iteration].node_to_sum_S_d_t[node],
-            admm.results[iteration].node_to_sum_S_c_t[node]
+            admm.results[iteration].sum_G_t, 
+            admm.results[iteration].sum_S_d_t,
+            admm.results[iteration].sum_S_c_t
         )
     end
 end

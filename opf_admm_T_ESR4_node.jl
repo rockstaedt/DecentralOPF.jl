@@ -10,7 +10,7 @@ gurobi_env = Gurobi.Env()
 
 node1 = Node("N1", [70, 120], false)
 node2 = Node("N2", [30, 120], false)
-node3 = Node("N3", [200, 200], true)
+node3 = Node("N3", [20, 200], true)
 
 nodes = [node1, node2, node3]
 
@@ -39,20 +39,16 @@ function optimize_subproblem(generator::Generator)
     # Maximum capacity of generator
     @variable(sub, 0 <= G[t=admm.T] <= generator.max_generation)
 
-    sum_G, sum_S_d, sum_S_c = getSumOfIterationResults(
-        admm.iteration - 1,
-        generator.node
-    )
+    sum_G, sum_S_d, sum_S_c = getSumOfIterationResults(admm.iteration - 1)
 
     previous_G = getIterationResults(generator, admm.iteration - 1)
     
     # Penalty term
-    node_demand = admm.node_to_demand[generator.node]
     @expression(
         sub,
         penalty_term[t=admm.T], 
         (G[t] + sum_G[t] - previous_G[t] + sum_S_d[t]
-            - sum_S_c[t] - node_demand[t])^2
+            - sum_S_c[t] - admm.total_demand_t[t])^2
     )
 
     node_id = admm.node_to_id[generator.node]
@@ -87,20 +83,16 @@ function optimize_subproblem(storage::Storage)
     # Maximum storage level
     @variable(sub, 0 <= storage_level[t=admm.T] <= storage.max_level)
 
-    sum_G, sum_S_d, sum_S_c = getSumOfIterationResults(
-        admm.iteration - 1,
-        storage.node
-    )
+    sum_G, sum_S_d, sum_S_c = getSumOfIterationResults(admm.iteration - 1)
 
     previous_S_d, previous_S_c = getIterationResults(storage, admm.iteration-1)
     
-    # Penalty term
-    node_demand = admm.node_to_demand[storage.node]
     @expression(
         sub,
         penalty_term[t=admm.T], 
         (sum_G[t] + G_S_d[t] + (sum_S_d[t] - previous_S_d[t])
-            - G_S_c[t] - (sum_S_c[t] - previous_S_c[t]) - node_demand[t])^2
+            - G_S_c[t] - (sum_S_c[t] - previous_S_c[t])
+            - admm.total_demand_t[t])^2
     )
 
     node_id = admm.node_to_id[storage.node]
@@ -137,14 +129,11 @@ end
 
 function update_lambda()
     lambdas = zeros(Float64, length(admm.N), length(admm.T))
-    for (node_id, node) in enumerate(admm.nodes)
-        sum_G_t, sum_S_d_t, sum_S_c_t = getSumOfIterationResults(
-            admm.iteration,
-            node
-        )
+    for node_id in 1:length(admm.N)
+        sum_G_t, sum_S_d_t, sum_S_c_t = getSumOfIterationResults(admm.iteration)
         node_lambdas = (admm.lambdas_n_t[admm.iteration][node_id, :] 
             + admm.gamma * (
-                sum_G_t + sum_S_d_t - sum_S_c_t - admm.node_to_demand[node]
+                sum_G_t + sum_S_d_t - sum_S_c_t - admm.total_demand_t
             )
         )
         lambdas[node_id, :] = node_lambdas
@@ -311,7 +300,7 @@ function plot_generation()
 end
 
 begin
-    admm = ADMM(0.02, nodes, generators, storages, lines)
+    admm = ADMM(0.008, nodes, generators, storages, lines)
 
     for i in 1:200
         calculate_iteration()
