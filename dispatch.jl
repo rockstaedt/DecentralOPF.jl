@@ -18,7 +18,7 @@ begin
 
     nodes = DataFrame(
         N = ["N1", "N2", "N3"],
-        demand = [10, 150, 200],
+        demand = [150, 30, 200],
         slack = [false, false, true]
     );
 
