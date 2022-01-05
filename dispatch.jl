@@ -18,7 +18,7 @@ begin
 
     nodes = DataFrame(
         N = ["N1", "N2", "N3"],
-        demand = [150, 30, 200],
+        demand = [10, 150, 200],
         slack = [false, false, true]
     );
 
@@ -51,7 +51,7 @@ dispatch = Model(with_optimizer(Gurobi.Optimizer))
 
 
 @objective(dispatch, Min, sum(G[p] * mc[p] for p in P));
-@constraint(dispatch, EnergyBalance[n=N], demand[n] - sum(G[p] for p in map_pn[n]) == I[n]);
+@constraint(dispatch, EnergyBalance[n=N], sum(G[p] for p in map_pn[n]) - demand[n] == I[n]);
 @constraint(dispatch, Slack, sum(I) == 0);
 
 optimize!(dispatch)
