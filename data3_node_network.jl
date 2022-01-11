@@ -189,7 +189,7 @@ end
 mutable struct ADMM
     iteration::Int
     gamma::Float64
-    lambdas::Vector{Matrix{Float64}}
+    lambdas::Vector{Vector{Float64}}
     mues::Vector{Matrix{Float64}}
     rhos::Vector{Matrix{Float64}}
     T::Vector{Int}
@@ -219,7 +219,7 @@ mutable struct ADMM
         admm.T = collect(1:length(nodes[1].demand))
         admm.N = collect(1:length(nodes))
         admm.L = collect(1:length(lines))
-        admm.lambdas = [zeros(Float64, length(admm.N), length(admm.T))]
+        admm.lambdas = [zeros(Float64, length(admm.T))]
         admm.mues = [zeros(Float64, length(admm.L), length(admm.T))]
         admm.rhos = [zeros(Float64, length(admm.L), length(admm.T))]
         admm.nodes = nodes

@@ -15,8 +15,8 @@ node3 = Node("N3", [200], true)
 nodes = [node1, node2, node3]
 
 line1 = Line("L1", node2, node1, 4000, 1)
-line2 = Line("L2", node3, node1, 10000, 1)
-line3 = Line("L3", node2, node3, 10000, 2)
+line2 = Line("L2", node3, node1, 1000, 1)
+line3 = Line("L3", node2, node3, 1000, 2)
 
 lines = [line1, line2]
 
@@ -78,7 +78,11 @@ function optimize_subproblem(generator::Generator)
         penalty_eb[t=admm.T],
         vcat(
             [penalty_term_eb_var[t]],
-            sum(injection[:, t].data))
+            (
+                sum(injection[:, t].data)
+                # - admm.lambdas[admm.iteration][t] / admm.gamma
+            )
+        )
         in SecondOrderCone()
     )
 
@@ -88,6 +92,7 @@ function optimize_subproblem(generator::Generator)
         penalty_term_flow1[l=admm.L, t=admm.T],
         sum(admm.ptdf[l, n] * injection[n, t] for n in admm.N)
         + R_ref[l, t] - admm.L_max[l]
+        # - admm.mues[admm.iteration][l, t] / admm.gamma
     )
 
     @constraint(
@@ -106,6 +111,7 @@ function optimize_subproblem(generator::Generator)
         R_cref.data[l, t]
         - sum(admm.ptdf[l, n] * injection.data[n, t] for n in admm.N)
         - admm.L_max[l]
+        # - admm.rhos[admm.iteration][l, t] / admm.gamma
     )
 
     @constraint(
@@ -141,13 +147,11 @@ function optimize_subproblem(generator::Generator)
         in SecondOrderCone()
     )
 
-    node_id = admm.node_to_id[generator.node]
-
     @objective(
         sub,
         Min,
         sum(G[t] * generator.marginal_costs
-            + admm.lambdas[admm.iteration][node_id, t] * G[t]
+            + admm.lambdas[admm.iteration][t] * G[t]
             + admm.gamma/2 * penalty_term_eb_var[t]
             + sum(admm.mues[admm.iteration][:, t]) * G[t]
             + admm.gamma/2 * penalty_term_flow1_var[t]
@@ -155,6 +159,7 @@ function optimize_subproblem(generator::Generator)
             + admm.gamma/2 * penalty_term_flow2_var[t]
             + admm.gamma/2 * penalty_term_R_ref_var[t]
             + admm.gamma/2 * penalty_term_R_cref_var[t]
+            + 1/2 * (G[t] - prev_G[t])^2
             for t in admm.T)
     )
 
@@ -225,7 +230,11 @@ function optimize_subproblem(storage::Storage)
         penalty_eb[t=admm.T],
         vcat(
             [penalty_term_eb_var[t]],
-            sum(injection[:, t].data))
+            (
+                sum(injection[:, t].data)
+                # + admm.lambdas[admm.iteration][t] / admm.gamma
+            )
+        )
         in SecondOrderCone()
     )
 
@@ -236,6 +245,7 @@ function optimize_subproblem(storage::Storage)
         penalty_term_flow1[l=admm.L, t=admm.T],
         sum(admm.ptdf[l, n] * injection[n, t] for n in admm.N)
         + R_ref[l, t] - admm.L_max[l]
+        # - admm.mues[admm.iteration][l, t] / admm.gamma
     )
 
     @constraint(
@@ -254,6 +264,7 @@ function optimize_subproblem(storage::Storage)
         R_cref.data[l, t]
         - sum(admm.ptdf[l, n] * injection.data[n, t] for n in admm.N)
         - admm.L_max[l]
+        # - admm.rhos[admm.iteration][l, t] / admm.gamma
     )
 
     @constraint(
@@ -297,13 +308,11 @@ function optimize_subproblem(storage::Storage)
         in SecondOrderCone()
     )
 
-    node_id = admm.node_to_id[storage.node]
-
     @objective(
         sub,
         Min,
         sum(storage.marginal_costs * (G_S_d[t] + G_S_c[t])
-            + admm.lambdas[admm.iteration][node_id, t] * (G_S_d[t] - G_S_c[t])
+            + admm.lambdas[admm.iteration][t] * (G_S_d[t] - G_S_c[t])
             + admm.gamma/2 * penalty_term_eb_var[t]
             + sum(admm.mues[admm.iteration][:, t]) * (G_S_d[t] - G_S_c[t])
             + admm.gamma/2 * penalty_term_flow1_var[t]
@@ -311,6 +320,8 @@ function optimize_subproblem(storage::Storage)
             + admm.gamma/2 * penalty_term_flow2_var[t]
             + admm.gamma/2 * penalty_term_R_ref_var[t]
             + admm.gamma/2 * penalty_term_R_cref_var[t]
+            + 1/2 * (G_S_d[t] - previous_S_d[t])^2
+            + 1/2 * (G_S_c[t] - previous_S_c[t])^2
             for t in admm.T)
     )
 
@@ -336,20 +347,12 @@ function optimize_subproblem(storage::Storage)
 end
 
 function update_lambda()
-    lambdas = zeros(Float64, length(admm.N), length(admm.T))
-    for (node_id, node) in enumerate(admm.nodes)
-        sum_G_t, sum_S_d_t, sum_S_c_t = get_node_results(
-            admm.iteration,
-            node
-        )
-        node_lambdas = (admm.lambdas[admm.iteration][node_id, :] 
-            + admm.gamma * 0.01 * (
-                sum_G_t + sum_S_d_t
-                - sum_S_c_t - admm.node_id_to_demand[node_id]
-            )
-        )
-        lambdas[node_id, :] = node_lambdas
-    end
+    lambdas = admm.lambdas[admm.iteration] + admm.gamma * 0.01 * (
+        admm.results[admm.iteration].generation
+        + admm.results[admm.iteration].discharge
+        - admm.results[admm.iteration].charge
+        - admm.total_demand_t
+    )
     push!(admm.lambdas, lambdas)
 end
 
@@ -584,11 +587,11 @@ end
 begin
     admm = ADMM(0.2, nodes, generators, storages, lines)
 
-    for i in 1:200
+    for i in 1:800
         calculate_iteration()
         
         println("Generation Results: ")
-        print_results(true, true, false, admm.iteration)
+        print_results(true, true, true, admm.iteration)
         
         update_duals()
         
@@ -599,20 +602,15 @@ begin
     end
 end
 
-plot_lambdas(node3)
+#plot_lambdas(node3)
 #plot_mues(node1)
 # plot_sum_penalty()
 
 # # Import is used here instead of in the beginning to avoid complications
 # # between PlotlyJS and Plots.
 # using Plots
-# plot_generation()
+# plot_generation()'
 
-for (i, result) in enumerate(admm.results)
-    if abs(sum(result.injection)) < 1
-    println(i)
-    end
+for (unit, result) in admm.results[end].unit_to_result
+    println("$(unit.name):\t\t$(result.penalty_term)")
 end
-
-admm.results[187].injection
-print_results(true, true, false, 187)
