@@ -8,15 +8,15 @@ include("data3_node_network.jl")
 # Trick to avoid multiple license printing
 gurobi_env = Gurobi.Env()
 
-node1 = Node("N1", [250], false)
-node2 = Node("N2", [30], false)
-node3 = Node("N3", [200], true)
+node1 = Node("N1", [10, 250], false)
+node2 = Node("N2", [50, 30], false)
+node3 = Node("N3", [50, 200], true)
 
 nodes = [node1, node2, node3]
 
-line1 = Line("L1", node2, node1, 4000, 1)
-line2 = Line("L2", node3, node1, 1000, 1)
-line3 = Line("L3", node2, node3, 1000, 2)
+line1 = Line("L1", node2, node1, 40, 1)
+line2 = Line("L2", node3, node1, 100, 1)
+line3 = Line("L3", node2, node3, 100, 2)
 
 lines = [line1, line2]
 
@@ -27,7 +27,7 @@ gas = Generator("gas", 50, 120, "grey", node1)
 
 generators = [pv, wind, coal, gas]
 
-battery = Storage("battery", 1000, 10, 20, "purple", node1)
+battery = Storage("battery", 1, 10, 20, "purple", node1)
 ps = Storage("ps", 2, 15, 30, "blue", node1)
 
 storages = [battery]
