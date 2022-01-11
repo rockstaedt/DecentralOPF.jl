@@ -9,7 +9,7 @@ include("example_system_ESR.jl")
 
 # Dispatch 
 
-D = [170, 190, 195, 250]
+D = [170, 230, 180, 220, 500, 230, 380, 286, 312, 420, 500]
 
 # Using first element in T as initialization!
 T = collect(1:length(D))

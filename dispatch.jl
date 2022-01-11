@@ -18,16 +18,16 @@ begin
 
     nodes = DataFrame(
         N = ["N1", "N2", "N3"],
-        demand = [150, 30, 200],
+        demand = [170, 30, 200],
         slack = [false, false, true]
     );
 
     lines = DataFrame(
-        L = ["L1", "L2", "L3"],
-        from = ["N2", "N3", "N2"],
-        to = ["N1", "N1", "N3"],
-        fmax = [40, 100, 100],
-        susceptance = [1, 1, 2]
+        L = ["L1", "L2"],
+        from = ["N2", "N3"],
+        to = ["N1", "N1"],
+        fmax = [40, 100],
+        susceptance = [1, 1]
 
     );
 
@@ -68,6 +68,7 @@ objective_value(dispatch)
 
 lines[!, :F_opf] = ptdf * [value(I[n]) for n in N]
 plants[!, :G_opf] = value.(G).data
+dual.(EnergyBalance)
 # lambda_ref = dual.(EnergyBalance)
 
 # ADMM Generators
