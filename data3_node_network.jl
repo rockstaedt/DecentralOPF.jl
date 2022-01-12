@@ -33,8 +33,8 @@ end
 
 mutable struct PenaltyTerm
     energy_balance::Vector{Float64}
-    flow1::Vector{Float64}
-    flow2::Vector{Float64}
+    flow1::Matrix{Float64}
+    flow2::Matrix{Float64}
 end
 
 function sum_up(summand1::PenaltyTerm, summand2::PenaltyTerm)
@@ -47,8 +47,8 @@ end
 function get_empty_penalty_term()
     return PenaltyTerm(
         zeros(Float64, length(admm.T)),
-        zeros(Float64, length(admm.T)),
-        zeros(Float64, length(admm.T))
+        zeros(Float64, length(admm.L), length(admm.T)),
+        zeros(Float64, length(admm.L), length(admm.T))
     )
 end
 
