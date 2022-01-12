@@ -10,15 +10,15 @@ gurobi_env = Gurobi.Env()
 
 node1 = Node("N1", [10, 250], false)
 node2 = Node("N2", [50, 30], false)
-node3 = Node("N3", [50, 200], true)
+node3 = Node("N3", [50, 150], true)
 
 nodes = [node1, node2, node3]
 
-line1 = Line("L1", node2, node1, 40, 1)
+line1 = Line("L1", node2, node1, 30, 1)
 line2 = Line("L2", node3, node1, 100, 1)
 line3 = Line("L3", node2, node3, 100, 2)
 
-lines = [line1, line2]
+lines = [line1, line2, line3]
 
 pv = Generator("pv", 3, 80, "yellow", node1)
 wind = Generator("wind", 4, 120, "lightblue", node2)
