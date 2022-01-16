@@ -1,0 +1,27 @@
+Reference Result,,,
+,,,
+,,,
+,,,
+,1,2,
+PV,80,80,
+Wind,40,120,
+Gas,0,115,
+Coal,0,105,
+,,,
+Charge ,-10,0,
+Discharge,0,10,
+,,,
+summe,110,430,
+Demand,110,430,
+,,,
+Line Flows,T1,T2,Max
+L1,-26,40,40
+L2,-34,15,100
+L3,16,50,100
+,,,
+,,,
+,,,
+Prices,T1,T2,
+Node 1,4,50,
+Node 2,4,20,
+Node 3,4,30,
