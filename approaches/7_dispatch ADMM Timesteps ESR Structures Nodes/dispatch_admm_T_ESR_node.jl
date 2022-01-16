@@ -2,7 +2,7 @@ using JuMP
 using Gurobi
 using PlotlyJS
 
-include("data2_node.jl")
+include("data_node.jl")
 
 
 # Trick to avoid multiple license printing
