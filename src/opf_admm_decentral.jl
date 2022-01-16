@@ -1,8 +1,8 @@
 using JuMP
 using Gurobi
-using PlotlyJS
 
 include("structures.jl")
+include("plotting.jl")
 
 
 # Trick to avoid multiple license printing
@@ -43,13 +43,6 @@ function optimize_subproblem(generator::Generator)
     @variable(sub, 0 <= R_ref[line=admm.L, t=admm.T])
     @variable(sub, 0 <= R_cref[line=admm.L, t=admm.T])
 
-    # Helper variables for second order cone
-    @variable(sub, penalty_term_flow1_var[t=admm.T] >= 0)
-    @variable(sub, penalty_term_flow2_var[t=admm.T] >= 0)
-    @variable(sub, penalty_term_eb_var[t=admm.T] >= 0)
-    @variable(sub, penalty_term_R_ref_var[t=admm.T] >= 0)
-    @variable(sub, penalty_term_R_cref_var[t=admm.T] >= 0)
-
 
     prev_G = get_unit_results(generator, admm.iteration - 1)
 
@@ -73,78 +66,48 @@ function optimize_subproblem(generator::Generator)
     )
 
     # Penalty term energy balance
-    @constraint(
+    @expression(
         sub,
-        penalty_eb[t=admm.T],
-        vcat(
-            [penalty_term_eb_var[t]],
-            (
-                sum(injection[:, t].data)
-                # - admm.lambdas[admm.iteration][t] / admm.gamma
-            )
-        )
-        in SecondOrderCone()
+        penalty_term_eb[t=admm.T],
+        sum(injection[:, t].data.^2)
     )
 
     # Penalty term flow1
     @expression(
         sub,
-        penalty_term_flow1[l=admm.L, t=admm.T],
-        sum(admm.ptdf[l, n] * injection[n, t] for n in admm.N)
-        + R_ref[l, t] - admm.L_max[l]
-        # - admm.mues[admm.iteration][l, t] / admm.gamma
-    )
-
-    @constraint(
-        sub,
-        penalty_flow1_soc[t=admm.T],
-        vcat(
-            [penalty_term_flow1_var[t]],
-            penalty_term_flow1[:, t].data)
-        in SecondOrderCone()
+        penalty_term_flow1[t=admm.T],
+        sum(
+            (sum(admm.ptdf[l, n] * injection[n, t] for n in admm.N)
+                + R_ref[l, t] - admm.L_max[l]).^2 
+            for l in admm.L
+        )
     )
 
     # Penalty term flow2
     @expression(
         sub,
-        penalty_term_flow2[l=admm.L, t=admm.T],
-        R_cref.data[l, t]
-        - sum(admm.ptdf[l, n] * injection.data[n, t] for n in admm.N)
-        - admm.L_max[l]
-        # - admm.rhos[admm.iteration][l, t] / admm.gamma
-    )
-
-    @constraint(
-        sub,
-        penalty_flow2_soc[t=admm.T],
-        vcat(
-            [penalty_term_flow2_var[t]],
-            penalty_term_flow2[:, t].data)
-        in SecondOrderCone()
+        penalty_term_flow2[t=admm.T],
+        sum(
+            (R_cref.data[l, t]
+                - sum(admm.ptdf[l, n]*injection.data[n, t] for n in admm.N)
+                - admm.L_max[l]).^2
+            for l in admm.L
+        )
     )
 
     # Penalty terms for slack variables
-    
     avg_R_ref, avg_R_cref = get_slack_results(admm.iteration - 1)
 
-    @constraint(
+    @expression(
         sub, 
-        penalty_term_R_ref_soc[t=admm.T],
-        vcat(
-            [penalty_term_R_ref_var[t]],
-            ((R_ref[:, t].data - avg_R_ref[:, t])...)
-        )
-        in SecondOrderCone()
+        penalty_term_R_ref[t=admm.T],
+        sum((R_ref[:, t].data - avg_R_ref[:, t]).^2)
     )
 
-    @constraint(
+    @expression(
         sub, 
-        penalty_term_R_cref_soc[t=admm.T],
-        vcat(
-            [penalty_term_R_ref_var[t]],
-            ((R_cref[:, t].data - avg_R_cref[:, t])...)
-        )
-        in SecondOrderCone()
+        penalty_term_R_cref[t=admm.T],
+        sum((R_cref[:, t].data - avg_R_cref[:, t]).^2)
     )
 
     @objective(
@@ -152,13 +115,13 @@ function optimize_subproblem(generator::Generator)
         Min,
         sum(G[t] * generator.marginal_costs
             + admm.lambdas[admm.iteration][t] * G[t]
-            + admm.gamma/2 * penalty_term_eb_var[t]
+            + admm.gamma/2 * penalty_term_eb[t]
             + sum(admm.mues[admm.iteration][:, t]) * G[t]
-            + admm.gamma/2 * penalty_term_flow1_var[t]
+            + admm.gamma/2 * penalty_term_flow1[t]
             - sum(admm.rhos[admm.iteration][:, t]) * G[t]
-            + admm.gamma/2 * penalty_term_flow2_var[t]
-            + admm.gamma/2 * penalty_term_R_ref_var[t]
-            + admm.gamma/2 * penalty_term_R_cref_var[t]
+            + admm.gamma/2 * penalty_term_flow2[t]
+            + admm.gamma/2 * penalty_term_R_ref[t]
+            + admm.gamma/2 * penalty_term_R_cref[t]
             + 1/2 * (G[t] - prev_G[t])^2
             for t in admm.T)
     )
@@ -166,9 +129,9 @@ function optimize_subproblem(generator::Generator)
     optimize!(sub)
 
     penalty_terms = PenaltyTerm(
-        value.(penalty_term_eb_var).data,
-        value.(penalty_term_flow1_var).data,
-        value.(penalty_term_flow2_var).data
+        value.(penalty_term_eb).data,
+        value.(penalty_term_flow1).data,
+        value.(penalty_term_flow2).data
     )
 
     result = ResultGenerator(
@@ -195,12 +158,6 @@ function optimize_subproblem(storage::Storage)
     @variable(sub, 0 <= R_ref[line=admm.L, t=admm.T])
     @variable(sub, 0 <= R_cref[line=admm.L, t=admm.T])
 
-    # Helper variables for second order cone
-    @variable(sub, penalty_term_flow1_var[t=admm.T] >= 0)
-    @variable(sub, penalty_term_flow2_var[t=admm.T] >= 0)
-    @variable(sub, penalty_term_eb_var[t=admm.T] >= 0)
-    @variable(sub, penalty_term_R_ref_var[t=admm.T] >= 0)
-    @variable(sub, penalty_term_R_cref_var[t=admm.T] >= 0)
 
     previous_S_d, previous_S_c = get_unit_results(storage, admm.iteration - 1)
 
@@ -224,56 +181,48 @@ function optimize_subproblem(storage::Storage)
     )
 
     # Penalty term energy balance
-
-    @constraint(
+    @expression(
         sub,
-        penalty_eb[t=admm.T],
-        vcat(
-            [penalty_term_eb_var[t]],
-            (
-                sum(injection[:, t].data)
-                # + admm.lambdas[admm.iteration][t] / admm.gamma
-            )
-        )
-        in SecondOrderCone()
+        penalty_term_eb[t=admm.T],
+        sum(injection[:, t].data.^2)
     )
-
 
     # Penalty term flow1
     @expression(
         sub,
-        penalty_term_flow1[l=admm.L, t=admm.T],
-        sum(admm.ptdf[l, n] * injection[n, t] for n in admm.N)
-        + R_ref[l, t] - admm.L_max[l]
-        # - admm.mues[admm.iteration][l, t] / admm.gamma
-    )
-
-    @constraint(
-        sub,
-        penalty_soc1[t=admm.T],
-        vcat(
-            [penalty_term_flow1_var[t]],
-            penalty_term_flow1[:, t].data)
-        in SecondOrderCone()
+        penalty_term_flow1[t=admm.T],
+        sum(
+            (sum(admm.ptdf[l, n] * injection[n, t] for n in admm.N)
+                + R_ref[l, t] - admm.L_max[l]).^2 
+            for l in admm.L
+        )
     )
 
     # Penalty term flow2
     @expression(
         sub,
-        penalty_term_flow2[l=admm.L, t=admm.T],
-        R_cref.data[l, t]
-        - sum(admm.ptdf[l, n] * injection.data[n, t] for n in admm.N)
-        - admm.L_max[l]
-        # - admm.rhos[admm.iteration][l, t] / admm.gamma
+        penalty_term_flow2[t=admm.T],
+        sum(
+            (R_cref.data[l, t]
+                - sum(admm.ptdf[l, n]*injection.data[n, t] for n in admm.N)
+                - admm.L_max[l]).^2
+            for l in admm.L
+        )
     )
 
-    @constraint(
-        sub,
-        penalty_flow2_soc[t=admm.T],
-        vcat(
-            [penalty_term_flow2_var[t]],
-            penalty_term_flow2[:, t].data)
-        in SecondOrderCone()
+    # Penalty terms for slack variables
+    avg_R_ref, avg_R_cref = get_slack_results(admm.iteration - 1)
+
+    @expression(
+        sub, 
+        penalty_term_R_ref[t=admm.T],
+        sum((R_ref[:, t].data - avg_R_ref[:, t]).^2)
+    )
+
+    @expression(
+        sub, 
+        penalty_term_R_cref[t=admm.T],
+        sum((R_cref[:, t].data - avg_R_cref[:, t]).^2)
     )
 
     # Storage level constraint
@@ -285,41 +234,18 @@ function optimize_subproblem(storage::Storage)
         )
     )
 
-    # Penalty terms for slack variables
-    avg_R_ref, avg_R_cref = get_slack_results(admm.iteration - 1)
-
-    @constraint(
-        sub, 
-        penalty_term_R_ref_soc[t=admm.T],
-        vcat(
-            [penalty_term_R_ref_var[t]],
-            ((R_ref[:, t].data - avg_R_ref[:, t])...)
-        )
-        in SecondOrderCone()
-    )
-
-    @constraint(
-        sub, 
-        penalty_term_R_cref_soc[t=admm.T],
-        vcat(
-            [penalty_term_R_ref_var[t]],
-            ((R_cref[:, t].data - avg_R_cref[:, t])...)
-        )
-        in SecondOrderCone()
-    )
-
     @objective(
         sub,
         Min,
         sum(storage.marginal_costs * (G_S_d[t] + G_S_c[t])
             + admm.lambdas[admm.iteration][t] * (G_S_d[t] - G_S_c[t])
-            + admm.gamma/2 * penalty_term_eb_var[t]
+            + admm.gamma/2 * penalty_term_eb[t]
             + sum(admm.mues[admm.iteration][:, t]) * (G_S_d[t] - G_S_c[t])
-            + admm.gamma/2 * penalty_term_flow1_var[t]
+            + admm.gamma/2 * penalty_term_flow1[t]
             - sum(admm.rhos[admm.iteration][:, t]) * (G_S_d[t] - G_S_c[t])
-            + admm.gamma/2 * penalty_term_flow2_var[t]
-            + admm.gamma/2 * penalty_term_R_ref_var[t]
-            + admm.gamma/2 * penalty_term_R_cref_var[t]
+            + admm.gamma/2 * penalty_term_flow2[t]
+            + admm.gamma/2 * penalty_term_R_ref[t]
+            + admm.gamma/2 * penalty_term_R_cref[t]
             + 1/2 * (G_S_d[t] - previous_S_d[t])^2
             + 1/2 * (G_S_c[t] - previous_S_c[t])^2
             for t in admm.T)
@@ -328,9 +254,9 @@ function optimize_subproblem(storage::Storage)
     optimize!(sub)
 
     penalty_terms = PenaltyTerm(
-        value.(penalty_term_eb_var).data,
-        value.(penalty_term_flow1_var).data,
-        value.(penalty_term_flow2_var).data
+        value.(penalty_term_eb).data,
+        value.(penalty_term_flow1).data,
+        value.(penalty_term_flow2).data
     )
 
     result = ResultStorage(
@@ -469,13 +395,13 @@ function print_duals(iteration::Int)
 end
 
 begin
-    admm = ADMM(0.2, nodes, generators, storages, lines)
+    admm = ADMM(0.01, nodes, generators, storages, lines)
 
-    for i in 1:800
+    for i in 1:1000
         calculate_iteration()
         
         println("Generation Results: ")
-        print_results(true, true, true, admm.iteration)
+        print_results(true, true, false, admm.iteration)
         
         update_duals()
         
@@ -484,17 +410,4 @@ begin
             break
         end
     end
-end
-
-#plot_lambdas(node3)
-#plot_mues(node1)
-# plot_sum_penalty()
-
-# # Import is used here instead of in the beginning to avoid complications
-# # between PlotlyJS and Plots.
-# using Plots
-# plot_generation()'
-
-for (unit, result) in admm.results[end].unit_to_result
-    println("$(unit.name):\t\t$(result.penalty_term)")
 end
