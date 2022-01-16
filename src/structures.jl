@@ -202,7 +202,7 @@ mutable struct ADMM
     results::Vector{Result}
     converged::Bool
     ptdf::Matrix{Float64}
-    total_demand_t::Vector{Float64}
+    total_demand::Vector{Float64}
     node_id_to_demand::Dict{Int, Vector{Int}}
     node_to_id::Dict{Node, Int}
     node_to_units::Dict{Node, Vector{Union{Generator, Storage}}}
@@ -230,13 +230,13 @@ mutable struct ADMM
         admm.results = []
         admm.converged = false
         admm.ptdf = calculate_ptdf(admm.nodes, admm.lines)
-        admm.total_demand_t = zeros(length(admm.T))
+        admm.total_demand = zeros(length(admm.T))
         admm.node_id_to_demand = Dict()
         admm.node_to_id = Dict()
         admm.node_to_units = Dict()
         if !isnothing(admm.nodes)
             for (id, node) in enumerate(admm.nodes)
-                admm.total_demand_t += node.demand
+                admm.total_demand += node.demand
                 admm.node_id_to_demand[id] = node.demand
                 admm.node_to_id[node] = id
             end

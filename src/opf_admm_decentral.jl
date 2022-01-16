@@ -351,7 +351,7 @@ function update_lambda()
         admm.results[admm.iteration].generation
         + admm.results[admm.iteration].discharge
         - admm.results[admm.iteration].charge
-        - admm.total_demand_t
+        - admm.total_demand
     )
     push!(admm.lambdas, lambdas)
 end
