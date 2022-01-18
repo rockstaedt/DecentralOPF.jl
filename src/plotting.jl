@@ -10,32 +10,23 @@ function plot_lambdas()
     PlotlyJS.plot(traces)
 end
 
-# TODO: Adapt function
-# -> auf Leitung anpassen
+function plot_mues(t)
+    traces = [scatter(
+        x=1:admm.iteration,
+        y=[admm.mues[i][l, t] for i in 1:admm.iteration],
+        name="l=$(l)")
+        for l in admm.L]
+    PlotlyJS.plot(traces)
+end
 
-# function plot_mues(node::Node)
-#     mues = []
-#     for mue_n_t in admm.mues
-#         push!(mues, mue_n_t[admm.node_to_id[node], :]) 
-#     end
-#     node_mue_matrix = hcat(mues...)
-#     traces = [
-#         scatter(x=1:admm.iteration, y=node_mue_matrix[1, :], name="t=1")
-#     ]
-#     for t in admm.T
-#         if t != 1
-#             push!(
-#                 traces,
-#                 scatter(
-#                     x=1:admm.iteration,
-#                     y=node_mue_matrix[t, :],
-#                     name="t=$(t)"
-#                 )
-#             )
-#         end
-#     end
-#     plot(traces, Layout(title="Mue for line $(node.name)"))
-# end
+function plot_rhos(t)
+    traces = [scatter(
+        x=1:admm.iteration,
+        y=[admm.rhos[i][l, t] for i in 1:admm.iteration],
+        name="l=$(l)")
+        for l in admm.L]
+    PlotlyJS.plot(traces)
+end
 
 # TODO: Adapt function
 
