@@ -14,9 +14,9 @@ begin
 
     nodes = [node1, node2, node3]
 
-    line1 = Line("L1", node2, node1, 30, 1)
-    line2 = Line("L2", node3, node1, 100, 1)
-    line3 = Line("L3", node2, node3, 100, 2)
+    line1 = Line("L1", node2, node1, 20, 1)
+    line2 = Line("L2", node3, node1, 30, 1)
+    line3 = Line("L3", node2, node3, 20, 2)
 
     lines = [line1, line2, line3]
 
@@ -47,6 +47,8 @@ begin # Like ADMM
     @variable(m, 0 <= G_S_d[t=T, s=S] <= storages[s].max_power)
     @variable(m, 0 <= G_S_c[t=T, s=S] <= storages[s].max_power)
     @variable(m, 0 <= L_S[t=T, s=S] <= storages[s].max_level)
+    @variable(m, 0 <= R_ref[t=T, l=L])
+    @variable(m, 0 <= R_cref[t=T, l=L])
     
     @expression(m, I[t=T, n=N], 
         sum((generators[p].node == nodes[n] ? G[t,p] : 0) for p in P)
@@ -58,8 +60,8 @@ begin # Like ADMM
         + sum((G_S_d[t,s] + G_S_c[t,s]) * storages[s].marginal_costs for s in S, t in T) 
     )
     @constraint(m, EB[t=T], sum(I[t, :]) == 0)
-    @constraint(m, FlowUpper[t=T, l=L], ptdf[l,:]' * I[t, :].data <= lines[l].max_capacity)
-    @constraint(m, FlowLower[t=T, l=L], ptdf[l,:]' * I[t, :].data >= -lines[l].max_capacity)
+    @constraint(m, FlowUpper[t=T, l=L], ptdf[l,:]' * I[t, :].data + R_ref[t, l] == lines[l].max_capacity)
+    @constraint(m, FlowLower[t=T, l=L], R_cref[t, l] - ptdf[l,:]' * I[t, :].data == lines[l].max_capacity)
     @constraint(m, StorageBalance[t=T, s=S], L_S[t,s] == (t > 1 ? L_S[t-1, s] : 0) - G_S_d[t,s] + G_S_c[t,s])
 end
 
