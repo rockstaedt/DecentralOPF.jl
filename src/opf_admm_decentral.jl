@@ -14,9 +14,9 @@ node3 = Node("N3", [50, 150], true)
 
 nodes = [node1, node2, node3]
 
-line1 = Line("L1", node2, node1, 30, 1)
-line2 = Line("L2", node3, node1, 100, 1)
-line3 = Line("L3", node2, node3, 100, 2)
+line1 = Line("L1", node2, node1, 20, 1)
+line2 = Line("L2", node3, node1, 30, 1)
+line3 = Line("L3", node2, node3, 20, 2)
 
 lines = [line1, line2, line3]
 
@@ -110,19 +110,27 @@ function optimize_subproblem(generator::Generator)
         sum((R_cref[:, t].data - avg_R_cref[:, t]).^2)
     )
 
+    node_index = admm.node_to_id[generator.node]
+
     @objective(
         sub,
         Min,
         sum(G[t] * generator.marginal_costs
             + admm.lambdas[admm.iteration][t] * G[t]
+            + admm.gamma/2 * sum(
+                admm.ptdf[l, node_index] * (
+                    admm.mues[admm.iteration][l, t]
+                    - admm.rhos[admm.iteration][l, t]
+                ) * G[t] for l in admm.L
+            )
             + admm.gamma/2 * penalty_term_eb[t]
-            + sum(admm.mues[admm.iteration][:, t]) * G[t]
+            # + sum(admm.mues[admm.iteration][:, t]) * G[t]
             + admm.gamma/2 * penalty_term_flow1[t]
-            - sum(admm.rhos[admm.iteration][:, t]) * G[t]
+            # - sum(admm.rhos[admm.iteration][:, t]) * G[t]
             + admm.gamma/2 * penalty_term_flow2[t]
             + admm.gamma/2 * penalty_term_R_ref[t]
             + admm.gamma/2 * penalty_term_R_cref[t]
-            + 1/2 * (G[t] - prev_G[t])^2
+            # + 1/2 * (G[t] - prev_G[t])^2
             for t in admm.T)
     )
 
@@ -234,20 +242,28 @@ function optimize_subproblem(storage::Storage)
         )
     )
 
+    node_index = admm.node_to_id[storage.node]
+
     @objective(
         sub,
         Min,
         sum(storage.marginal_costs * (G_S_d[t] + G_S_c[t])
             + admm.lambdas[admm.iteration][t] * (G_S_d[t] - G_S_c[t])
+            + admm.gamma/2 * sum(
+                admm.ptdf[l, node_index] * (
+                    admm.mues[admm.iteration][l, t]
+                    - admm.rhos[admm.iteration][l, t]
+                ) * (G_S_d[t] - G_S_c[t]) for l in admm.L
+            ) 
             + admm.gamma/2 * penalty_term_eb[t]
-            + sum(admm.mues[admm.iteration][:, t]) * (G_S_d[t] - G_S_c[t])
+            # + sum(admm.mues[admm.iteration][:, t]) * (G_S_d[t] - G_S_c[t])
             + admm.gamma/2 * penalty_term_flow1[t]
-            - sum(admm.rhos[admm.iteration][:, t]) * (G_S_d[t] - G_S_c[t])
+            # - sum(admm.rhos[admm.iteration][:, t]) * (G_S_d[t] - G_S_c[t])
             + admm.gamma/2 * penalty_term_flow2[t]
             + admm.gamma/2 * penalty_term_R_ref[t]
             + admm.gamma/2 * penalty_term_R_cref[t]
-            + 1/2 * (G_S_d[t] - previous_S_d[t])^2
-            + 1/2 * (G_S_c[t] - previous_S_c[t])^2
+            # + 1/2 * (G_S_d[t] - previous_S_d[t])^2
+            # + 1/2 * (G_S_c[t] - previous_S_c[t])^2
             for t in admm.T)
     )
 
@@ -273,7 +289,7 @@ function optimize_subproblem(storage::Storage)
 end
 
 function update_lambda()
-    lambdas = admm.lambdas[admm.iteration] + admm.gamma * 0.01 * (
+    lambdas = admm.lambdas[admm.iteration] + admm.gamma * (
         admm.results[admm.iteration].generation
         + admm.results[admm.iteration].discharge
         - admm.results[admm.iteration].charge
@@ -287,7 +303,7 @@ function update_mue()
     avg_R_ref, _ = get_slack_results(admm.iteration)
     mues = (
         admm.mues[admm.iteration]
-        + admm.gamma * 0.01 * (admm.ptdf * injection + avg_R_ref .- admm.L_max)
+        + admm.gamma * (admm.ptdf * injection + avg_R_ref .- admm.L_max)
     )
     push!(admm.mues, mues)
 end
@@ -297,7 +313,7 @@ function update_rho()
     _, avg_R_cref = get_slack_results(admm.iteration)
     rhos = (
         admm.rhos[admm.iteration]
-        + admm.gamma * 0.01 * (avg_R_cref- admm.ptdf * injection .- admm.L_max)
+        + admm.gamma * (avg_R_cref- admm.ptdf * injection .- admm.L_max)
     )
     push!(admm.rhos, rhos)
 end
@@ -395,9 +411,9 @@ function print_duals(iteration::Int)
 end
 
 begin
-    admm = ADMM(0.01, nodes, generators, storages, lines)
+    admm = ADMM(0.0001, nodes, generators, storages, lines)
 
-    for i in 1:1000
+    for i in 1:2000
         calculate_iteration()
         
         println("Generation Results: ")
@@ -411,3 +427,16 @@ begin
         end
     end
 end
+
+function get_nodal_price(iteration::Int)
+    nodal_price = zeros(length(admm.N), length(admm.T))
+    for t in admm.T
+        nodal_price[:, t] = admm.lambdas[iteration][t] .+ sum((admm.mues[iteration][l, t] + admm.rhos[iteration][l, t])  * admm.ptdf[l, :] for l in admm.L)
+    end
+    return nodal_price
+end
+
+
+plot_mues(2)
+plot_rhos(1)
+plot_lambdas()
