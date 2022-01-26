@@ -28,6 +28,24 @@ function plot_rhos(t)
     PlotlyJS.plot(traces)
 end
 
+function plot_generation(generator::Generator, t::Int)
+    traces = [scatter(
+        x=1:admm.iteration-1,
+        y=[admm.results[i].unit_to_result[generator].generation[t] for i in 1:admm.iteration-1],
+        name=generator.name
+    )]
+    PlotlyJS.plot(traces)
+end
+
+function plot_line_utilization(line_id::Int, t::Int)
+    traces = [scatter(
+        x=1:admm.iteration-1,
+        y=[admm.results[i].line_utilization[line_id] for i in 1:admm.iteration-1],
+        name=line_id
+    )]
+    PlotlyJS.plot(traces)
+end
+
 # TODO: Adapt function
 
 # function plot_sum_penalty()
