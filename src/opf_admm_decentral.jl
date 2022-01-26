@@ -15,7 +15,7 @@ node3 = Node("N3", [50], true)
 
 nodes = [node1, node2, node3]
 
-line1 = Line("L1", node2, node1, 31, 1)
+line1 = Line("L1", node2, node1, 20, 1)
 line2 = Line("L2", node3, node1, 3000, 1)
 line3 = Line("L3", node2, node3, 2000, 2)
 
@@ -330,9 +330,9 @@ function print_duals(iteration::Int)
 end
 
 begin
-    admm = ADMM(0.00001, nodes, generators, storages, lines)
+    admm = ADMM(0.01, nodes, generators, storages, lines)
 
-    for i in 1:2730
+    for i in 1:200
         calculate_iteration()
         
         println("Generation Results: ")
@@ -357,8 +357,15 @@ end
 
 # np = get_nodal_price(admm.iteration)
 
+# injection = admm.results[admm.iteration-1].injection
+# _, avg_R_cref = get_slack_results(admm.iteration-1)
+# rhos = (
+#     admm.rhos[admm.iteration]
+#     + admm.gamma * (avg_R_cref- admm.ptdf * injection .- admm.L_max)
+# )
+
 # test = (admm.results[end].avg_R_ref + admm.results[end].avg_R_cref) ./ 2
 
 plot_mues(1)
 plot_rhos(1)
-# plot_lambdas()
+plot_lambdas()
