@@ -37,12 +37,41 @@ function plot_generation(generator::Generator, t::Int)
     PlotlyJS.plot(traces)
 end
 
-function plot_line_utilization(line_id::Int, t::Int)
-    traces = [scatter(
-        x=1:admm.iteration-1,
-        y=[admm.results[i].line_utilization[line_id] for i in 1:admm.iteration-1],
-        name=line_id
-    )]
+function plot_line_utilization(t::Int)
+    traces = [
+        scatter(
+            x=1:admm.iteration-1,
+            y=[admm.results[i].line_utilization[l] for i in 1:admm.iteration-1],
+            name="Utilization for line $(l)"
+        ) for l in admm.L
+    ]
+    PlotlyJS.plot(traces)
+end
+
+function plot_slack_variables(line_id::Int)
+    traces = [
+        scatter(
+            x=1:admm.iteration-1,
+            y=[admm.results[i].avg_R_ref[line_id] for i in 1:admm.iteration-1],
+            name="R_ref for $(line_id)"
+        ),
+        scatter(
+            x=1:admm.iteration-1,
+            y=[admm.results[i].avg_R_cref[line_id] for i in 1:admm.iteration-1],
+            name="R_cref for $(line_id)"
+        ),
+        ]
+    PlotlyJS.plot(traces)
+end
+
+function plot_injection(t::Int)
+    traces = [
+        scatter(
+            x=1:admm.iteration-1,
+            y=[admm.results[i].injection[n] for i in 1:admm.iteration-1],
+            name="I for node $(n)"
+        ) for n in admm.N
+    ]
     PlotlyJS.plot(traces)
 end
 
