@@ -3,6 +3,7 @@ using Gurobi
 
 include("structures.jl")
 include("plotting.jl")
+include("penalty_terms.jl")
 
 
 # Trick to avoid multiple license printing
