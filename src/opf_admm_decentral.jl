@@ -9,15 +9,15 @@ include("penalty_terms.jl")
 # Trick to avoid multiple license printing
 gurobi_env = Gurobi.Env()
 
-node1 = Node("N1", [10, 250], false)
-node2 = Node("N2", [50, 30], false)
-node3 = Node("N3", [50, 150], true)
+node1 = Node("N1", [10], false)
+node2 = Node("N2", [50], false)
+node3 = Node("N3", [50], true)
 
 nodes = [node1, node2, node3]
 
-line1 = Line("L1", node2, node1, 20, 1)
-line2 = Line("L2", node3, node1, 30, 1)
-line3 = Line("L3", node2, node3, 20, 2)
+line1 = Line("L1", node2, node1, 31, 1)
+line2 = Line("L2", node3, node1, 3000, 1)
+line3 = Line("L3", node2, node3, 2000, 2)
 
 lines = [line1, line2, line3]
 
@@ -74,20 +74,22 @@ function optimize_subproblem(generator::Generator)
         sub,
         Min,
         sum(G[t] * generator.marginal_costs
-            + admm.lambdas[admm.iteration][t] * G[t]
-            + admm.gamma/2 * sum(
-                admm.ptdf[l, node_index] * (
-                    admm.mues[admm.iteration][l, t]
-                    - admm.rhos[admm.iteration][l, t]
-                ) * G[t] for l in admm.L
+            + G[t] * (
+                admm.lambdas[admm.iteration][t]
+                + sum(
+                    admm.ptdf[l, node_index] * (
+                        admm.mues[admm.iteration][l, t]
+                        + admm.rhos[admm.iteration][l, t]
+                    ) for l in admm.L
+                )
             )
             + admm.gamma/2 * sub[:penalty_term_eb][t]
             # + sum(admm.mues[admm.iteration][:, t]) * G[t]
-            + admm.gamma/2 * sub[:penalty_term_flow1][t]
+            + sub[:penalty_term_flow1][t]
             # - sum(admm.rhos[admm.iteration][:, t]) * G[t]
-            + admm.gamma/2 * sub[:penalty_term_flow2][t]
-            + admm.gamma/2 * sub[:penalty_term_R_ref][t]
-            + admm.gamma/2 * sub[:penalty_term_R_cref][t]
+            + sub[:penalty_term_flow2][t]
+            # + admm.gamma/2 * sub[:penalty_term_R_ref][t]
+            # + admm.gamma/2 * sub[:penalty_term_R_cref][t]
             # + 1/2 * (G[t] - prev_G[t])^2
             for t in admm.T)
     )
@@ -163,20 +165,22 @@ function optimize_subproblem(storage::Storage)
         sub,
         Min,
         sum(storage.marginal_costs * (G_S_d[t] + G_S_c[t])
-            + admm.lambdas[admm.iteration][t] * (G_S_d[t] - G_S_c[t])
-            + admm.gamma/2 * sum(
-                admm.ptdf[l, node_index] * (
-                    admm.mues[admm.iteration][l, t]
-                    - admm.rhos[admm.iteration][l, t]
-                ) * (G_S_d[t] - G_S_c[t]) for l in admm.L
-            ) 
+            + (G_S_d[t] - G_S_c[t]) * (
+                admm.lambdas[admm.iteration][t]
+                + sum(
+                    admm.ptdf[l, node_index] * (
+                        admm.mues[admm.iteration][l, t]
+                        + admm.rhos[admm.iteration][l, t]
+                    ) for l in admm.L
+                )
+            )
             + admm.gamma/2 * sub[:penalty_term_eb][t]
             # + sum(admm.mues[admm.iteration][:, t]) * (G_S_d[t] - G_S_c[t])
-            + admm.gamma/2 * sub[:penalty_term_flow1][t]
+            + sub[:penalty_term_flow1][t]
             # - sum(admm.rhos[admm.iteration][:, t]) * (G_S_d[t] - G_S_c[t])
-            + admm.gamma/2 * sub[:penalty_term_flow2][t]
-            + admm.gamma/2 * sub[:penalty_term_R_ref][t]
-            + admm.gamma/2 * sub[:penalty_term_R_cref][t]
+            + sub[:penalty_term_flow2][t]
+            # + admm.gamma/2 * sub[:penalty_term_R_ref][t]
+            # + admm.gamma/2 * sub[:penalty_term_R_cref][t]
             # + 1/2 * (G_S_d[t] - previous_S_d[t])^2
             # + 1/2 * (G_S_c[t] - previous_S_c[t])^2
             for t in admm.T)
@@ -326,9 +330,9 @@ function print_duals(iteration::Int)
 end
 
 begin
-    admm = ADMM(0.0001, nodes, generators, storages, lines)
+    admm = ADMM(0.00001, nodes, generators, storages, lines)
 
-    for i in 1:2000
+    for i in 1:2730
         calculate_iteration()
         
         println("Generation Results: ")
@@ -351,7 +355,10 @@ function get_nodal_price(iteration::Int)
     return nodal_price
 end
 
+# np = get_nodal_price(admm.iteration)
 
-plot_mues(2)
+# test = (admm.results[end].avg_R_ref + admm.results[end].avg_R_cref) ./ 2
+
+plot_mues(1)
 plot_rhos(1)
-plot_lambdas()
+# plot_lambdas()

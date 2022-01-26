@@ -8,15 +8,15 @@ include("structures.jl")
 # Trick to avoid multiple license printing
 gurobi_env = Gurobi.Env()
 begin 
-    node1 = Node("N1", [10, 250], false)
-    node2 = Node("N2", [50, 30], false)
-    node3 = Node("N3", [50, 150], true)
+    node1 = Node("N1", [10], false)
+    node2 = Node("N2", [50], false)
+    node3 = Node("N3", [50], true)
 
     nodes = [node1, node2, node3]
 
-    line1 = Line("L1", node2, node1, 20, 1)
-    line2 = Line("L2", node3, node1, 30, 1)
-    line3 = Line("L3", node2, node3, 20, 2)
+    line1 = Line("L1", node2, node1, 31, 1)
+    line2 = Line("L2", node3, node1, 3000, 1)
+    line3 = Line("L3", node2, node3, 2000, 2)
 
     lines = [line1, line2, line3]
 
