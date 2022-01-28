@@ -88,8 +88,8 @@ function optimize_subproblem(generator::Generator)
             + sub[:penalty_term_flow1][t]
             # - sum(admm.rhos[admm.iteration][:, t]) * G[t]
             + sub[:penalty_term_flow2][t]
-            # + admm.gamma/2 * sub[:penalty_term_R_ref][t]
-            # + admm.gamma/2 * sub[:penalty_term_R_cref][t]
+            + admm.gamma/2 * sub[:penalty_term_R_ref][t]
+            + admm.gamma/2 * sub[:penalty_term_R_cref][t]
             # + 1/2 * (G[t] - prev_G[t])^2
             for t in admm.T)
     )
@@ -179,8 +179,8 @@ function optimize_subproblem(storage::Storage)
             + sub[:penalty_term_flow1][t]
             # - sum(admm.rhos[admm.iteration][:, t]) * (G_S_d[t] - G_S_c[t])
             + sub[:penalty_term_flow2][t]
-            # + admm.gamma/2 * sub[:penalty_term_R_ref][t]
-            # + admm.gamma/2 * sub[:penalty_term_R_cref][t]
+            + admm.gamma/2 * sub[:penalty_term_R_ref][t]
+            + admm.gamma/2 * sub[:penalty_term_R_cref][t]
             # + 1/2 * (G_S_d[t] - previous_S_d[t])^2
             # + 1/2 * (G_S_c[t] - previous_S_c[t])^2
             for t in admm.T)
