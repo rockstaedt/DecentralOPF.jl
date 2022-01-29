@@ -16,8 +16,8 @@ node3 = Node("N3", [50], true)
 nodes = [node1, node2, node3]
 
 line1 = Line("L1", node2, node1, 20, 1)
-line2 = Line("L2", node3, node1, 3000, 1)
-line3 = Line("L3", node2, node3, 2000, 2)
+line2 = Line("L2", node3, node1, 30, 1)
+line3 = Line("L3", node2, node3, 20, 2)
 
 lines = [line1, line2, line3]
 
@@ -38,7 +38,7 @@ function optimize_subproblem(generator::Generator)
     set_silent(sub)
 
     # Maximum capacity of generator
-    @variable(sub, 0 <= G[t=admm.T] <= generator.max_generation)
+    @variable(sub, 0 <= G[t=admm.T] <= generator.max_generation, Int)
 
     # Slack variables
     @variable(sub, 0 <= R_ref[line=admm.L, t=admm.T])
@@ -85,12 +85,12 @@ function optimize_subproblem(generator::Generator)
             )
             + admm.gamma/2 * sub[:penalty_term_eb][t]
             # + sum(admm.mues[admm.iteration][:, t]) * G[t]
-            + sub[:penalty_term_flow1][t]
+            + 10*sub[:penalty_term_flow1][t]
             # - sum(admm.rhos[admm.iteration][:, t]) * G[t]
-            + sub[:penalty_term_flow2][t]
+            + 10*sub[:penalty_term_flow2][t]
             + admm.gamma/2 * sub[:penalty_term_R_ref][t]
             + admm.gamma/2 * sub[:penalty_term_R_cref][t]
-            # + 1/2 * (G[t] - prev_G[t])^2
+            + 1/2 * (G[t] - prev_G[t])^2
             for t in admm.T)
     )
 
@@ -118,9 +118,9 @@ function optimize_subproblem(storage::Storage)
     set_silent(sub)
 
     # Storage variables with maximum bounds
-    @variable(sub, 0 <= G_S_d[t=admm.T] <= storage.max_power)
-    @variable(sub, 0 <= G_S_c[t=admm.T] <= storage.max_power)
-    @variable(sub, 0 <= storage_level[t=admm.T] <= storage.max_level)
+    @variable(sub, 0 <= G_S_d[t=admm.T] <= storage.max_power, Int)
+    @variable(sub, 0 <= G_S_c[t=admm.T] <= storage.max_power, Int)
+    @variable(sub, 0 <= storage_level[t=admm.T] <= storage.max_level, Int)
 
     # Slack variables
     @variable(sub, 0 <= R_ref[line=admm.L, t=admm.T])
@@ -176,13 +176,13 @@ function optimize_subproblem(storage::Storage)
             )
             + admm.gamma/2 * sub[:penalty_term_eb][t]
             # + sum(admm.mues[admm.iteration][:, t]) * (G_S_d[t] - G_S_c[t])
-            + sub[:penalty_term_flow1][t]
+            + 10*sub[:penalty_term_flow1][t]
             # - sum(admm.rhos[admm.iteration][:, t]) * (G_S_d[t] - G_S_c[t])
-            + sub[:penalty_term_flow2][t]
+            + 10*sub[:penalty_term_flow2][t]
             + admm.gamma/2 * sub[:penalty_term_R_ref][t]
             + admm.gamma/2 * sub[:penalty_term_R_cref][t]
-            # + 1/2 * (G_S_d[t] - previous_S_d[t])^2
-            # + 1/2 * (G_S_c[t] - previous_S_c[t])^2
+            + 1/2 * (G_S_d[t] - previous_S_d[t])^2
+            + 1/2 * (G_S_c[t] - previous_S_c[t])^2
             for t in admm.T)
     )
 
@@ -330,7 +330,7 @@ function print_duals(iteration::Int)
 end
 
 begin
-    admm = ADMM(0.01, nodes, generators, storages, lines)
+    admm = ADMM(0.001, nodes, generators, storages, lines)
 
     for i in 1:200
         calculate_iteration()
@@ -366,6 +366,6 @@ end
 
 # test = (admm.results[end].avg_R_ref + admm.results[end].avg_R_cref) ./ 2
 
-plot_mues(1)
-plot_rhos(1)
-plot_lambdas()
+# plot_mues(1)
+# plot_rhos(1)
+# plot_lambdas()
