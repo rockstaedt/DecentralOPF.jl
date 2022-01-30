@@ -1,0 +1,83 @@
+\usepackage[utf8]{inputenc}
+\usepackage{setspace}
+
+%\setlength\parskip{12pt}
+%\setlength\parindent{0pt}
+
+%%% Margins %%%
+\usepackage[a4paper,
+lmargin={3cm},
+rmargin={3cm},
+tmargin={3cm},
+bmargin={3cm}
+]{geometry}
+
+%%% Linespacing %%%
+\usepackage{setspace}
+\onehalfspacing
+
+%%% Symbols and Math %%%
+\usepackage{amsmath} % math: extended environment
+\usepackage{amssymb} % math: symbols
+\usepackage{amsthm} % math: theorems
+\usepackage{gensymb} % degree symbol
+\usepackage{mathtools}
+\usepackage{siunitx}
+\usepackage{physics} % for bold vectors and matrices
+
+%%% Footer and Header %%%
+\usepackage[markcase=ignoreuppercase,headsepline]{scrlayer-scrpage}
+\ReplacePackage{scrpage2}{scrlayer-scrpage}
+
+%%% Abbreviations %%%
+\usepackage[acronym,
+			nonumberlist,
+            toc,	
+            style=super,
+            nopostdot,
+           	nogroupskip]{glossaries}
+\makeglossaries
+
+%%% Nomenclature %%%
+\usepackage[intoc]{nomencl}
+\makenomenclature
+% Heading
+\renewcommand{\nomname}{List of Symbols}
+% Intro text
+\renewcommand{\nompreamble}{In the following, several symbols are described that will be later used within the document.}
+% Group of nomenclatures
+\usepackage{etoolbox}
+\renewcommand\nomgroup[1]{%
+  \item[\bfseries
+  \ifstrequal{#1}{P}{Parameters}{%
+  \ifstrequal{#1}{V}{Variables}{%
+  \ifstrequal{#1}{S}{Sets}{}}}%
+]}
+% Unit
+\newcommand{\nomunit}[1]{%
+\renewcommand{\nomentryend}{\hspace*{\fill}#1}}
+
+%%% Caligraphed set-symbols %%%
+\newcommand{\set}[1]{\mathcal{#1}}
+
+%%% Additional formel symbols %%%
+\DeclareMathOperator{\PTDF}{PTDF}
+\DeclareMathOperator{\EX}{EX}
+
+%%% Bibliography %%%
+% WIP-Standards: chicago-authordate
+\usepackage[style=authoryear,	
+            giveninits,					% shorten first names
+			maxbibnames=10,				
+            maxcitenames=2,				% max. 3 authors for \cite
+            backend=biber,
+			doi=false,
+			isbn=false,
+			url=false,
+            natbib=true,
+            sorting=nyt					
+			]{biblatex}
+\addbibresource{literature.bib}
+% \citet{} when the authors name(s) are to be read as part of the text
+% \citep{} when the entire citation id parenthetical
+

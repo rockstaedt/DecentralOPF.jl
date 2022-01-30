@@ -1,0 +1,166 @@
+\chead{\textit{Methodology}}  				
+\section{Methodology}
+
+
+\subsection{Problem formulations}
+
+\subsubsection{General problem}
+\label{sec:general_formulation}
+
+The following optimization problem describes a basic economic dispatch with network restrictions.
+
+\begin{subequations}
+	\begin{align}
+		 \min \quad & \sum_{t\in\mathcal{T}}\sum_{g\in\mathcal{G}}c_g*P_g(t) + \sum_{s\in\mathcal{S}}c_s*(P_s^d(t)+P_s^c(t))\\
+		 \text{s.t. } \quad & 0 \leq P_g(t) \leq \overline{P_g} && \forall g \in \set{G}, t \in \set{T}\\
+		 & 0 \leq P_s^d(t) \leq \overline{P_s} && \forall s \in \set{S}, t \in \set{T}\\
+		 & 0 \leq P_s^c(t) \leq \overline{P_s} && \forall s \in \set{S}, t \in \set{T}\\
+		 & 0 \leq E_s(t) \leq \overline{E_s} && \forall s \in \set{S}, t \in \set{T}\\
+		 & E_s(t) - E_s(t-1) - P_s^c(t) + P_s^d(t) = 0 && \forall s \in \set{S}, t \in \set{T}\\
+		 & I_n(t) = \sum_{g\in\mathcal{G}}P_g(t) + \sum_{s\in\mathcal{S}}(P_s^d(t)-P_s^c(t))-D_n(t) = 0 && \forall t \in \set{T}, n \in \set{N}\\
+		 & -\overline{L_l} \leq PTDF * I_n(t) \leq \overline{L_l} && \forall l \in \set{L}, t \in \set{T}, n \in \set{N} \label{eq:con_power_flow_all}
+	\end{align}
+\end{subequations}
+
+\subsubsection{Replace inequality line constraint}
+
+Since the \gls{admm} can not cope with inequality constraints, equation (\ref{eq:con_power_flow_all}) is replaced by two equality constraints by introducing two slack variables $R_{ref}$ and $R_{cref}$. The problem formulation evolves to the following:
+
+\begin{subequations}
+	\begin{align}
+		 \min \quad & \sum_{t\in\mathcal{T}}\sum_{g\in\mathcal{G}}c_g*P_g(t) + \sum_{s\in\mathcal{S}}c_s*(P_s^d(t)+P_s^c(t))\\
+		 \text{s.t. } \quad & 0 \leq P_g(t) \leq \overline{P_g} && \forall g \in \set{G}, t \in \set{T}\\\
+		 & 0 \leq P_s^d(t) \leq \overline{P_s} && \forall s \in \set{S}, t \in \set{T}\\
+		 & 0 \leq P_s^c(t) \leq \overline{P_s} && \forall s \in \set{S}, t \in \set{T}\\
+		 & 0 \leq E_s(t) \leq \overline{E_s} && \forall s \in \set{S}, t \in \set{T}\\
+		 & E_s(t) - E_s(t-1) - P_s^c(t) + P_s^d(t) = 0 && \forall s \in \set{S}, t \in \set{T}\\
+		 & I_n(t) = \sum_{g\in\mathcal{G}}P_g(t) + \sum_{s\in\mathcal{S}}(P_s^d(t)-P_s^c(t))-D_n(t) = 0 && \forall t \in \set{T}, n \in \set{N} \label{eq:con_energy_balance}\\
+		 & PTDF * I_n(t) + R_{ref} - \overline{L_l} = 0 && \forall l \in \set{L}, t \in \set{T}, n \in \set{N} \label{eq:con_power_flow_upper} \\
+		 & R_{cref} - PTDF * I_n(t) - \overline{L_l} = 0 && \forall l \in \set{L}, t \in \set{T}, n \in \set{N} \label{eq:con_power_flow_lower}
+	\end{align}
+\end{subequations}
+
+The complicating constraints are equations (\ref{eq:con_energy_balance}), (\ref{eq:con_power_flow_upper}) and (\ref{eq:con_power_flow_lower}). If these constraints are relaxed, the main problem decomposes into a generator and a storage subproblem.
+
+\subsubsection{Augmented Lagrangian Relaxation}
+
+The complicated constraints are relaxed by implementing a max-min problem using the dual variables of the complicated constraints. Hereby, $\lambda$ is the dual of the energy balance constraint, $\mu$ and $\rho$ are the duals of the upper and lower flow constraint respectively. Since the objective function is linear, the relaxation is implemented by using the \gls{alr}. Thus, a penalty term per dual variable is added whose value equals zero in the optimality point. 
+
+\begin{subequations}
+	\begin{align}
+		\max{(\lambda, \mu, \rho)}\\
+		 & \min{(P_g, P_s^d, P_s^c)} \quad \sum_{t\in\mathcal{T}}\sum_{g\in\mathcal{G}}c_g*P_g(t) + \sum_{s\in\mathcal{S}}c_s*(P_s^d(t)+P_s^c(t)) \nonumber \\
+		 & + \lambda * \left[\sum_{g\in\mathcal{G}}P_g(t) + \sum_{s\in\mathcal{S}}(P_s^d(t)-P_s^c(t))-D_n(t))\right]\nonumber \\
+		 & + \frac{\gamma}{2} * \bigg\|\sum_{g\in\mathcal{G}}P_g(t) + \sum_{s\in\mathcal{S}}(P_s^d(t)-P_s^c(t))-D_n(t))\bigg\|_2^2 \nonumber \\
+		 & + \mu * \left[PTDF * I_n(t) + R_{ref} - \overline{L_l}\right] \nonumber \\
+		 & + \frac{\gamma}{2} * \bigg\|PTDF * I_n(t) + R_{ref} - \overline{L_l}\bigg\|_2^2 \nonumber \\
+		 & + \rho * \left[R_{cref} - PTDF * I_n(t) - \overline{L_l}\right]\nonumber \\
+		 & + \frac{\gamma}{2} * \bigg\|R_{cref} - PTDF * I_n(t) - \overline{L_l}\bigg\|_2^2\nonumber
+	\end{align}
+	\begin{align}
+		 \text{s.t. } \quad & 0 \leq P_g(t) \leq \overline{P_g} && \forall g \in \set{G}, t \in \set{T}\\\
+		 & 0 \leq P_s^d(t) \leq \overline{P_s} && \forall s \in \set{S}, t \in \set{T}\\
+		 & 0 \leq P_s^c(t) \leq \overline{P_s} && \forall s \in \set{S}, t \in \set{T}\\
+		 & 0 \leq E_s(t) \leq \overline{E_s} && \forall s \in \set{S}, t \in \set{T}\\
+		 & E_s(t) - E_s(t-1) - P_s^c(t) + P_s^d(t) = 0 && \forall s \in \set{S}, t \in \set{T}
+	\end{align}
+\end{subequations}
+
+\subsubsection{Matrix Form}
+
+Typically, \gls{admm} solves problems in the form:
+
+\begin{subequations}
+	\begin{align}
+		\min{(x, z)} \quad & f(x) + g(z) \\
+		\text{s.t. } \quad & \vb{A}x + \vb{B}z = c
+	\end{align}
+\end{subequations}
+
+If applied to the formulation in the section \ref{sec:general_formulation}, the generator problem looks like:
+
+\begin{subequations}
+	\begin{align}
+		f(x) &= f(\vb{P_G}) = \vb{P_G} * \va{c_G}\\
+		& = \begin{bmatrix}
+			P_{g_1}(t_1) & P_{g_2}(t_1) \\
+			P_{g_1}(t_2) & P_{g_2}(t_2)
+		\end{bmatrix} * \begin{bmatrix}
+			c_{g_1} \\
+			c_{g_2}
+		\end{bmatrix} \\
+		& = \begin{bmatrix}
+			P_{g_1}(t_1) * c_{g_1} + P_{g_2}(t_1) * c_{g_2} \\
+			P_{g_1}(t_2) * c_{g_1} + P_{g_2}(t_2) * c_{g_2} \\
+		\end{bmatrix}
+	\end{align}
+\end{subequations}
+
+In addition, the storage problem yields:
+
+\begin{subequations}
+	\begin{align}
+		g(z) &= g(\vb{P_S^d}, \vb{P_S^c})\\
+		& = \left(\vb{P_S^d} + \vb{P_S^c}\right) * \va{c_S} \\
+		& = \left(\begin{bmatrix}
+			P_{s_1}^d(t_1) & P_{s_2}^d(t_1) \\
+			P_{s_1}^d(t_2) & P_{s_2}^d(t_2)
+		\end{bmatrix} + \begin{bmatrix}
+			P_{s_1}^c(t_1) & P_{s_2}^c(t_1) \\
+			P_{s_1}^c(t_2) & P_{s_2}^c(t_2)
+		\end{bmatrix} \right) * \begin{bmatrix}
+			c_{s_1} \\
+			c_{s_2}
+		\end{bmatrix} \\
+		& = \begin{bmatrix}
+			P_{s_1}(t_1) * c_{s_1} + P_{s_2}(t_1) * c_{s_2} \\
+			P_{s_1}(t_2) * c_{s_1} + P_{s_2}(t_2) * c_{s_2} \\
+		\end{bmatrix}
+	\end{align}
+\end{subequations}
+
+Only the energy balance constraint and the constraints for the power flow are part of the \gls{admm} formulation. All the other constraints are either part of the generator problem or of the storage problem and can be easily decomposed. \\
+
+The energy balance constraint in matrix form yields: 
+
+\begin{subequations}
+	\begin{align}
+		a = 1
+	\end{align}
+\end{subequations}
+
+
+\subsubsection{Scaled Form}
+
+According to \citet{Boyd-2010-DistributedOptimizationStatistical}, \gls{admm} is often written in a shorter, scaled form. In the scaled form the linear and quadratic terms of the objective function are combined and the dual variables are scaled. This yields a much shorter formulation. For each dual variable, a residual is defined:
+
+\begin{equation}
+	r = \sum_{g\in\mathcal{G}}P_g(t) + \sum_{s\in\mathcal{S}}(P_s^d(t)-P_s^c(t))-D_n(t)
+\end{equation} 
+\begin{equation}
+	s = PTDF * I_n(t) + R_{ref} - \overline{L_l}
+\end{equation} 
+\begin{equation}
+	t = R_{cref} - PTDF * I(t) - \overline{L_l}
+\end{equation}
+
+%Pursuing the decomposability, one fixes the dual variables to a given value. This yields the following equations:
+%
+%\begin{subequations}
+%	\begin{align}
+%		 & \min{(P_g, P_s^d, P_s^c)} \quad \sum_{t\in\mathcal{T}}\sum_{g\in\mathcal{G}}c_g*P_g(t) + \sum_{s\in\mathcal{S}}c_s*(P_s^d(t)+P_s^c(t)) \nonumber \\
+%		 & + \overline{\lambda} * \left[\sum_{g\in\mathcal{G}}P_g(t) + \sum_{s\in\mathcal{S}}(P_s^d(t)-P_s^c(t))-D_n(t))\right]\nonumber \\
+%		 & + \frac{\gamma}{2} * \bigg\|\sum_{g\in\mathcal{G}}P_g(t) + \sum_{s\in\mathcal{S}}(P_s^d(t)-P_s^c(t))-D_n(t))\bigg\|_2^2 \nonumber \\
+%		 & + \overline{\mu} * \left[PTDF * I_n(t) + R_{ref} - \overline{L_l}\right] \nonumber \\
+%		 & + \frac{\gamma}{2} * \bigg\|PTDF * I_n(t) + R_{ref} - \overline{L_l}\bigg\|_2^2 \nonumber \\
+%		 & + \overline{\rho} * \left[R_{cref} - PTDF * I(t) - \overline{L_l}\right]\nonumber \\
+%		 & + \frac{\gamma}{2} * \bigg\|R_{cref} - PTDF * I(t) - \overline{L_l}\bigg\|_2^2\nonumber
+%	\end{align}
+%	\begin{align}
+%		 \text{s.t. } \quad & 0 \leq P_g(t) \leq \overline{P_g} && \forall g \in \set{G}, t \in \set{T}\\\
+%		 & 0 \leq P_s^d(t) \leq \overline{P_s} && \forall s \in \set{S}, t \in \set{T}\\
+%		 & 0 \leq P_s^c(t) \leq \overline{P_s} && \forall s \in \set{S}, t \in \set{T}\\
+%		 & 0 \leq E_s(t) \leq \overline{E_s} && \forall s \in \set{S}, t \in \set{T}\\
+%		 & E_s(t) - E_s(t-1) - P_s^c(t) + P_s^d(t) = 0 && \forall s \in \set{S}, t \in \set{T}
+%	\end{align}
+%\end{subequations}

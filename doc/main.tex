@@ -1,15 +1,87 @@
-\documentclass{article}
-\usepackage[utf8]{inputenc}
+\documentclass[11pt, a4paper, oneside, bibliography=totoc]{scrartcl}
 
-\title{ADMM}
+\input{packages}
+\input{acronyms}
+
+\title{Development of a framework to model a decentralised, multi-period optimal power flow based on the Alternating direction Method of Multipliers}
 \author{Eric Rockstädt}
-\date{January 2022}
+\date{Berlin, \today}
+\makeatletter
+
 
 \begin{document}
 
-\maketitle
+\begin{titlepage}
+	\centering
+	\includegraphics[width=0.2\textwidth]{images/TU-Logo}\par\vspace{1cm}
+	{\scshape\Large Technical University Berlin \par}
+	\vspace{1cm}
+	{\scshape\LARGE Masterthesis\par}
+	\vspace{1.5cm}
+	{\huge\bfseries \@title \par}
+	\vspace{2cm}
+	{\Large\itshape \@author\par}
+	\vfill
+	supervised by\par
+	Dr.~Richard \textsc{Weinhold}
+
+	\vfill
+
+% Bottom of the page
+	{\large \@date\par}
+\end{titlepage}
+
 \newpage
 
-\section{Mathematical Formulations}
+\pagenumbering{roman}
+
+\addcontentsline{toc}{section}{Abstract}
+\input{chapters/0_abstract}
+\newpage
+
+\addcontentsline{toc}{section}{Executive Summary}
+\include{chapters/0_executive_summary}
+\newpage
+
+\chead{\textit{Contents}}
+\tableofcontents
+\newpage
+
+\chead{\textit{List of Figures}} 
+\addcontentsline{toc}{section}{\listfigurename}
+\listoffigures
+\newpage
+
+\chead{\textit{List of Tables}} 
+\addcontentsline{toc}{section}{\listtablename}
+\listoftables
+\newpage
+
+\chead{\textit{List of Symbols}}
+\input{nomenclature}
+\printnomenclature
+\newpage
+
+\chead{\textit{Abbreviations}}
+\input{acronyms}
+\printglossary[type=\acronymtype, title=Abbreviations]
+\newpage
+
+\pagenumbering{arabic}
+
+\input{chapters/1_introduction}
+\newpage
+
+\input{chapters/2_theory}
+\newpage
+
+\input{chapters/3_methodology}
+\newpage
+
+\input{chapters/4_results}
+\newpage
+
+\chead{\textit{References}}
+\printbibliography
 
 \end{document}
