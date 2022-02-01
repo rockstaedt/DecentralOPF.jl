@@ -81,7 +81,7 @@ If applied to the formulation in the section \ref{sec:general_formulation}, the 
 
 \begin{subequations}
 	\begin{align}
-		f(x) &= f(\vb{P_\mathcal{G}}) = \vb{P_\mathcal{G}} * \va{c_\mathcal{G}}\\
+		f(x) &= f(\vb{P_\mathcal{G}}) = \vb{P_\mathcal{G}}^T * \va{c_\mathcal{G}}\\
 		& = \begin{bmatrix}
 			P_{g_1}(t_1) & P_{g_2}(t_1) & P_{g_3}(t_1) \\
 			P_{g_1}(t_2) & P_{g_2}(t_2) & P_{g_3}(t_2)
@@ -102,7 +102,7 @@ In addition, the storage problem yields:
 \begin{subequations}
 	\begin{align}
 		g(z) &= g(\vb{P_\mathcal{S}^d}, \vb{P_\mathcal{S}^c})\\
-		& = \left(\vb{P_S^d} + \vb{P_S^c}\right) * \va{c_\mathcal{S}} \\
+		& = \left(\vb{P_\mathcal{S}^d}^T + \vb{P_\mathcal{S}^c}^T\right) * \va{c_\mathcal{S}} \\
 		& = \left(\begin{bmatrix}
 			P_{s_1}^d(t_1) & P_{s_2}^d(t_1) \\
 			P_{s_1}^d(t_2) & P_{s_2}^d(t_2)
@@ -133,49 +133,49 @@ For this example, only generator 2 and storage 2 are located at node 2. The othe
 
 \begin{subequations}
 	\begin{align}
-		& \vb{P_\mathcal{G}} * \vb{N_\mathcal{G}} + (\vb{P_\mathcal{S}^d} - \vb{P_\mathcal{S}^c}) * \vb{N_\mathcal{S}} - \vb{D_\mathcal{N}} = \vb{I_\mathcal{N}} = \vb{0} \\
+		& \vb{N_\mathcal{G}}*\vb{P_\mathcal{G}} + \vb{N_\mathcal{S}}*(\vb{P_\mathcal{S}^d} - \vb{P_\mathcal{S}^c}) - \vb{D_\mathcal{N}} = \vb{I_\mathcal{N}} = \vb{0} \\
 		& \Leftrightarrow \begin{bmatrix}
-				P_{g_1}(t_1) & P_{g_2}(t_1) & P_{g_3}(t_1) \\
-				P_{g_1}(t_2) & P_{g_2}(t_2) & P_{g_3}(t_2)
+			1 & 0 & 1 \\
+			0 & 1 & 0 \\
 		\end{bmatrix} * \begin{bmatrix}
-			1 & 0 \\
-			0 & 1 \\
-			1 & 0 \\
+				P_{g_1}(t_1) & P_{g_1}(t_2) \\
+				P_{g_2}(t_1) & P_{g_2}(t_2) \\
+				P_{g_3}(t_1) & P_{g_3}(t_2)
 		\end{bmatrix} \\
-		& \qquad + \left(\begin{bmatrix}
-			P_{s_1}^d(t_1) & P_{s_2}^d(t_1) \\
-			P_{s_1}^d(t_2) & P_{s_2}^d(t_2)
-		\end{bmatrix} - \begin{bmatrix}
-			P_{s_1}^c(t_1) & P_{s_2}^c(t_1) \\
-			P_{s_1}^c(t_2) & P_{s_2}^c(t_2)
-		\end{bmatrix} \right) * \begin{bmatrix}
+		& \qquad + \begin{bmatrix}
 			1 & 0 \\
 			0 & 1 \\
-		\end{bmatrix} \nonumber \\
+		\end{bmatrix} * \left(\begin{bmatrix}
+			P_{s_1}^d(t_1) & P_{s_1}^d(t_2) \\
+			P_{s_2}^d(t_1) & P_{s_2}^d(t_2)
+		\end{bmatrix} - \begin{bmatrix}
+			P_{s_1}^c(t_1) & P_{s_1}^c(t_2) \\
+			P_{s_2}^c(t_1) & P_{s_2}^c(t_2)
+		\end{bmatrix} \right) \nonumber \\
 		& \qquad - \begin{bmatrix}
-			D_{n_1}(t_1) & D_{n_2}(t_1) \\
-			D_{n_1}(t_2) & D_{n_2}(t_2)
+			D_{n_1}(t_1) & D_{n_1}(t_2) \\
+			D_{n_2}(t_1) & D_{n_2}(t_2)
 		\end{bmatrix} = \begin{bmatrix}
 			0 & 0 \\
 			0 & 0
 		\end{bmatrix} \nonumber \\
 		& \Leftrightarrow \begin{bmatrix}
-				P_{g_1}(t_1) + P_{g_3}(t_1) & P_{g_2}(t_1) \\
-				P_{g_1}(t_2) + P_{g_3}(t_2) & P_{g_2}(t_2)
+				P_{g_1}(t_1) + P_{g_3}(t_1) & P_{g_1}(t_2) + P_{g_3}(t_2) \\
+				P_{g_2}(t_1) & P_{g_2}(t_2)
 		\end{bmatrix} + \begin{bmatrix}
-			P_{s_1}^d(t_1) - P_{s_1}^c(t_1) & P_{s_2}^d(t_1) - P_{s_2}^c(t_1) \\
-			P_{s_1}^d(t_2) - P_{s_1}^c(t_2) & P_{s_2}^d(t_2) - P_{s_2}^c(t_2)
+			P_{s_1}^d(t_1) - P_{s_1}^c(t_1) & P_{s_1}^d(t_2) - P_{s_1}^c(t_2) \\
+			P_{s_2}^d(t_1) - P_{s_2}^c(t_1) & P_{s_2}^d(t_2) - P_{s_2}^c(t_2)
 		\end{bmatrix} \nonumber \\
 		& \qquad - \begin{bmatrix}
-			D_{n_1}(t_1) & D_{n_2}(t_1) \\
-			D_{n_1}(t_2) & D_{n_2}(t_2)
+			D_{n_1}(t_1) & D_{n_1}(t_2) \\
+			D_{n_2}(t_1) & D_{n_2}(t_2)
 		\end{bmatrix} = \begin{bmatrix}
 			0 & 0 \\
 			0 & 0
 		\end{bmatrix} \nonumber \\
 		& \Leftrightarrow \begin{bmatrix}
-			P_{g_1}(t_1) + P_{g_3}(t_1) + P_{s_1}^d(t_1) - P_{s_1}^c(t_1) - D_{n_1}(t_1) & P_{g_2}(t_1) + P_{s_2}^d(t_1) - P_{s_2}^c(t_1) - D_{n_2}(t_1) \\
-			P_{g_1}(t_2) + P_{g_3}(t_2) + P_{s_1}^d(t_2) - P_{s_1}^c(t_2) - D_{n_1}(t_2) & P_{g_2}(t_2) + P_{s_2}^d(t_2) - P_{s_2}^c(t_2) - D_{n_2}(t_2)
+			P_{g_1}(t_1) + P_{g_3}(t_1) + P_{s_1}^d(t_1) - P_{s_1}^c(t_1) - D_{n_1}(t_1) & P_{g_1}(t_2) + P_{g_3}(t_2) + P_{s_1}^d(t_2) - P_{s_1}^c(t_2) - D_{n_1}(t_2) \\
+			P_{g_2}(t_1) + P_{s_2}^d(t_1) - P_{s_2}^c(t_1) - D_{n_2}(t_1) & P_{g_2}(t_2) + P_{s_2}^d(t_2) - P_{s_2}^c(t_2) - D_{n_2}(t_2)
 		\end{bmatrix} \\
 		& \qquad = \begin{bmatrix}
 			0 & 0 \\
@@ -189,7 +189,7 @@ The power flow constraints are set up accordingly. The \gls{admm} formulation be
 \begin{subequations}
 	\begin{align}
 		\max{(\lambda, \mu, \rho)} \label{eq:opt_admm_matrix}\\
-		 & \min{(\vb{P_\mathcal{G}}, \vb{P_\mathcal{S}^d}, \vb{P_\mathcal{S}^c})} \quad \vb{P_\mathcal{G}} * \va{c_\mathcal{G}} + \left(\vb{P_S^d} + \vb{P_S^c}\right) * \va{c_\mathcal{S}} \nonumber \\
+		 & \min{(\vb{P_\mathcal{G}}, \vb{P_\mathcal{S}^d}, \vb{P_\mathcal{S}^c})} \quad \vb{P_\mathcal{G}}^T * \va{c_\mathcal{G}} + \left(\vb{P_S^d} + \vb{P_S^c}\right)^T * \va{c_\mathcal{S}} \nonumber \\
 		 & + \vb{\lambda} * \vb{I_\mathcal{N}} + \frac{\gamma}{2} * \big\|\vb{I_\mathcal{N}}\big\|_2^2 \nonumber \\
 		 & + \vb{\mu} * \left[ PTDF * \vb{I_\mathcal{N}} + \vb{R_\mathcal{L}^{ref}} - \vb{\overline{L_\mathcal{L}}} \right] \nonumber \\
 		 & + \frac{\gamma}{2} * \big\| PTDF * \vb{I_\mathcal{N}} + \vb{R_\mathcal{L}^{ref}} - \vb{\overline{L_\mathcal{L}}} \big\|_2^2 \nonumber \\
@@ -210,7 +210,7 @@ The power flow constraints are set up accordingly. The \gls{admm} formulation be
 According to \citet{Boyd-2010-DistributedOptimizationStatistical}, \gls{admm} is often written in a shorter, so called scaled form. In this form, the linear and quadratic terms of the objective function are combined and the dual variables are scaled. This yields a much shorter formulation. As an example, the scaled dual variable of the energy balance is derived. First, one defines a residual term of the energy balance constraint.
 
 \begin{equation}
-	\vb{r} = \vb{P_\mathcal{G}} * \vb{N_\mathcal{G}} + (\vb{P_\mathcal{S}^d} - \vb{P_\mathcal{S}^c}) * \vb{N_\mathcal{S}} - \vb{D_\mathcal{N}} = \vb{I_\mathcal{N}}
+	\vb{r} = \vb{N_\mathcal{G}}*\vb{P_\mathcal{G}} + \vb{N_\mathcal{S}}*(\vb{P_\mathcal{S}^d} - \vb{P_\mathcal{S}^c}) - \vb{D_\mathcal{N}} = \vb{I_\mathcal{N}}
 \end{equation}
 
 %Respectively, one can also define the residuals for the power flow constraints.
@@ -233,7 +233,7 @@ The transformation is not very straight forward but allows to further simplify t
 \begin{subequations}
 	\begin{align}
 		\max{(\lambda, \mu, \rho)} \label{eq:opt_admm_matrix_scaled}\\
-		 & \min{(\vb{P_\mathcal{G}}, \vb{P_\mathcal{S}^d}, \vb{P_\mathcal{S}^c})} \quad \vb{P_\mathcal{G}} * \va{c_\mathcal{G}} + \left(\vb{P_S^d} + \vb{P_S^c}\right) * \va{c_\mathcal{S}} \nonumber \\
+		 & \min{(\vb{P_\mathcal{G}}, \vb{P_\mathcal{S}^d}, \vb{P_\mathcal{S}^c})} \quad \vb{P_\mathcal{G}}^T * \va{c_\mathcal{G}} + \left(\vb{P_S^d} + \vb{P_S^c}\right)^T * \va{c_\mathcal{S}} \nonumber \\
 		 & + \frac{\gamma}{2} * \big\|\vb{I_\mathcal{N}} + \vb{\hat{\lambda}}\big\|_2^2 \nonumber \\
 		 & + \frac{\gamma}{2} * \big\| PTDF * \vb{I_\mathcal{N}} + \vb{R_\mathcal{L}^{ref}} - \vb{\overline{L_\mathcal{L}}} + \vb{\hat{\mu}} \big\|_2^2 \nonumber \\
 		 & + \frac{\gamma}{2} * \big\| \vb{R_\mathcal{L}^{cref}} - PTDF * \vb{I_\mathcal{N}} - \vb{\overline{L_\mathcal{L}}} + \vb{\hat{\rho}} \big\|_2^2 \nonumber
@@ -247,3 +247,4 @@ The transformation is not very straight forward but allows to further simplify t
 	\end{align}
 \end{subequations}
 
+The scaled dual variables can be again replaced by the dual variable. \textbf{Maybe that is better to be more consistent.}
