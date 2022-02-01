@@ -49,7 +49,7 @@ The complicated constraints are relaxed by implementing a max-min problem using 
 \begin{subequations}
 	\begin{align}
 		\max{(\lambda, \mu, \rho)}\\
-		 & \min{(P_g, P_s^d, P_s^c)} \quad \sum_{t\in\mathcal{T}}\sum_{g\in\mathcal{G}}c_g*P_g(t) + \sum_{s\in\mathcal{S}}c_s*(P_s^d(t)+P_s^c(t)) \nonumber \\
+		 & \min{(P_\mathcal{G}, P_\mathcal{S}^d, P_\mathcal{S}^c)} \quad \sum_{t\in\mathcal{T}}\sum_{g\in\mathcal{G}}c_g*P_g(t) + \sum_{s\in\mathcal{S}}c_s*(P_s^d(t)+P_s^c(t)) \nonumber \\
 		 & + \lambda * \left[\sum_{g\in\mathcal{G}}P_g(t) + \sum_{s\in\mathcal{S}}(P_s^d(t)-P_s^c(t))-D_n(t))\right]\nonumber \\
 		 & + \frac{\gamma}{2} * \bigg\|\sum_{g\in\mathcal{G}}P_g(t) + \sum_{s\in\mathcal{S}}(P_s^d(t)-P_s^c(t))-D_n(t))\bigg\|_2^2 \nonumber \\
 		 & + \mu * \left[PTDF * I_n(t) + R_{ref} - \overline{L_l}\right] \nonumber \\
@@ -81,17 +81,18 @@ If applied to the formulation in the section \ref{sec:general_formulation}, the 
 
 \begin{subequations}
 	\begin{align}
-		f(x) &= f(\vb{P_G}) = \vb{P_G} * \va{c_G}\\
+		f(x) &= f(\vb{P_\mathcal{G}}) = \vb{P_\mathcal{G}} * \va{c_\mathcal{G}}\\
 		& = \begin{bmatrix}
-			P_{g_1}(t_1) & P_{g_2}(t_1) \\
-			P_{g_1}(t_2) & P_{g_2}(t_2)
+			P_{g_1}(t_1) & P_{g_2}(t_1) & P_{g_3}(t_1) \\
+			P_{g_1}(t_2) & P_{g_2}(t_2) & P_{g_3}(t_2)
 		\end{bmatrix} * \begin{bmatrix}
 			c_{g_1} \\
-			c_{g_2}
+			c_{g_2} \\
+			c_{g_3}
 		\end{bmatrix} \\
 		& = \begin{bmatrix}
-			P_{g_1}(t_1) * c_{g_1} + P_{g_2}(t_1) * c_{g_2} \\
-			P_{g_1}(t_2) * c_{g_1} + P_{g_2}(t_2) * c_{g_2} \\
+			P_{g_1}(t_1) * c_{g_1} + P_{g_2}(t_1) * c_{g_2} + P_{g_3}(t_1) * c_{g_3} \\
+			P_{g_1}(t_2) * c_{g_1} + P_{g_2}(t_2) * c_{g_2} + P_{g_3}(t_2) * c_{g_3} \\
 		\end{bmatrix}
 	\end{align}
 \end{subequations}
@@ -100,8 +101,8 @@ In addition, the storage problem yields:
 
 \begin{subequations}
 	\begin{align}
-		g(z) &= g(\vb{P_S^d}, \vb{P_S^c})\\
-		& = \left(\vb{P_S^d} + \vb{P_S^c}\right) * \va{c_S} \\
+		g(z) &= g(\vb{P_\mathcal{S}^d}, \vb{P_\mathcal{S}^c})\\
+		& = \left(\vb{P_S^d} + \vb{P_S^c}\right) * \va{c_\mathcal{S}} \\
 		& = \left(\begin{bmatrix}
 			P_{s_1}^d(t_1) & P_{s_2}^d(t_1) \\
 			P_{s_1}^d(t_2) & P_{s_2}^d(t_2)
@@ -109,6 +110,13 @@ In addition, the storage problem yields:
 			P_{s_1}^c(t_1) & P_{s_2}^c(t_1) \\
 			P_{s_1}^c(t_2) & P_{s_2}^c(t_2)
 		\end{bmatrix} \right) * \begin{bmatrix}
+			c_{s_1} \\
+			c_{s_2}
+		\end{bmatrix} \\
+		& = \begin{bmatrix}
+			P_{s_1}^d(t_1) + P_{s_1}^c(t_1) & P_{s_2}^d(t_1) + P_{s_2}^c(t_1) \\
+			P_{s_1}^d(t_2) + P_{s_1}^c(t_2) & P_{s_2}^d(t_2) + P_{s_2}^c(t_2)
+		\end{bmatrix} * \begin{bmatrix}
 			c_{s_1} \\
 			c_{s_2}
 		\end{bmatrix} \\
@@ -121,46 +129,121 @@ In addition, the storage problem yields:
 
 Only the energy balance constraint and the constraints for the power flow are part of the \gls{admm} formulation. All the other constraints are either part of the generator problem or of the storage problem and can be easily decomposed. \\
 
-The energy balance constraint in matrix form yields: 
+For this example, only generator 2 and storage 2 are located at node 2. The other resources are located at node 1. Then, the energy balance constraint in matrix form yields:
 
 \begin{subequations}
 	\begin{align}
-		a = 1
+		& \vb{P_\mathcal{G}} * \vb{N_\mathcal{G}} + (\vb{P_\mathcal{S}^d} - \vb{P_\mathcal{S}^c}) * \vb{N_\mathcal{S}} - \vb{D_\mathcal{N}} = \vb{I_\mathcal{N}} = \vb{0} \\
+		& \Leftrightarrow \begin{bmatrix}
+				P_{g_1}(t_1) & P_{g_2}(t_1) & P_{g_3}(t_1) \\
+				P_{g_1}(t_2) & P_{g_2}(t_2) & P_{g_3}(t_2)
+		\end{bmatrix} * \begin{bmatrix}
+			1 & 0 \\
+			0 & 1 \\
+			1 & 0 \\
+		\end{bmatrix} \\
+		& \qquad + \left(\begin{bmatrix}
+			P_{s_1}^d(t_1) & P_{s_2}^d(t_1) \\
+			P_{s_1}^d(t_2) & P_{s_2}^d(t_2)
+		\end{bmatrix} - \begin{bmatrix}
+			P_{s_1}^c(t_1) & P_{s_2}^c(t_1) \\
+			P_{s_1}^c(t_2) & P_{s_2}^c(t_2)
+		\end{bmatrix} \right) * \begin{bmatrix}
+			1 & 0 \\
+			0 & 1 \\
+		\end{bmatrix} \nonumber \\
+		& \qquad - \begin{bmatrix}
+			D_{n_1}(t_1) & D_{n_2}(t_1) \\
+			D_{n_1}(t_2) & D_{n_2}(t_2)
+		\end{bmatrix} = \begin{bmatrix}
+			0 & 0 \\
+			0 & 0
+		\end{bmatrix} \nonumber \\
+		& \Leftrightarrow \begin{bmatrix}
+				P_{g_1}(t_1) + P_{g_3}(t_1) & P_{g_2}(t_1) \\
+				P_{g_1}(t_2) + P_{g_3}(t_2) & P_{g_2}(t_2)
+		\end{bmatrix} + \begin{bmatrix}
+			P_{s_1}^d(t_1) - P_{s_1}^c(t_1) & P_{s_2}^d(t_1) - P_{s_2}^c(t_1) \\
+			P_{s_1}^d(t_2) - P_{s_1}^c(t_2) & P_{s_2}^d(t_2) - P_{s_2}^c(t_2)
+		\end{bmatrix} \nonumber \\
+		& \qquad - \begin{bmatrix}
+			D_{n_1}(t_1) & D_{n_2}(t_1) \\
+			D_{n_1}(t_2) & D_{n_2}(t_2)
+		\end{bmatrix} = \begin{bmatrix}
+			0 & 0 \\
+			0 & 0
+		\end{bmatrix} \nonumber \\
+		& \Leftrightarrow \begin{bmatrix}
+			P_{g_1}(t_1) + P_{g_3}(t_1) + P_{s_1}^d(t_1) - P_{s_1}^c(t_1) - D_{n_1}(t_1) & P_{g_2}(t_1) + P_{s_2}^d(t_1) - P_{s_2}^c(t_1) - D_{n_2}(t_1) \\
+			P_{g_1}(t_2) + P_{g_3}(t_2) + P_{s_1}^d(t_2) - P_{s_1}^c(t_2) - D_{n_1}(t_2) & P_{g_2}(t_2) + P_{s_2}^d(t_2) - P_{s_2}^c(t_2) - D_{n_2}(t_2)
+		\end{bmatrix} \\
+		& \qquad = \begin{bmatrix}
+			0 & 0 \\
+			0 & 0
+		\end{bmatrix} \nonumber
 	\end{align}
 \end{subequations}
 
+The power flow constraints are set up accordingly. The \gls{admm} formulation becomes:
+
+\begin{subequations}
+	\begin{align}
+		\max{(\lambda, \mu, \rho)} \label{eq:opt_admm_matrix}\\
+		 & \min{(\vb{P_\mathcal{G}}, \vb{P_\mathcal{S}^d}, \vb{P_\mathcal{S}^c})} \quad \vb{P_\mathcal{G}} * \va{c_\mathcal{G}} + \left(\vb{P_S^d} + \vb{P_S^c}\right) * \va{c_\mathcal{S}} \nonumber \\
+		 & + \vb{\lambda} * \vb{I_\mathcal{N}} + \frac{\gamma}{2} * \big\|\vb{I_\mathcal{N}}\big\|_2^2 \nonumber \\
+		 & + \vb{\mu} * \left[ PTDF * \vb{I_\mathcal{N}} + \vb{R_\mathcal{L}^{ref}} - \vb{\overline{L_\mathcal{L}}} \right] \nonumber \\
+		 & + \frac{\gamma}{2} * \big\| PTDF * \vb{I_\mathcal{N}} + \vb{R_\mathcal{L}^{ref}} - \vb{\overline{L_\mathcal{L}}} \big\|_2^2 \nonumber \\
+		 & + \vb{\rho} * \left[ \vb{R_\mathcal{L}^{cref}} - PTDF * \vb{I_\mathcal{N}} - \vb{\overline{L_\mathcal{L}}} \right] \nonumber \\
+		 & + \frac{\gamma}{2} * \big\| \vb{R_\mathcal{L}^{cref}} - PTDF * \vb{I_\mathcal{N}} - \vb{\overline{L_\mathcal{L}}} \big\|_2^2 \nonumber
+	\end{align}
+		\begin{align}
+		 \text{s.t. } \quad & \vb{0} \leq \vb{P_\mathcal{G}} \leq \vb{\overline{P_\mathcal{G}}} \\
+		 & \vb{0} \leq \vb{P_\mathcal{S}^d} \leq \vb{\overline{P_\mathcal{S}}} \\
+		 & \vb{0} \leq \vb{P_\mathcal{S}^c} \leq \vb{\overline{P_\mathcal{S}}} \\
+		 & \vb{0} \leq \vb{E_\mathcal{S}} \leq \vb{\overline{E_\mathcal{S}}}\\
+		 & \vb{0} = \vb{E_\mathcal{S}} - \vb{E_\mathcal{S}^{t-1}} - \vb{P_\mathcal{S}^c} + \vb{P_\mathcal{S}^d}
+	\end{align}
+\end{subequations}
 
 \subsubsection{Scaled Form}
 
-According to \citet{Boyd-2010-DistributedOptimizationStatistical}, \gls{admm} is often written in a shorter, scaled form. In the scaled form the linear and quadratic terms of the objective function are combined and the dual variables are scaled. This yields a much shorter formulation. For each dual variable, a residual is defined:
+According to \citet{Boyd-2010-DistributedOptimizationStatistical}, \gls{admm} is often written in a shorter, so called scaled form. In this form, the linear and quadratic terms of the objective function are combined and the dual variables are scaled. This yields a much shorter formulation. As an example, the scaled dual variable of the energy balance is derived. First, one defines a residual term of the energy balance constraint.
 
 \begin{equation}
-	r = \sum_{g\in\mathcal{G}}P_g(t) + \sum_{s\in\mathcal{S}}(P_s^d(t)-P_s^c(t))-D_n(t)
-\end{equation} 
-\begin{equation}
-	s = PTDF * I_n(t) + R_{ref} - \overline{L_l}
-\end{equation} 
-\begin{equation}
-	t = R_{cref} - PTDF * I(t) - \overline{L_l}
+	\vb{r} = \vb{P_\mathcal{G}} * \vb{N_\mathcal{G}} + (\vb{P_\mathcal{S}^d} - \vb{P_\mathcal{S}^c}) * \vb{N_\mathcal{S}} - \vb{D_\mathcal{N}} = \vb{I_\mathcal{N}}
 \end{equation}
 
-%Pursuing the decomposability, one fixes the dual variables to a given value. This yields the following equations:
+%Respectively, one can also define the residuals for the power flow constraints.
 %
-%\begin{subequations}
-%	\begin{align}
-%		 & \min{(P_g, P_s^d, P_s^c)} \quad \sum_{t\in\mathcal{T}}\sum_{g\in\mathcal{G}}c_g*P_g(t) + \sum_{s\in\mathcal{S}}c_s*(P_s^d(t)+P_s^c(t)) \nonumber \\
-%		 & + \overline{\lambda} * \left[\sum_{g\in\mathcal{G}}P_g(t) + \sum_{s\in\mathcal{S}}(P_s^d(t)-P_s^c(t))-D_n(t))\right]\nonumber \\
-%		 & + \frac{\gamma}{2} * \bigg\|\sum_{g\in\mathcal{G}}P_g(t) + \sum_{s\in\mathcal{S}}(P_s^d(t)-P_s^c(t))-D_n(t))\bigg\|_2^2 \nonumber \\
-%		 & + \overline{\mu} * \left[PTDF * I_n(t) + R_{ref} - \overline{L_l}\right] \nonumber \\
-%		 & + \frac{\gamma}{2} * \bigg\|PTDF * I_n(t) + R_{ref} - \overline{L_l}\bigg\|_2^2 \nonumber \\
-%		 & + \overline{\rho} * \left[R_{cref} - PTDF * I(t) - \overline{L_l}\right]\nonumber \\
-%		 & + \frac{\gamma}{2} * \bigg\|R_{cref} - PTDF * I(t) - \overline{L_l}\bigg\|_2^2\nonumber
-%	\end{align}
-%	\begin{align}
-%		 \text{s.t. } \quad & 0 \leq P_g(t) \leq \overline{P_g} && \forall g \in \set{G}, t \in \set{T}\\\
-%		 & 0 \leq P_s^d(t) \leq \overline{P_s} && \forall s \in \set{S}, t \in \set{T}\\
-%		 & 0 \leq P_s^c(t) \leq \overline{P_s} && \forall s \in \set{S}, t \in \set{T}\\
-%		 & 0 \leq E_s(t) \leq \overline{E_s} && \forall s \in \set{S}, t \in \set{T}\\
-%		 & E_s(t) - E_s(t-1) - P_s^c(t) + P_s^d(t) = 0 && \forall s \in \set{S}, t \in \set{T}
-%	\end{align}
-%\end{subequations}
+%\begin{equation}
+%	\vb{s} = PTDF * \vb{I_\mathcal{N}} + \vb{R_\mathcal{L}^{ref}} - \vb{\overline{L_\mathcal{L}}}
+%\end{equation} 
+%\begin{equation}
+%	\vb{t} = \vb{R_\mathcal{L}^{cref}} - PTDF * \vb{I_\mathcal{N}} - \vb{\overline{L_\mathcal{L}}}
+%\end{equation}
+
+Inserting the residual term into the corresponding part of the optimization problem yields:
+
+\begin{equation}
+	\vb{\lambda} * \vb{r} + \frac{\gamma}{2} * || \vb{r} ||^2_2 = \frac{\gamma}{2} || \vb{r} + \frac{1}{\gamma}\vb{\lambda} ||^2_2 - \frac{1}{2\gamma}|| \vb{\lambda} ||^2_2 = \frac{\gamma}{2} || \vb{r} + \vb{\hat{\lambda}} ||^2_2 - \frac{\gamma}{2}|| \vb{\hat{\lambda}} ||^2_2 \label{eq:derivation_lambda_hat}
+\end{equation}
+
+The transformation is not very straight forward but allows to further simplify the main optimization problem in equation (\ref{eq:opt_admm_matrix}). With $\vb{\hat{\lambda}} = \frac{1}{\gamma}*\vb{\lambda}$, one gets the scaled dual variable of $\vb{\lambda}$. Using the scaled dual variable makes the problem formulation much shorter because the last term $- \frac{\gamma}{2}|| \vb{\hat{\lambda}} ||^2_2$ of equation (\ref{eq:derivation_lambda_hat}) does not contain any optimization variable. Hence, this term can be removed. The other dual variables can be replaced respectively. Inserting all scaled dual variables $\vb{\hat{\lambda}}$, $\vb{\hat{\mu}}$, $\vb{\hat{\rho}}$ in equation (\ref{eq:opt_admm_matrix}) yields:
+
+\begin{subequations}
+	\begin{align}
+		\max{(\lambda, \mu, \rho)} \label{eq:opt_admm_matrix_scaled}\\
+		 & \min{(\vb{P_\mathcal{G}}, \vb{P_\mathcal{S}^d}, \vb{P_\mathcal{S}^c})} \quad \vb{P_\mathcal{G}} * \va{c_\mathcal{G}} + \left(\vb{P_S^d} + \vb{P_S^c}\right) * \va{c_\mathcal{S}} \nonumber \\
+		 & + \frac{\gamma}{2} * \big\|\vb{I_\mathcal{N}} + \vb{\hat{\lambda}}\big\|_2^2 \nonumber \\
+		 & + \frac{\gamma}{2} * \big\| PTDF * \vb{I_\mathcal{N}} + \vb{R_\mathcal{L}^{ref}} - \vb{\overline{L_\mathcal{L}}} + \vb{\hat{\mu}} \big\|_2^2 \nonumber \\
+		 & + \frac{\gamma}{2} * \big\| \vb{R_\mathcal{L}^{cref}} - PTDF * \vb{I_\mathcal{N}} - \vb{\overline{L_\mathcal{L}}} + \vb{\hat{\rho}} \big\|_2^2 \nonumber
+	\end{align}
+		\begin{align}
+		 \text{s.t. } \quad & \vb{0} \leq \vb{P_\mathcal{G}} \leq \vb{\overline{P_\mathcal{G}}} \\
+		 & \vb{0} \leq \vb{P_\mathcal{S}^d} \leq \vb{\overline{P_\mathcal{S}}} \\
+		 & \vb{0} \leq \vb{P_\mathcal{S}^c} \leq \vb{\overline{P_\mathcal{S}}} \\
+		 & \vb{0} \leq \vb{E_\mathcal{S}} \leq \vb{\overline{E_\mathcal{S}}}\\
+		 & \vb{0} = \vb{E_\mathcal{S}} - \vb{E_\mathcal{S}^{t-1}} - \vb{P_\mathcal{S}^c} + \vb{P_\mathcal{S}^d}
+	\end{align}
+\end{subequations}
+
