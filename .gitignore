@@ -25,3 +25,6 @@ Manifest.toml
 
 # Temporary TeX files
 */.texpadtmp
+
+# Main PDF file
+doc/main.pdf
