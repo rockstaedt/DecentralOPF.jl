@@ -38,7 +38,7 @@ function optimize_subproblem(generator::Generator)
     set_silent(sub)
 
     # Maximum capacity of generator
-    @variable(sub, 0 <= G[t=admm.T] <= generator.max_generation, Int)
+    @variable(sub, 0 <= G[t=admm.T] <= generator.max_generation)
 
     # Slack variables
     @variable(sub, 0 <= R_ref[line=admm.L, t=admm.T])
@@ -118,9 +118,9 @@ function optimize_subproblem(storage::Storage)
     set_silent(sub)
 
     # Storage variables with maximum bounds
-    @variable(sub, 0 <= G_S_d[t=admm.T] <= storage.max_power, Int)
-    @variable(sub, 0 <= G_S_c[t=admm.T] <= storage.max_power, Int)
-    @variable(sub, 0 <= storage_level[t=admm.T] <= storage.max_level, Int)
+    @variable(sub, 0 <= G_S_d[t=admm.T] <= storage.max_power)
+    @variable(sub, 0 <= G_S_c[t=admm.T] <= storage.max_power)
+    @variable(sub, 0 <= storage_level[t=admm.T] <= storage.max_level)
 
     # Slack variables
     @variable(sub, 0 <= R_ref[line=admm.L, t=admm.T])
