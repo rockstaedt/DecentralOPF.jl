@@ -249,24 +249,44 @@ end
 
 function check_convergence()
     eps = 10^(-5)
-    # if admm.iteration != 1
-    #     # Iteration counter is not increased yet. Hence, the new lamba is
-    #     # compared to the lambda of the current iteration.
-    #     lambda_convergence = (
-    #         abs.(admm.lambdas[end] - admm.lambdas[admm.iteration]) .< eps
-    #     )
-    #     mue_convergence = (
-    #         abs.(admm.mues[end] - admm.mues[admm.iteration]) .< eps
-    #     )
-    #     rho_convergence = (
-    #         abs.(admm.rhos[end] - admm.rhos[admm.iteration]) .< eps
-    #     )
-    #     convergence = hcat(lambda_convergence, mue_convergence)
-    #     convergence = hcat(convergence, rho_convergence)
-    #     admm.converged = all(convergence)
-    # end
-
-    if admm.converged
+    if admm.iteration != 1
+        r_delta = abs.(
+            (
+                admm.results[admm.iteration].generation
+                + admm.results[admm.iteration].discharge
+                - admm.results[admm.iteration].charge
+                - admm.total_demand
+            )
+        )
+        push!(admm.convergence.lambda_res, r_delta)
+        s_delta = abs.(
+            (
+                admm.ptdf * admm.results[admm.iteration].injection
+                + admm.results[admm.iteration].avg_R_ref
+                .- admm.L_max
+            )
+        )
+        push!(admm.convergence.mue_res, s_delta)
+        t_delta = abs.(
+            (
+                admm.results[admm.iteration].avg_R_cref
+                - admm.ptdf * admm.results[admm.iteration].injection
+                .- admm.L_max
+            )
+        )
+        push!(admm.convergence.rho_res, t_delta)
+        admm.convergence.lambda = all(r_delta .< eps)
+        admm.convergence.mue = all(s_delta .< eps)
+        admm.convergence.rho = all(t_delta .< eps)
+        
+        admm.convergence.all = all([
+            admm.convergence.lambda
+            admm.convergence.mue
+            admm.convergence.rho
+        ])
+    end
+    
+    if admm.convergence.all
         println("Converged")
     else
         println("Not converged")
@@ -336,7 +356,7 @@ end
 begin
     admm = ADMM(0.03, nodes, generators, storages, lines)
 
-    for i in 1:5000
+    while (!admm.convergence.all)
         calculate_iteration()
         
         println("Generation Results: ")
@@ -345,9 +365,6 @@ begin
         update_duals()
         
         check_convergence()
-        if admm.converged
-            break
-        end
     end
 end
 

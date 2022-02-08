@@ -186,6 +186,26 @@ mutable struct Result
     end
 end
 
+mutable struct Convergence
+    lambda::Bool
+    lambda_res::Vector{Vector{Float64}}
+    mue::Bool
+    mue_res::Vector{Matrix{Float64}}
+    rho::Bool
+    rho_res::Vector{Matrix{Float64}}
+    all::Bool
+    function Convergence()
+        convergence = new()
+        convergence.lambda = false
+        convergence.lambda_res = []
+        convergence.mue = false
+        convergence.mue_res = []
+        convergence.rho = false
+        convergence.rho_res = []
+        return convergence
+    end
+end
+
 mutable struct ADMM
     iteration::Int
     gamma::Float64
@@ -200,7 +220,7 @@ mutable struct ADMM
     storages::Union{Vector{Storage}, Nothing}
     lines::Union{Vector{Line}, Nothing}
     results::Vector{Result}
-    converged::Bool
+    convergence::Convergence
     ptdf::Matrix{Float64}
     total_demand::Vector{Float64}
     node_id_to_demand::Dict{Int, Vector{Int}}
@@ -228,7 +248,7 @@ mutable struct ADMM
         admm.lines = lines
         admm.L_max = [line.max_capacity for line in admm.lines]
         admm.results = []
-        admm.converged = false
+        admm.convergence = Convergence()
         admm.ptdf = calculate_ptdf(admm.nodes, admm.lines)
         admm.total_demand = zeros(length(admm.T))
         admm.node_id_to_demand = Dict()
