@@ -354,7 +354,7 @@ function print_duals(iteration::Int)
 end
 
 begin
-    admm = ADMM(0.03, nodes, generators, storages, lines)
+    admm = ADMM(0.3, nodes, generators, storages, lines)
 
     while (!admm.convergence.all)
         calculate_iteration()
