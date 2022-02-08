@@ -28,12 +28,14 @@ function plot_rhos(t)
     PlotlyJS.plot(traces)
 end
 
-function plot_generation(generator::Generator, t::Int)
-    traces = [scatter(
-        x=1:admm.iteration-1,
-        y=[admm.results[i].unit_to_result[generator].generation[t] for i in 1:admm.iteration-1],
-        name=generator.name
-    )]
+function plot_generation(generator::Generator)
+    traces = [
+        scatter(
+            x=1:admm.iteration-1,
+            y=[admm.results[i].unit_to_result[generator].generation[t] for i in 1:admm.iteration-1],
+            name="$(generator.name) | t = $(t)"
+        ) for t in admm.T
+    ]
     PlotlyJS.plot(traces)
 end
 
