@@ -41,7 +41,7 @@ function plot_line_utilization(t::Int)
     traces = [
         scatter(
             x=1:admm.iteration-1,
-            y=[admm.results[i].line_utilization[l] for i in 1:admm.iteration-1],
+            y=[admm.results[i].line_utilization[l, t] for i in 1:admm.iteration-1],
             name="Utilization for line $(l)"
         ) for l in admm.L
     ]
