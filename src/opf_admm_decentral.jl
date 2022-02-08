@@ -9,15 +9,15 @@ include("penalty_terms.jl")
 # Trick to avoid multiple license printing
 gurobi_env = Gurobi.Env()
 
-node1 = Node("N1", [10], false)
-node2 = Node("N2", [50], false)
-node3 = Node("N3", [50], true)
+node1 = Node("N1", [10, 250], false)
+node2 = Node("N2", [50, 70], false)
+node3 = Node("N3", [120, 200], true)
 
 nodes = [node1, node2, node3]
 
 line1 = Line("L1", node2, node1, 20, 1)
-line2 = Line("L2", node3, node1, 30, 1)
-line3 = Line("L3", node2, node3, 20, 2)
+line2 = Line("L2", node3, node1, 3000, 1)
+line3 = Line("L3", node2, node3, 2000, 2)
 
 lines = [line1, line2, line3]
 
@@ -334,9 +334,9 @@ function print_duals(iteration::Int)
 end
 
 begin
-    admm = ADMM(0.001, nodes, generators, storages, lines)
+    admm = ADMM(0.03, nodes, generators, storages, lines)
 
-    for i in 1:200
+    for i in 1:5000
         calculate_iteration()
         
         println("Generation Results: ")
@@ -359,7 +359,7 @@ function get_nodal_price(iteration::Int)
     return nodal_price
 end
 
-# np = get_nodal_price(admm.iteration)
+np = get_nodal_price(admm.iteration)
 
 # injection = admm.results[admm.iteration-1].injection
 # _, avg_R_cref = get_slack_results(admm.iteration-1)
