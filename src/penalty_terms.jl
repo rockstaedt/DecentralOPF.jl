@@ -3,7 +3,7 @@ function add_penalty_terms!(sub)
     @expression(
         sub,
         penalty_term_eb[t=admm.T],
-        sum(sub[:injection][:, t].data.^2)
+        sum(sub[:injection][:, t].data)^2
     )
 
     # Penalty term flow1
