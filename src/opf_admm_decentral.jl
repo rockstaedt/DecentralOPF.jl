@@ -16,8 +16,8 @@ node3 = Node("N3", [120, 200], true)
 nodes = [node1, node2, node3]
 
 line1 = Line("L1", node2, node1, 20, 1)
-line2 = Line("L2", node3, node1, 50, 1)
-line3 = Line("L3", node2, node3, 75, 2)
+line2 = Line("L2", node3, node1, 45, 1)
+line3 = Line("L3", node2, node3, 70, 2)
 
 lines = [line1, line2, line3]
 
