@@ -248,7 +248,7 @@ function update_duals()
 end
 
 function check_convergence()
-    eps = 10^(-5)
+    eps = 10^(-3)
     if admm.iteration != 1
         r_delta = abs.(
             (
