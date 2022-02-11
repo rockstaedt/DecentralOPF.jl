@@ -52,3 +52,18 @@ function add_penalty_terms!(sub)
     )
     
 end
+
+function sum_up(summand1::PenaltyTerm, summand2::PenaltyTerm)
+    summand1.energy_balance += summand2.energy_balance
+    summand1.flow1 += summand2.flow1
+    summand1.flow2 += summand2.flow2
+    return summand1
+end
+
+function get_empty_penalty_term()
+    return PenaltyTerm(
+        zeros(Float64, length(admm.T)),
+        zeros(Float64, length(admm.T)),
+        zeros(Float64, length(admm.T))
+    )
+end
