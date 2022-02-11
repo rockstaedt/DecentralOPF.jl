@@ -79,7 +79,7 @@ function optimize_subproblem(generator::Generator)
                 + sum(
                     admm.ptdf[l, node_index] * (
                         admm.mues[admm.iteration][l, t]
-                        + admm.rhos[admm.iteration][l, t]
+                        - admm.rhos[admm.iteration][l, t]
                     ) for l in admm.L
                 )
             )
@@ -170,7 +170,7 @@ function optimize_subproblem(storage::Storage)
                 + sum(
                     admm.ptdf[l, node_index] * (
                         admm.mues[admm.iteration][l, t]
-                        + admm.rhos[admm.iteration][l, t]
+                        - admm.rhos[admm.iteration][l, t]
                     ) for l in admm.L
                 )
             )
