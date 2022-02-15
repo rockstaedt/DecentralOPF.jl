@@ -1,0 +1,48 @@
+\chead{\textit{Theoretical Approach}}  				
+\section{Theoretical Approach}
+
+\subsection{Centralized Economic Dispatch}
+
+\begin{itemize}
+	\item Old school optimization problem
+	\item Nodal pricing schemes in Europe and US
+	\item Works good
+	\item Explain OPF
+\end{itemize}
+
+\subsubsection{Optimal Power Flow}
+
+\begin{itemize}
+	\item Explain OPF
+\end{itemize}
+
+\subsection{Approaches to decentralize power systems}
+\label{subsec:decentralization}
+
+\subsubsection{Current state}
+
+\begin{itemize}
+	\item But system is changing
+	\item What other approaches exists
+	\item next chapter	
+	\item Approaches that cope with changes
+	\begin{itemize}
+		\item Microgrids
+		\item P2P
+	\end{itemize}
+	\item Test
+\end{itemize}
+
+\subsubsection{Current Decentral Modeling Frameworks}
+
+\subsubsection{Alternating Direction Method of Multipliers}
+As written in section \ref{subsec:decentralization}, there is a need to establish new algorithms and procedures to cope with the ongoing transformation of the power system worldwide. The used datasets become larger since the number of measured data points increases constantly. Subsequently, centralized algorithm schemes take much longer to derive a solution. In this context, the \gls{admm} would provide a possibility to create algorithms that are well suited for these large scale problems \citep{Boyd-2010-DistributedOptimizationStatistical}. The \gls{admm} decomposes the problem into several subproblems. The solutions of the subproblems are then coordinated and combined to derive a global optimum \citep{Boyd-2010-DistributedOptimizationStatistical}. The \gls{admm} combines the methods of Dual Decomposition methods and \gls{alr}. The algorithm itself was established in the mid-1970-s by Gabay, Mercier, Glowinski and Marrocco \citep{Boyd-2010-DistributedOptimizationStatistical}. The following chapters equip the reader with the necessary knowledge about the \gls{admm} to follow along.
+
+Typically, \gls{admm} solves problems in the form:
+
+\begin{subequations}
+	\begin{align}
+		\min{(x, z)} \quad & f(x) + g(z) \\
+		\text{s.t. } \quad & \vb{A}x + \vb{B}z = c
+	\end{align}
+\end{subequations}

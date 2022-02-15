@@ -1,4 +1,4 @@
-\documentclass[11pt, a4paper, oneside, bibliography=totoc]{scrartcl}
+\documentclass[12pt, a4paper, oneside, bibliography=totoc, numbers=noendperiod]{scrartcl}
 
 \input{packages}
 \input{acronyms}
@@ -13,7 +13,7 @@
 
 \begin{titlepage}
 	\centering
-	\includegraphics[width=0.2\textwidth]{images/TU-Logo}\par\vspace{1cm}
+	\includegraphics[width=0.2\textwidth]{TU-Logo}\par\vspace{1cm}
 	{\scshape\Large Technical University Berlin \par}
 	\vspace{1cm}
 	{\scshape\LARGE Masterthesis\par}
@@ -36,25 +36,30 @@
 \pagenumbering{roman}
 
 \addcontentsline{toc}{section}{Abstract}
-\input{chapters/0_abstract}
+\input{sections/section_0_abstract}
 \newpage
 
 \addcontentsline{toc}{section}{Executive Summary}
-\include{chapters/0_executive_summary}
+\input{sections/section_0_executive_summary}
 \newpage
 
 \chead{\textit{Contents}}
 \tableofcontents
 \newpage
 
-\chead{\textit{List of Figures}} 
+\chead{\textit{\listfigurename}} 
 \addcontentsline{toc}{section}{\listfigurename}
 \listoffigures
 \newpage
 
-\chead{\textit{List of Tables}} 
+\chead{\textit{\listtablename}} 
 \addcontentsline{toc}{section}{\listtablename}
 \listoftables
+\newpage
+
+\chead{\textit{\lstlistlistingname}} 
+\addcontentsline{toc}{section}{\lstlistlistingname}
+\lstlistoflistings
 \newpage
 
 \chead{\textit{List of Symbols}}
@@ -69,16 +74,19 @@
 
 \pagenumbering{arabic}
 
-\input{chapters/1_introduction}
+\input{sections/section_1}
 \newpage
 
-\input{chapters/2_theory}
+\input{sections/section_2}
 \newpage
 
-\input{chapters/3_methodology}
+\input{sections/section_3}
 \newpage
 
-\input{chapters/4_results}
+\input{sections/section_4}
+\newpage
+
+\input{sections/section_5}
 \newpage
 
 \chead{\textit{References}}

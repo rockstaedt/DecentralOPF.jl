@@ -1,8 +1,3 @@
-\usepackage[utf8]{inputenc}
-\usepackage{setspace}
-
-%\setlength\parskip{12pt}
-%\setlength\parindent{0pt}
 
 %%% Margins %%%
 \usepackage[a4paper,
@@ -11,6 +6,14 @@ rmargin={3cm},
 tmargin={3cm},
 bmargin={3cm}
 ]{geometry}
+
+%%%%% Character Set, Language, Font %%%%%
+
+\usepackage[utf8]{inputenc}
+\usepackage{setspace}
+\usepackage[T1]{fontenc}
+\usepackage[ngerman,english]{babel}
+\usepackage{csquotes}
 
 %%% Linespacing %%%
 \usepackage{setspace}
@@ -66,17 +69,36 @@ bmargin={3cm}
 
 %%% Bibliography %%%
 % WIP-Standards: chicago-authordate
-\usepackage[style=authoryear,	
-            giveninits,					% shorten first names
-			maxbibnames=10,				
-            maxcitenames=2,				% max. 3 authors for \cite
-            backend=biber,
-			doi=false,
-			isbn=false,
-			url=false,
-            natbib=true,
-            sorting=nyt					
-			]{biblatex}
+\usepackage[
+    backend=biber,
+    natbib,
+    authordate,
+    date=year,
+    maxcitenames=3,
+    maxbibnames=99,
+    uniquelist=false,
+    cmsdate=full,
+    doi=false,
+    isbn=false,
+    url=false,
+    clearlang=true
+    ]{biblatex-chicago}
+    \AtEveryBibitem{
+        \clearfield{doi}
+        \clearfield{publisher}
+        \clearfield{url}
+        \clearfield{urldate}
+        \clearfield{urlyear}
+        \clearfield{urlmonth}
+    }
+    
+	\DeclareRedundantLanguages{en,de,fr}{english,ngerman,french}
+	\DeclareFieldFormat{doi}{%
+	doi\addcolon\space
+	\ifhyperref
+		{\href{https://dx.doi.org/#1}{\nolinkurl{#1}}}
+		{\nolinkurl{#1}}%
+	}
 \addbibresource{literature.bib}
 % \citet{} when the authors name(s) are to be read as part of the text
 % \citep{} when the entire citation id parenthetical
@@ -84,28 +106,51 @@ bmargin={3cm}
 
 %%% Code Snippets %%%
 \usepackage{listings}
+\renewcommand{\lstlistingname}{Code Snippet}
+\renewcommand{\lstlistlistingname}{List of \lstlistingname s}
 % Julia formatting
-\usepackage[T1]{fontenc}
-\usepackage{beramono}
-\usepackage{listings}
-\usepackage[usenames,dvipsnames]{xcolor}
-\lstdefinelanguage{Julia}
-  {morekeywords={abstract,break,case,catch,const,continue,do,else,elseif,
-      end,export,false,for,function,immutable,import,importall,if,in,
-      macro,module,otherwise,quote,return,switch,true,try,type,typealias,
-      using,while},
-   sensitive=true,
-   morecomment=[l]\#,
-   morecomment=[n]{\#=}{=\#},
-   morestring=[s]{"}{"},
-   morestring=[m]{'}{'},
-}[keywords,comments,strings]
+\usepackage{inconsolata} % very nice fixed-width font included with texlive-full
+\usepackage[usenames,dvipsnames]{color} % more flexible names for syntax highlighting colors
 
 \lstset{
-    language         = Julia,
-    basicstyle       = \ttfamily,
-    keywordstyle     = \bfseries\color{blue},
-    stringstyle      = \color{magenta},
-    commentstyle     = \color{ForestGreen},
-    showstringspaces = false,
+basicstyle=\ttfamily, 
+columns=fullflexible, % make sure to use fixed-width font, CM typewriter is NOT fixed width
+numberstyle=\small\ttfamily\color{Gray},             
+numbersep=10pt, 
+numberfirstline=true, 
+numberblanklines=true, 
+tabsize=4,
+lineskip=-1.5pt,
+extendedchars=true,
+breaklines=true,        
+keywordstyle=\color{Blue}\bfseries,
+identifierstyle=, % using emph or index keywords
+commentstyle=\sffamily\color{OliveGreen},
+stringstyle=\color{Maroon},
+showstringspaces=false,
+showtabs=false,
+upquote=false,
+texcl=true % interpet comments as LaTeX
 }
+
+\lstdefinelanguage{julia}
+{
+  keywordsprefix=\@,
+  morekeywords={
+    exit,whos,edit,load,is,isa,isequal,typeof,tuple,ntuple,uid,hash,finalizer,convert,promote,
+    subtype,typemin,typemax,realmin,realmax,sizeof,eps,promote_type,method_exists,applicable,
+    invoke,dlopen,dlsym,system,error,throw,assert,new,Inf,Nan,pi,im,begin,while,for,in,return,
+    break,continue,macro,quote,let,if,elseif,else,try,catch,end,bitstype,ccall,do,using,module,
+    import,export,importall,baremodule,immutable,local,global,const,Bool,Int,Int8,Int16,Int32,
+    Int64,Uint,Uint8,Uint16,Uint32,Uint64,Float32,Float64,Complex64,Complex128,Any,Nothing,None,
+    function,type,typealias,abstract, mutable, struct, String, Node, Generator, Storage, Line, Result, ADMM
+  },
+  sensitive=true,
+  morecomment=[l]{\#},
+  morestring=[b]',
+  morestring=[b]" 
+}
+
+%%% Images %%%
+\usepackage{graphicx}
+\graphicspath{ {./images/} }

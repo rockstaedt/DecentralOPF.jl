@@ -1,6 +1,35 @@
-\chead{\textit{Methodology}}  				
-\section{Methodology}
+\chead{\textit{Application}}  				
+\section{Application}
 
+
+\subsection{Modeling Framework}
+
+This section introduces the reader to all relevant information about the modelling framework that is used to model a real-life application. The modelling framework has to cover certain requirements. Firstly, there should be generators that produce electrical power. The power output is only limited by the maximum capacity of the generator. There exist no ramping constraints or minimum up- and down-times. Each generator has marginal costs and is connected to a specific node. To depict these requirements in Julia, a generator structure was implemented as you can see in the following code snippet. In addition to the stated requirements, the structure also contains a colour and a name. These attributes are mainly used for evaluation reasons and are not important for modelling purposes. 
+
+\lstinputlisting[language=julia, firstline=7, lastline=13, caption=Julia structure for node element]{../src/structures/network_elements.jl}
+
+Another part of the modelling framework is a storage unit. Storages should be able to store a surplus of energy as well as deliver electrical power by discharging their capacity. The power input or output is also limited by a maximum value. In addition, a storage unit should only be able to store a certain amount of energy. This is depicted by the storage level. As generators, storages have specific marginal costs for charging and discharging and are connected to a specific node. A Julia structure was implemented respectively.  
+
+As written before, generators and storages are located at network nodes. These nodes have a specific demand that should be matched by the output of the generating units. For modelling purposes, it is also crucial to define a slack node to compensate the power flow balance. The node structure was implemented as follows:
+
+\lstinputlisting[language=julia, firstline=1, lastline=5, caption=Julia structure for generator element]{../src/structures/network_elements.jl}
+
+The last element of the framework is a transmission line. This element connects nodes and enables the exchange of energy. Transmission lines are characterized by their maximum capacity and their susceptance value. However, susceptance might not be the correct term here since the model does not consider alternating current. Thus, the correct name would be conductance but is not used to follow general naming conventions. A Julia structure was also implemented for this network element.
+
+Lastly, the modelling framework has to consider multi-periods. This is crucial since without multi periods, it would not make sense to include storages into the system.
+
+ 
+\subsection{Three Node System}
+
+The following section describes the \gls{tns} which will be used throughout the chapter to explain the optimization models and to derive the corresponding equations. The system consists of three nodes. At each of them, a different set of generators and storages is located and a multi-period load curve exists. To simplify the equations, only two time steps are considered. The nodes are connected by a total of three transmission lines. Thus, every node has two neighbours. Figure (\ref{fig:tns}) illustrates the described system.
+
+%TODO Make own graphic for three node system
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\textwidth]{three-node-system.png}
+	\caption{Exemplary Three Node System}
+	\label{fig:tns}
+\end{figure}
 
 \subsection{Problem formulations}
 
