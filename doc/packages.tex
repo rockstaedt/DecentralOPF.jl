@@ -155,5 +155,12 @@ texcl=true % interpet comments as LaTeX
 \usepackage{graphicx}
 \graphicspath{ {./images/} }
 
-%%% Writing file paths %%%
+%%% Writing file paths and URLs %%%
 \usepackage{url}
+
+%%% Footnotes %%%
+
+\deffootnote[1.5em]{0em}{1.5em}{\textsuperscript{\thefootnotemark}}
+
+\makeatletter
+\def\chfootnote{\xdef\@thefnmark{}\@footnotetext}
