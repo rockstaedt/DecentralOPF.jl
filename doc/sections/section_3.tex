@@ -300,8 +300,22 @@ If this formulation is applied to the storage optimization problem of equation (
 \end{subequations}
 
 
-\subsection{Implementation of in Julia}
+\subsection{Documentation of the Implementation in Julia}
 
-\subsubsection{Centralized problem}
+This section provides the reader with a detailed description of how the previously stated optimization models are implemented in the programming language Julia\footnote{~\url{www.julialang.org}}. Hereby, Julia is used for this thesis because of its extremely fast execution times of scripts. Speed was one of the core design patterns when Julia was developed. Execution times are faster in comparison to other scripting languages like Python\footnote{~\url{www.python.org}} because Julia code is compiled to efficient native code with the help of the Low Level Virtual Machine. In addition, Julia is dynamically typed. This means that the programmer can define types, accelerating the execution time even more. The syntax of the language is easy to understand, making it possible for beginners to get started quickly. With over a thousand contributors, Julia has a large open-source community from which one can expect even more improvements in future times. Lastly, Julia provides a lot of interfaces to open-source and commercial optimization solvers like Gurobi\footnote{~\url{www.gurobi.com}}. These features supported the decision to implement the optimization models in Julia. \\
 
-\subsubsection{Decentralized problem}
+The section starts with a general overview of the code structure including information about structures, helper and optimization functions. Afterwards, the optimization model of the centralized approach is explained. Finally, the implementations for the decentralized optimization model are described.
+
+\subsubsection{General Information}
+
+Rather than defining everything in one Julia script, the approach was followed to divide the source code into separate units. This is a best practice in modern software development that allows to better understand the code and contributes to a more maintainable project. However, Julia is more a scripting language than an object-oriented language. Thus, one had to make some adjustments to provide a structured source code.\\ 
+
+All Julia files are placed into the directory \path{src} that contains several subdirectories. Each of them has a different purpose. There is the \path{src\cases} directory that contains the Julia scripts for setting up a case study system. This directory can contain different case studies, making it possible to easily switch between different scenarios. Inside of \path{src\helpers} several helper scripts are defined that are used while running the decentralized optimization model. This includes methods to print results, calculating the $PTDF$ or several plotting functions to visualize the optimization results. All Julia scripts related to the decentralized optimization model are located in \path{src\optimization}. Lastly, all defined structures that are utilized in the source code are placed in \path{src\structures} that are also separated in corresponding categories, e.g. network elements like generators.\\
+
+In the end, there is one main script for running the centralized optimization model \path{src\opf_central_reference.jl} and one for the decentral optimization model using the \gls{admm} named \path{src\opf_admm_decentral.jl}. Both scripts include a case study from the before mentioned directory and the Julia script \path{src\imports.jl} that manages all imports from the subdirectories.\\
+
+%TODO Include information about used packages
+
+\subsubsection{Centralized Problem}
+
+\subsubsection{Decentralized Problem}
