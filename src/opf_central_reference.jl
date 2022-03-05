@@ -1,7 +1,9 @@
 include("imports.jl")
 include("cases/three_node.jl")
 
-begin # Like ADMM
+# Set up optimization model.
+begin
+    # Create necessary indexes for all equations.
     N = 1:length(nodes)
     S = 1:length(storages)
     P = 1:length(generators)
@@ -10,26 +12,45 @@ begin # Like ADMM
 
     ptdf = calculate_ptdf(nodes, lines)
 
+    # Create model instance.
     m = Model(with_optimizer(Gurobi.Optimizer, gurobi_env))
+
+    # Define all optimization variables.
+
+    # Generation power of generators
     @variable(m, 0 <= G[t=T, p=P] <= generators[p].max_generation)
+    # Discharge power of storages
     @variable(m, 0 <= G_S_d[t=T, s=S] <= storages[s].max_power)
+    # Charge power of storages.
     @variable(m, 0 <= G_S_c[t=T, s=S] <= storages[s].max_power)
+    # Energy level of storages.
     @variable(m, 0 <= L_S[t=T, s=S] <= storages[s].max_level)
+    # Slack variable for upper flow limit.
     @variable(m, 0 <= R_ref[t=T, l=L])
+    # Slack variable for lower flow limit.
     @variable(m, 0 <= R_cref[t=T, l=L])
     
+    # Define expression for injection term.
     @expression(m, I[t=T, n=N], 
         sum((generators[p].node == nodes[n] ? G[t,p] : 0) for p in P)
         + sum((storages[s].node == nodes[n] ? G_S_d[t,s] - G_S_c[t,s] : 0) for s in S)
         - nodes[n].demand[t]
     )
+
+    # Set objective function.
     @objective(m, Min, 
         sum(G[t,p] * generators[p].marginal_costs for p in P, t in T) 
         + sum((G_S_d[t,s] + G_S_c[t,s]) * storages[s].marginal_costs for s in S, t in T) 
     )
+
+    # Set energy balance constraint.
     @constraint(m, EB[t=T], sum(I[t, :]) == 0)
+    # Set upper flow constraint.
     @constraint(m, FlowUpper[t=T, l=L], ptdf[l,:]' * I[t, :].data + R_ref[t, l] == lines[l].max_capacity)
+    # Set lower flow constraint.
     @constraint(m, FlowLower[t=T, l=L], R_cref[t, l] - ptdf[l,:]' * I[t, :].data == lines[l].max_capacity)
+    # Set constraint for energy level of storage.
+    
     @constraint(m, StorageBalance[t=T, s=S], L_S[t,s] == (t > 1 ? L_S[t-1, s] : 0) - G_S_d[t,s] + G_S_c[t,s])
 end
 
