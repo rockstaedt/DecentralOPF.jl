@@ -54,16 +54,28 @@ begin
     @constraint(m, StorageBalance[t=T, s=S], L_S[t,s] == (t > 1 ? L_S[t-1, s] : 0) - G_S_d[t,s] + G_S_c[t,s])
 end
 
+# Solve optimization problem.
 optimize!(m)
-objective_value(m)
-print(value.(G))
-value.(G_S_d)
-value.(G_S_c)
-print(ptdf * value.(I).data')
+
+# Get objective value.
+println("Objective value: $(objective_value(m))\n")
+
+# Print generation results.
+println("Generator results:\n$(value.(G)')\n")
+println("Discharge results:\n$(value.(G_S_d)')\n")
+println("Charge results:\n$(value.(G_S_c)')\n")
+
+# Print line flows.
+println("Line utilization:\n$(ptdf * value.(I).data')\n")
+
+# Print system price.
 lambda = dual.(EB).data
+println("System price:\n$(lambda)\n")
+
+# Calculate nodal price.
 mu = dual.(FlowUpper).data + dual.(FlowLower).data
 nodal_price = zeros(length(N), length(T))
 for t in T
     nodal_price[:, t] = lambda[t] .+ sum(mu[t, l] * ptdf[l, :] for l in L)
 end
-println(nodal_price)
+println("Nodal price:\n$(nodal_price)\n")
