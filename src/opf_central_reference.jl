@@ -50,7 +50,6 @@ begin
     # Set lower flow constraint.
     @constraint(m, FlowLower[t=T, l=L], R_cref[t, l] - ptdf[l,:]' * I[t, :].data == lines[l].max_capacity)
     # Set constraint for energy level of storage.
-    
     @constraint(m, StorageBalance[t=T, s=S], L_S[t,s] == (t > 1 ? L_S[t-1, s] : 0) - G_S_d[t,s] + G_S_c[t,s])
 end
 
