@@ -60,12 +60,12 @@ optimize!(m)
 println("Objective value: $(objective_value(m))\n")
 
 # Print generation results.
-println("Generator results:\n$(value.(G)')\n")
-println("Discharge results:\n$(value.(G_S_d)')\n")
-println("Charge results:\n$(value.(G_S_c)')\n")
+println("Generator results:\n$(value.(G).data)\n")
+println("Discharge results:\n$(value.(G_S_d).data)\n")
+println("Charge results:\n$(value.(G_S_c).data)\n")
 
 # Print line flows.
-println("Line utilization:\n$(ptdf * value.(I).data')\n")
+println("Line utilization:\n$(ptdf * value.(I).data)\n")
 
 # Print system price.
 lambda = dual.(EB).data
