@@ -69,8 +69,19 @@ bmargin={3cm}
 
 %%% Bibliography %%%
 % WIP-Standards: chicago-authordate
+%\usepackage[style=authoryear, 	% WIP-Standards: chicago-authordate
+%			%style=authoryear, 	
+%            giveninits,					% Vornamen abkürzen
+%			maxbibnames=10,				% in der Bib werden 10 Autoren ausgegeben (bis zu 10)
+%            maxcitenames=2,				% max. 3 Autoren bei \cite
+%            backend=biber,
+%			doi=false,
+%			isbn=false,
+%			url=false,
+%            natbib=true,				% verwendet Natbib 
+%            sorting=nyt					
+%			]{biblatex}
 \usepackage[
-    backend=biber,
     natbib,
     authordate,
     date=year,
@@ -81,7 +92,8 @@ bmargin={3cm}
     doi=false,
     isbn=false,
     url=false,
-    clearlang=true
+    clearlang=true,
+    backend=bibtex
     ]{biblatex-chicago}
     \AtEveryBibitem{
         \clearfield{doi}
