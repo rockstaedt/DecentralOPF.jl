@@ -125,8 +125,10 @@ bmargin={3cm}
 \usepackage[usenames,dvipsnames]{color} % more flexible names for syntax highlighting colors
 
 \lstset{
-basicstyle=\ttfamily, 
+basicstyle=\small\ttfamily,
+frame=single,
 columns=fullflexible, % make sure to use fixed-width font, CM typewriter is NOT fixed width
+numbers=left,
 numberstyle=\small\ttfamily\color{Gray},             
 numbersep=10pt, 
 numberfirstline=true, 
@@ -147,6 +149,10 @@ texcl=true % interpet comments as LaTeX
 
 \lstdefinelanguage{julia}
 {
+  basicstyle=\small\ttfamily,
+  keywordstyle=\color{Blue}\bfseries,
+  stringstyle=\color{Maroon},
+  commentstyle=\sffamily\color{OliveGreen},
   keywordsprefix=\@,
   morekeywords={
     exit,whos,edit,load,is,isa,isequal,typeof,tuple,ntuple,uid,hash,finalizer,convert,promote,
@@ -159,7 +165,6 @@ texcl=true % interpet comments as LaTeX
   },
   sensitive=true,
   morecomment=[l]{\#},
-  morestring=[b]',
   morestring=[b]" 
 }
 
