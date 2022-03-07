@@ -18,39 +18,39 @@ begin
     # Define all optimization variables.
 
     # Generation power of generators
-    @variable(m, 0 <= G[t=T, p=P] <= generators[p].max_generation)
+    @variable(m, 0 <= G[p=P, t=T] <= generators[p].max_generation)
     # Discharge power of storages
-    @variable(m, 0 <= G_S_d[t=T, s=S] <= storages[s].max_power)
+    @variable(m, 0 <= G_S_d[s=S, t=T] <= storages[s].max_power)
     # Charge power of storages.
-    @variable(m, 0 <= G_S_c[t=T, s=S] <= storages[s].max_power)
+    @variable(m, 0 <= G_S_c[s=S, t=T] <= storages[s].max_power)
     # Energy level of storages.
-    @variable(m, 0 <= L_S[t=T, s=S] <= storages[s].max_level)
+    @variable(m, 0 <= L_S[s=S, t=T] <= storages[s].max_level)
     # Slack variable for upper flow limit.
-    @variable(m, 0 <= R_ref[t=T, l=L])
+    @variable(m, 0 <= R_ref[l=L, t=T])
     # Slack variable for lower flow limit.
-    @variable(m, 0 <= R_cref[t=T, l=L])
+    @variable(m, 0 <= R_cref[l=L, t=T])
     
     # Define expression for injection term.
-    @expression(m, I[t=T, n=N], 
-        sum((generators[p].node == nodes[n] ? G[t,p] : 0) for p in P)
-        + sum((storages[s].node == nodes[n] ? G_S_d[t,s] - G_S_c[t,s] : 0) for s in S)
+    @expression(m, I[n=N, t=T], 
+        sum((generators[p].node == nodes[n] ? G[p,t] : 0) for p in P)
+        + sum((storages[s].node == nodes[n] ? G_S_d[s,t] - G_S_c[s,t] : 0) for s in S)
         - nodes[n].demand[t]
     )
 
     # Set objective function.
     @objective(m, Min, 
-        sum(G[t,p] * generators[p].marginal_costs for p in P, t in T) 
-        + sum((G_S_d[t,s] + G_S_c[t,s]) * storages[s].marginal_costs for s in S, t in T) 
+        sum(G[p, t] * generators[p].marginal_costs for p in P, t in T) 
+        + sum((G_S_d[s,t] + G_S_c[s,t]) * storages[s].marginal_costs for s in S, t in T) 
     )
 
     # Set energy balance constraint.
-    @constraint(m, EB[t=T], sum(I[t, :]) == 0)
+    @constraint(m, EB[t=T], sum(I[:,t]) == 0)
     # Set upper flow constraint.
-    @constraint(m, FlowUpper[t=T, l=L], ptdf[l,:]' * I[t, :].data + R_ref[t, l] == lines[l].max_capacity)
+    @constraint(m, FlowUpper[l=L, t=T], sum(ptdf[l,n] * I[n,t] for n in N) + R_ref[l,t] == lines[l].max_capacity)
     # Set lower flow constraint.
-    @constraint(m, FlowLower[t=T, l=L], R_cref[t, l] - ptdf[l,:]' * I[t, :].data == lines[l].max_capacity)
+    @constraint(m, FlowLower[l=L, t=T], R_cref[l,t] - sum(ptdf[l,n] * I[n,t] for n in N) == lines[l].max_capacity)
     # Set constraint for energy level of storage.
-    @constraint(m, StorageBalance[t=T, s=S], L_S[t,s] == (t > 1 ? L_S[t-1, s] : 0) - G_S_d[t,s] + G_S_c[t,s])
+    @constraint(m, StorageBalance[s=S, t=T], L_S[s,t] == (t > 1 ? L_S[s,t-1] : 0) - G_S_d[s,t] + G_S_c[s,t])
 end
 
 # Solve optimization problem.
@@ -75,6 +75,6 @@ println("System price:\n$(lambda)\n")
 mu = dual.(FlowUpper).data + dual.(FlowLower).data
 nodal_price = zeros(length(N), length(T))
 for t in T
-    nodal_price[:, t] = lambda[t] .+ sum(mu[t, l] * ptdf[l, :] for l in L)
+    nodal_price[:, t] = lambda[t] .+ sum(mu[l,t] * ptdf[l,:] for l in L)
 end
 println("Nodal price:\n$(nodal_price)\n")
