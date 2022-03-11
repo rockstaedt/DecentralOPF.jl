@@ -34,25 +34,32 @@ The total system costs of a electrical network are the sum of generation costs o
 
 \begin{subequations}
 	\begin{align}
-		 \min \quad & \sum_{t\in\mathcal{T}}\sum_{g\in\mathcal{G}}c_g*P_g(t) + \sum_{s\in\mathcal{S}}c_s*(P_s^d(t)+P_s^c(t))\\
-		 \text{s.t. } \quad & 0 \leq P_g(t) \leq \overline{P_g} && \forall g \in \set{G}, t \in \set{T} \label{eq:com:con:max-g}\\
-		 & 0 \leq P_s^d(t) \leq \overline{P_s} && \forall s \in \set{S}, t \in \set{T} \label{eq:com:con:max-sd}\\
-		 & 0 \leq P_s^c(t) \leq \overline{P_s} && \forall s \in \set{S}, t \in \set{T} \label{eq:com:con:max-sc}\\
-		 & 0 \leq E_s(t) \leq \overline{E_s} && \forall s \in \set{S}, t \in \set{T} \label{eq:com:con:s-level-max}\\
-		 & E_s(t) - E_s(t-1) - P_s^c(t) + P_s^d(t) = 0 && \forall s \in \set{S}, t \in \set{T} \label{eq:com:con:s-level}\\
-		 & I_n(t) = \sum_{g\in\mathcal{G}}P_g(t) + \sum_{s\in\mathcal{S}}(P_s^d(t)-P_s^c(t))-D_n(t) = 0 && \forall t \in \set{T}, n \in \set{N} \label{eq:com:con:eb}\\
-		 & -\overline{L_l} \leq PTDF * I_n(t) \leq \overline{L_l} && \forall l \in \set{L}, t \in \set{T}, n \in \set{N} \label{eq:com:con:pf}
+		 \min \quad & \sum_{t\in\mathcal{T}} \quad \sum_{g\in\mathcal{G}}mc_g \cdot P_{g,t} + \sum_{s\in\mathcal{S}}mc_s \cdot (D_{s,t}+C_{s,t})\\
+		 \text{s.t. } \quad & 0 \leq P_{g,t} \leq \overline{p_g} && \forall g \in \set{G}, t \in \set{T} \label{eq:com:con:max-g}\\
+		 & 0 \leq D_{s,t} \leq \overline{p_s} && \forall s \in \set{S}, t \in \set{T} \label{eq:com:con:max-sd}\\
+		 & 0 \leq C_{s,t} \leq \overline{p_s} && \forall s \in \set{S}, t \in \set{T} \label{eq:com:con:max-sc}\\
+		 & 0 \leq E_{s,t} \leq \overline{e_s} && \forall s \in \set{S}, t \in \set{T} \label{eq:com:con:s-level-max}\\
+		 & E_{s,t} - E_{s,t-1} - C_{s,t} + D_{s,t} = 0 && \forall s \in \set{S}, t \in \set{T} \label{eq:com:con:s-level}\\
+		 & \sum_{n \in \mathcal{N}} I_{n,t} = 0 && \forall t \in \set{T} \label{eq:com:con:eb}\\
+		 & -\overline{f_l} \leq PTDF_{l,n} \cdot I_{n,t} \leq \overline{f_l} && \forall l \in \set{L}, t \in \set{T}, n \in \set{N} \label{eq:com:con:pf}
 	\end{align}
 \end{subequations}
 
-Hereby, $\mathcal{G}$ represents the set of generators and $\mathcal{S}$ the set of storage respectively. $\mathcal{T}$ includes all considered timesteps. The optimization problem is constrained to meet the requirements written in section (\ref{sec:app:mod-framework}). First of all, equation (\ref{eq:com:con:max-g}) limits the maximum output of all generators where $\overline{P_g}$ is the maximum power generation of the considered generator. Equations (\ref{eq:com:con:max-sd}) and (\ref{eq:com:con:max-sc}) set the boundaries of all storages and equation (\ref{eq:com:con:s-level-max}) ensures that the storage level of all storages remains between zero and the maximum storage level $\overline{E_s}$. The storage level at a specific time step can be calculated as follows:
+Hereby, $\mathcal{G}$ represents the set of generators and $\mathcal{S}$ the set of storage respectively. $\mathcal{T}$ includes all considered timesteps. The optimization problem is constrained to meet the requirements described in section (\ref{sec:app:mod-framework}). First of all, equation (\ref{eq:com:con:max-g}) limits the maximum output of all generators where $\overline{p_g}$ is the maximum power generation of the considered generator. Equations (\ref{eq:com:con:max-sd}) and (\ref{eq:com:con:max-sc}) set the power boundaries of all storages respectively. Equation (\ref{eq:com:con:s-level-max}) ensures that the storage level of all storages remains between zero and the maximum storage level $\overline{e_s}$. In addition, this constraint prevents the storage from discharging power more than the energy is stored. The energy level of a storage $s$ at a specific timestep $t$ can be calculated as follows:
 
 \begin{equation}
 	\label{eq:storage-level}
-	E_s(t) = E_s(t-1) + P_s^c(t) - P_s^d(t)
+	E_{s,t} = E_{s,t-1} + C_{s,t} - D_{s,t}
 \end{equation}
 
-To get a consistent form of all constraints, equation (\ref{eq:storage-level}) is rearranged to equal zero and integrated in the optimization problem as equation (\ref{eq:com:con:s-level}). Hereby, $P_s^c(t)$ denotes the charging output of a storage $s$ at a timestep $t$ and $P_s^d(t)$ the discharging output. Equation (\ref{eq:com:con:eb}) is the so called energy balance. This constraint ensures that the demand at every node and every time step is met. The energy balance is also referred to as the injection at node $n$ at time step $t$. The injection term is used in the last constraint (\ref{eq:com:con:pf}) that establishs the network constraints. Here, the power flows on each transmission line are limited by the maximum line capacity $\overline{L_l}$. The line utilization for each transmission line is calculated by multiplying the \gls{ptdf} with the injection term $I_n(t)$.\\
+To get a consistent form of all constraints, equation (\ref{eq:storage-level}) is rearranged to equal zero and integrated in the optimization problem as equation (\ref{eq:com:con:s-level}). $C_{s,t}$ denotes the charging output of a storage $s$ at a timestep $t$ and $D_{s,t}$ the discharging power output. Another requirement of the previous section was that the demand at every node and every timestep $d_{n,t}$ is met by the generating units. This is the so called energy balance. Due to the fact that the system allows line flows on the tranmission lines, it can happen that the production at a node exceeds the nodal demand. Thus, to make sure that all nodal demands are met, the sum of all nodal injections has to be zero, see equation (\ref{eq:com:con:eb}). The injection at a node $n$ and at at timestep $t$ yields:
+
+\begin{equation}
+	I_{n,t} = \sum_{g\in\mathcal{G}_n}P_{g,t} + \sum_{s\in\mathcal{S}_n}(D_{s,t}-C_{s,t})-d_{n,t}
+	\label{eq:injection-term}
+\end{equation}
+
+Here, $\mathcal{G}_n$ ($\mathcal{S}_n$) represents a subset of all generators (storages) that are located at node $n$. Hence, the injection is basically the sum of the power values of all generators and storages at that node. This injection term is also used in the last constraint (\ref{eq:com:con:pf}) that establishs the network constraints. Here, the line flows on each transmission line are limited by the maximum line capacity $\overline{f_l}$. The line flow of a transmission line $l$ is calculated by multiplying the power distribution factors of that line with the injection term $I_{n,t}$ of a specific node $n$.\\
 
 	%TODO Explain PTDF, see maybe document from EMOD.
 	
@@ -62,131 +69,162 @@ To solve the optimization problem, all relevant information has to be shared wit
 \label{sec:app:dom}
 
 % TODO Add reference for ADMM explanation
-The generating units in the centralized optimization problem are not able to optimize on their own because a central entity is needed to coordinate the system constraints (\ref{eq:com:con:eb}) and (\ref{eq:com:con:pf}). These constraints prevent that the solution is obtained by optimizing per generating unit because both include all decision variables of the optimization problem. This is the reason why these constraints are called complicating constraints. If resolved, it would be possible to derive the optimal dispatch plan per generating unit and without sharing sensible information like marginal costs. As written in \ref{admm}, the \gls{admm} provides a technique to resolve these constraints, making the problem decomposable and thus enables the path to a decentralized mechanism. \gls{admm} is only working for equality constraints. Thus, the power flow inequality constraint (\ref{eq:com:con:pf}) is transformed into two equality constraints by introducing two slack variables $R^{ref}_l$ and $R^{cref}_l$ for each tranmission line $l$. The optimization problem evolves to the following:
+The generating units in the centralized optimization problem are not able to optimize on their own because a central entity is needed to coordinate the system constraints (\ref{eq:com:con:eb}) and (\ref{eq:com:con:pf}). These constraints prevent that the solution is obtained by optimizing per generating unit because both include all decision variables of the optimization problem. This is the reason why these constraints are called complicating constraints. If resolved, it would be possible to derive the optimal dispatch plan per generating unit and without sharing sensible information like marginal costs. As written in \ref{admm}, the \gls{admm} provides a technique to resolve these constraints, making the problem decomposable and thus enables the path to a decentralized mechanism. \gls{admm} is only working for equality constraints. Thus, the power flow inequality constraint (\ref{eq:com:con:pf}) is transformed into two equality constraints by introducing two slack variables $U_{l,t}$ and $K_{l,t}$ for each tranmission line $l$ and timestep $t$. The optimization problem evolves to the following:
 
 \begin{subequations}
 	\begin{align}
-		 \min \quad & \sum_{t\in\mathcal{T}}\sum_{g\in\mathcal{G}}c_g*P_g(t) + \sum_{s\in\mathcal{S}}c_s*(P_s^d(t)+P_s^c(t)) \label{eq:dom:relaxed-constraints}\\
-		 \text{s.t.} \quad & 0 \leq P_g(t) \leq \overline{P_g} && \forall g \in \set{G}, t \in \set{T} \\
-		 & 0 \leq P_s^d(t) \leq \overline{P_s} && \forall s \in \set{S}, t \in \set{T} \\
-		 & 0 \leq P_s^c(t) \leq \overline{P_s} && \forall s \in \set{S}, t \in \set{T} \\
-		 & 0 \leq E_s(t) \leq \overline{E_s} && \forall s \in \set{S}, t \in \set{T} \\
-		 & E_s(t) - E_s(t-1) - P_s^c(t) + P_s^d(t) = 0 && \forall s \in \set{S}, t \in \set{T} \\
-		 & I_n(t) = \sum_{g\in\mathcal{G}}P_g(t) + \sum_{s\in\mathcal{S}}(P_s^d(t)-P_s^c(t))-D_n(t) = 0 && \forall t \in \set{T}, n \in \set{N} \label{eq:dom:injection-term} \\
-		 & PTDF * I_n(t) + R^{ref}_l(t) - \overline{L_l} = 0 && \forall l \in \set{L}, t \in \set{T}, n \in \set{N} \label{eq:dom:con:pf-upper} \\
-		 & R^{cref}_l(t) - PTDF * I_n(t) - \overline{L_l} = 0 && \forall l \in \set{L}, t \in \set{T}, n \in \set{N} \label{eq:dom:con:pf-lower}
+		 \min \quad & \sum_{t\in\mathcal{T}} \quad \sum_{g\in\mathcal{G}}mc_g \cdot P_{g,t} + \sum_{s\in\mathcal{S}}mc_s \cdot (D_{s,t}+C_{s,t}) \label{eq:dom:relaxed-constraints}\\
+		 \text{s.t. } \quad & 0 \leq P_{g,t} \leq \overline{p_g} && \forall g \in \set{G}, t \in \set{T}\\
+		 & 0 \leq D_{s,t} \leq \overline{p_s} && \forall s \in \set{S}, t \in \set{T} \\
+		 & 0 \leq C_{s,t} \leq \overline{p_s} && \forall s \in \set{S}, t \in \set{T} \\
+		 & 0 \leq E_{s,t} \leq \overline{e_s} && \forall s \in \set{S}, t \in \set{T} \\
+		 & E_{s,t} - E_{s,t-1} - C_{s,t} + D_{s,t} = 0 && \forall s \in \set{S}, t \in \set{T}\\
+		 & \sum_{n \in \mathcal{N}} I_{n,t} = 0 && \forall t \in \set{T} \\
+		 & PTDF_{l,n} \cdot I_{n,t} + U_{l,t} - \overline{f_l} = 0 && \forall l \in \mathcal{L}, n \in \mathcal{N}, t \in \set{T} \label{eq:dom:con:pf-upper} \\
+		 & K_{l,t} - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l} = 0 && \forall l \in \mathcal{L}, n \in \mathcal{N}, t \in \set{T} \label{eq:dom:con:pf-lower}
 	\end{align}
 \end{subequations}
 
-The slack variable $R_l^{ref}$ ensures that the upper bound of the transmission line capactiy is kept, while slack variable $R_l^{cref}$ ensures the lower limit. Both variables are added as additional decision variables. Instead of two complicating constraints, one has to handle three complicating constraints. If these constraints are relaxed, the main problem decomposes into a generator and a storage subproblem.\\
+The slack variable $U_{l,t}$ ensures that the upper bound of the transmission line capactiy is kept, while slack variable $K_{l,t}$ ensures the lower limit. Both variables are added as additional decision variables. Instead of two complicating constraints, one has to handle three complicating constraints. If these constraints are relaxed, the main problem decomposes into a generator and a storage subproblem.\\
 
 Relaxing the complicating variables is done by implementing a max-min problem using the dual variables of the complicated constraints. Hereby, $\lambda$ is the dual of the energy balance constraint, $\mu$ and $\rho$ are the duals of the upper and lower power flow constraint respectively. Since the objective function is a linear cost function, \gls{lr} is not applicable. Thus, the complicated constraints are relaxed by applying \gls{alr}. A penalty term for each dual variable is introduced. The penalty terms equal zero in the optimality point and contribute to a faster convergence. The optimization problem of (\ref{eq:dom:relaxed-constraints}) derives to:
 
 \begin{subequations}
 	\begin{align}
 		\max{(\lambda, \mu, \rho)} \label{eq:dom:fixed-duals} \\
-		 & \min \quad \sum_{t\in\mathcal{T}}\sum_{g\in\mathcal{G}}c_g*P_g(t) + \sum_{s\in\mathcal{S}}c_s*(P_s^d(t)+P_s^c(t)) \nonumber \\
-		 & + \lambda * \left[\sum_{g\in\mathcal{G}}P_g(t) + \sum_{s\in\mathcal{S}}(P_s^d(t)-P_s^c(t))-D_n(t)\right]\nonumber \\
-		 & + \frac{\gamma}{2} * \left[\sum_{g\in\mathcal{G}}P_g(t) + \sum_{s\in\mathcal{S}}(P_s^d(t)-P_s^c(t))-D_n(t)\right]^2 \nonumber \\
-		 & + \mu * \left[PTDF * I_n(t) + R^{ref}_l(t) - \overline{L_l}\right] \nonumber \\
-		 & + \frac{\gamma}{2} * \left[PTDF * I_n(t) + R^{ref}_l(t) - \overline{L_l}\right]^2 \nonumber \\
-		 & + \rho * \left[R^{cref}_l(t) - PTDF * I_n(t) - \overline{L_l}\right]\nonumber \\
-		 & + \frac{\gamma}{2} * \left[R^{cref}_l(t) - PTDF * I_n(t) - \overline{L_l}\right]^2 \nonumber
+		 & \min \quad \sum_{t\in\mathcal{T}} \quad \sum_{g\in\mathcal{G}}mc_g \cdot P_{g,t} + \sum_{s\in\mathcal{S}}mc_s \cdot (D_{s,t}+C_{s,t}) \nonumber \\
+		 & + \lambda_t \cdot \sum_{n \in \mathcal{N}} I_{n,t} \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\|\sum_{n \in \mathcal{N}} I_{n,t}\big\|^2_2 \nonumber \\
+		 & + \mu_{l,t} \cdot (PTDF_{l,n} \cdot I_{n,t} + U_{l,t} - \overline{f_l}) \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\| PTDF_{l,n} \cdot I_{n,t} + U_{l,t} - \overline{f_l} \big\|^2_2 \nonumber \\
+		 & + \rho_{l,t} \cdot (K_{l,t} - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l}) \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\|K_{l,t} - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l} \big\|^2_2 \nonumber
 	\end{align}
 	\begin{align}
-		 \text{s.t. } \quad & 0 \leq P_g(t) \leq \overline{P_g} && \forall g \in \set{G}, t \in \set{T}\\\
-		 & 0 \leq P_s^d(t) \leq \overline{P_s} && \forall s \in \set{S}, t \in \set{T}\\
-		 & 0 \leq P_s^c(t) \leq \overline{P_s} && \forall s \in \set{S}, t \in \set{T}\\
-		 & 0 \leq E_s(t) \leq \overline{E_s} && \forall s \in \set{S}, t \in \set{T}\\
-		 & E_s(t) - E_s(t-1) - P_s^c(t) + P_s^d(t) = 0 && \forall s \in \set{S}, t \in \set{T}
+		 \text{s.t. } \quad & 0 \leq P_{g,t} \leq \overline{p_g} && \forall g \in \set{G}, t \in \set{T}\\
+		 & 0 \leq D_{s,t} \leq \overline{p_s} && \forall s \in \set{S}, t \in \set{T} \\
+		 & 0 \leq C_{s,t} \leq \overline{p_s} && \forall s \in \set{S}, t \in \set{T} \\
+		 & 0 \leq E_{s,t} \leq \overline{e_s} && \forall s \in \set{S}, t \in \set{T} \\
+		 & E_{s,t} - E_{s,t-1} - C_{s,t} + D_{s,t} = 0 && \forall s \in \set{S}, t \in \set{T}
 	\end{align}
 \end{subequations}
 
-Variable $\gamma$ is a positive constant and is the only parameter needed for the \gls{admm}. Due to the quadratic terms of the relaxed complicating constraitns, the first derivatives of the objective function is not fixed anymore but continuous. This is also a necessary condition for the convergence of the algorithm. Still, the optimization problem in equation (\ref{eq:dom:fixed-duals}) is not decomposable because of the introduced dual variables. The problem is further relaxed by fixing the dual variable to given values $\overline{\lambda}$, $\overline{\mu}$, $\overline{\rho}$. The problem formulation becomes:
+Variable $\gamma$ is a positive constant and is the only parameter needed for the \gls{admm}. Due to the second order norm\footnote{~The norm formulation $\big\| . \big\|^2_2$ can be understood as the quadratic sum of the entries of the penalty term vector.} of the penalty terms of the relaxed complicating constraints, the first derivative of the objective function is not fixed anymore but continuous. This is also a necessary condition for the convergence of the algorithm. Still, the optimization problem in equation (\ref{eq:dom:fixed-duals}) is not decomposable because of the introduced dual variables. The problem is further relaxed by fixing the dual variable to given values $\overline{\lambda}$, $\overline{\mu}$, $\overline{\rho}$. The problem formulation becomes:
 
 \begin{subequations}
 	\begin{align}
-		 \min \quad & \sum_{t\in\mathcal{T}}\sum_{g\in\mathcal{G}}c_g*P_g(t) + \sum_{s\in\mathcal{S}}c_s*(P_s^d(t)+P_s^c(t)) \label{eq:dom:final} \\
-		 & + \overline{\lambda} * \left[\sum_{g\in\mathcal{G}}P_g(t) + \sum_{s\in\mathcal{S}}(P_s^d(t)-P_s^c(t))-D_n(t)\right]\nonumber \\
-		 & + \frac{\gamma}{2} * \left[\sum_{g\in\mathcal{G}}P_g(t) + \sum_{s\in\mathcal{S}}(P_s^d(t)-P_s^c(t))-D_n(t)\right]^2 \nonumber \\
-		 & + \overline{\mu} * \left[PTDF * I_n(t) + R^{ref}_l(t) - \overline{L_l}\right] \nonumber \\
-		 & + \frac{\gamma}{2} * \left[PTDF * I_n(t) + R^{ref}_l(t) - \overline{L_l}\right]^2 \nonumber \\
-		 & + \overline{\rho} * \left[R^{cref}_l(t) - PTDF * I_n(t) - \overline{L_l}\right]\nonumber \\
-		 & + \frac{\gamma}{2} * \left[R^{cref}_l(t) - PTDF * I_n(t) - \overline{L_l}\right]^2\nonumber \\
-		 \text{s.t.} \quad & 0 \leq P_g(t) \leq \overline{P_g} && \forall g \in \set{G}, t \in \set{T}\\\
-		 & 0 \leq P_s^d(t) \leq \overline{P_s} && \forall s \in \set{S}, t \in \set{T}\\
-		 & 0 \leq P_s^c(t) \leq \overline{P_s} && \forall s \in \set{S}, t \in \set{T}\\
-		 & 0 \leq E_s(t) \leq \overline{E_s} && \forall s \in \set{S}, t \in \set{T}\\
-		 & E_s(t) - E_s(t-1) - P_s^c(t) + P_s^d(t) = 0 && \forall s \in \set{S}, t \in \set{T}
+		 \min \quad & \sum_{t\in\mathcal{T}} \quad \sum_{g\in\mathcal{G}}mc_g \cdot P_{g,t} + \sum_{s\in\mathcal{S}}mc_s \cdot (D_{s,t}+C_{s,t}) \label{eq:dom:final} \\
+		 & + \overline{\lambda}_t \cdot \sum_{n \in \mathcal{N}} I_{n,t} \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\|\sum_{n \in \mathcal{N}} I_{n,t}\big\|^2_2 \nonumber \\
+		 & + \overline{\mu}_{l,t} \cdot (PTDF_{l,n} \cdot I_{n,t} + U_{l,t} - \overline{f_l}) \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\| PTDF_{l,n} \cdot I_{n,t} + U_{l,t} - \overline{f_l} \big\|^2_2 \nonumber \\
+		 & + \overline{\rho}_{l,t} \cdot (K_{l,t} - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l}) \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\|K_{l,t} - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l} \big\|^2_2 \nonumber \\
+		 \text{s.t. } \quad & 0 \leq P_{g,t} \leq \overline{p_g} && \forall g \in \set{G}, t \in \set{T}\\
+		 & 0 \leq D_{s,t} \leq \overline{p_s} && \forall s \in \set{S}, t \in \set{T} \\
+		 & 0 \leq C_{s,t} \leq \overline{p_s} && \forall s \in \set{S}, t \in \set{T} \\
+		 & 0 \leq E_{s,t} \leq \overline{e_s} && \forall s \in \set{S}, t \in \set{T} \\
+		 & E_{s,t} - E_{s,t-1} - C_{s,t} + D_{s,t} = 0 && \forall s \in \set{S}, t \in \set{T}
 	\end{align}
 \end{subequations}
 
 % TODO Add reference for ADMM explanation
-Because of the product of the decision variable $P_{\mathcal{G}}$, $P_{\mathcal{S}}^d$ and $P_{\mathcal{S}}^c$ in all penalty terms, the optimization model is still not decomposable. At this step, the \gls{admm} comes into action and provides a possibility to solve the problem in a decomposable way. As written in \ref{admm}, \gls{admm} fixes each decision variable to the previous iteration value. Thus, one is finally able to derive the generator and storage subproblem. Out of simplicity, the overline symbol on the dual variables is omitted in the next equations.
+Because of the product of the decision variable $P_{\mathcal{G},\mathcal{T}}$, $D_{\mathcal{S},\mathcal{T}}$ and $C_{\mathcal{S},\mathcal{T}}$ in all penalty terms, the optimization model is still not decomposable. At this step, the \gls{admm} comes into action and provides a possibility to solve the problem in a decomposable way. As written in \ref{admm}, \gls{admm} fixes each decision variable to the previous iteration value. Thus, one is finally able to derive the generator and storage subproblem. Out of simplicity, the overline symbol on the dual variables is omitted in the next equations.
 
 
 \subsubsection*{Generator Subproblem}
 
-In the following, the optimization model for a specific generator $g$ is derived. The problem is only optimized by the decision variable $P_{g}$ of this generator and the corresponding slack variables of the power flow constraint. With the help of \gls{admm}, decision variables $P_{\mathcal{S}}^d$ and $P_{\mathcal{S}}^c$ are fixed to the values of the previous iteration. The power output of all other generators $P_{g \notin \mathcal{G}}$ is fixed too. Any constraint related to these variables can be removed. Another parameter $v$ is added to the problem formulation that indicates the iteration number. Obviously, for decision variable $P_{g}$ one takes the current iteration number $v$ while for the storages and other generators one takes the previous iteration $v-1$. The first derivative of the objective function shows that the objective function can be further simplified by removing terms related to $P_{g \notin \mathcal{G}}$, $P_{\mathcal{S}}^d$ and $P_{\mathcal{S}}^c$. The penalty terms can not be further simplified because of the quadratic term. The optimization model for a single generator yields:
+In the following, the optimization model for a specific generator $g$ is derived. The problem is only optimized by the decision variable $P_{g,\mathcal{T}}$ of this generator and the corresponding slack variables of the power flow constraint. With the help of \gls{admm}, decision variables $D_{\mathcal{S},\mathcal{T}}$ and $C_{\mathcal{S},\mathcal{T}}$ are fixed to the values of the previous iteration. The power output of all other generators $P_{g' \in \mathcal{G}\setminus g,\mathcal{T}}$ is fixed too. Any constraint related to these variables can be removed. Another parameter $v$ is added to the problem formulation that indicates the iteration number. Obviously, for decision variable $P_{g,\mathcal{T}}$ one takes the current iteration number $v$ while for the storages and other generators one takes the previous iteration $v-1$. The first derivative of the objective function shows that the objective function can be further simplified by removing terms related to $P_{g' \in \mathcal{G}\setminus g,\mathcal{T}}$, $D_{\mathcal{S},\mathcal{T}}$ and $C_{\mathcal{S},\mathcal{T}}$. The penalty terms can not be further simplified because of the second order norm. The optimization model for a single generator yields:
 
-% When writing multi-line equations with the align, align* or aligned environments, the \left and \right commands must be balanced on each line and on the same side of &. The solution is to use "invisible" brackets to balance things out, i.e. adding a \right. at the end of the first line, and a \left. at the start of the second line after &:
+% P_{g,t}^v + \sum_{g'=g\notin\mathcal{G}}P_{g',t}^{v-1}  + \sum_{s\in\mathcal{S}}(D_{s,t}^{v-1} - C_{s,t}^{v-1}) - d_{n,t}
 \begin{subequations}
 	\begin{align}
-		 \min \quad & \sum_{t\in\mathcal{T}} c_g*P_g(v, t) + \lambda * P_g(v, t) \label{eq:sub:gen}\\
-		 & + \frac{\gamma}{2} * \left[ P_g(v, t) + \sum_{g\notin\mathcal{G}}P_g(v-1,t) \right. \nonumber \\
-		 & \qquad \left. + \sum_{s\in\mathcal{S}}(P_s^d(v-1, t)-P_s^c(v-1, t))-D_n(t)\right]^2 \label{eq:sub:gen:eb} \\
-		 & + \mu * PTDF * P_g(v, t) \nonumber \\
-		 & + \frac{\gamma}{2} * \left[PTDF * I_n(v, t) + R^{ref}_l(v, t) - \overline{L_l}\right]^2 \nonumber \\
-		 & - \rho * PTDF * P_g(v, t) \nonumber \\
-		 & + \frac{\gamma}{2} * \left[R^{cref}_l(v, t) - PTDF * I_n(v, t) - \overline{L_l}\right]^2\nonumber \\
-		 \text{s.t.} \quad & 0 \leq P_g(v, t) \leq \overline{P_g} && \forall t \in \set{T}
+		 \min \quad & \sum_{t\in\mathcal{T}} mc_g \cdot P_{g,t}^v + \lambda_t \cdot P_{g,t}^v \label{eq:sub:gen}\\
+		 & + \frac{\gamma}{2} \cdot \big\| \sum_{n \in \mathcal{N}} I_{n,t} \big\|^2_2 \nonumber \\
+		 & + \mu_{l,t} \cdot PTDF_{l,n} \cdot P_{g,t}^v \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\| PTDF_{l,n} \cdot I_{n,t} + U_{l,t}^v - \overline{f_l} \big\|^2_2 \nonumber \\
+		 & - \rho_{l,t} \cdot PTDF_{l,n} \cdot P_{g,t}^v \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\|K_{l,t}^v - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l} \big\|^2_2 \nonumber \\
+		 \text{s.t.} \quad & 0 \leq P_{g,t}^v \leq \overline{p_g} && \forall t \in \set{T}
 	\end{align}
 \end{subequations}
 
- The term inside of the brackets of equation (\ref{eq:sub:gen:eb}) is once again the injection formulation. In comparison to equation (\ref{eq:dom:injection-term}), the power output of the other generators and storages is not a variable anymore but a parameter. Hence, the power output of the specific generator $P_{g}$ is excluded from the sum.\\
+The term inside of the brackets in the second line of equation (\ref{eq:sub:gen}) is once again the energy balance constraint. However, the power output of the other generators and storages is not a variable anymore but a parameter that is fixed to the previous iteration values'. Hence, the power output of the specific generator $P_{g,t}$ can be excluded from the sum. Then, the injection of the node $\breve{n}$, the generator is located at, can be formulated as:
  
- As for now, the specific generator needs to know the previous dispatch of all other units to compute the injection. This is in contradiction to the aim of this thesis to create a decentralized framework in which sensitive information is not shared with other participants. That includes the power dispatch of the previous iteration. To overcome the problem, the coordinating algorithm provides the summed power outputs of the other generators and storages. Using the sum prevents the fact that the specific generators needs to know the acutal power values. Since the power output of the specific generator is also included, one has to subtract the power output from the last iteration of the specific generator from the sum. \\
+ \begin{equation}
+	I_{\breve{n},t} = P_{g,t}^v + \sum_{g'\in\mathcal{G}_{\breve{n}} \setminus g}p_{g',t}^{v-1} + \sum_{s\in\mathcal{S}_{\breve{n}}}(d_{s,t}^{v-1}-c_{s,t}^{v-1})-d_{\breve{n},t}
+	\label{eq:injection:decentralized}
+\end{equation} 
  
- The optimization model in (\ref{eq:sub:gen}) is further rearranged by summarising the dual variables. In addition, penalty terms for the decision variables are introduced. These penalty terms calculate the difference between the current iteration value and the last iteration value. Since the slack variables of the power flow constraint have to be the same for all subproblems, the penalty term of these decision variables is compared against the average value of the last iteration of all subproblems. In the optimality point, these penalty terms become zero. Subsequently, they also contribute to a faster convergence. Finally, the generator subproblem becomes:
+ The power generation terms of the other units are written in lower case to match the notation of parameters. Be aware that $d_{s,t}^{v-1}$ and $d_{\breve{n},t}$ are not the same. The first term depicts the discharge power output of a storage at node $\breve{n}$. The latter stands for the nodal demand of node $\breve{n}$. Equation (\ref{eq:injection:decentralized}) can be then inserted in the sum of all nodal injections for a specific timestep $t$:
+ 
+ \begin{equation}
+ 	\sum_{n \in \mathcal{N}} I_{n,t} = I_{\breve{n},t} + \sum_{n \in \mathcal{N} \setminus \breve{n}} \quad \sum_{g\in\mathcal{G}_n}p_{g',t}^{v-1} + \sum_{s\in\mathcal{S}_n}(d_{s,t}^{v-1}-c_{s,t}^{v-1})-d_{n,t}
+ \end{equation}
+ 
+ As for now, the specific generator needs to know the previous dispatch of all other units to compute the injection. This is in contradiction to the aim of this thesis to create a decentralized framework in which sensitive information is not shared with other participants. That includes the power dispatch of the previous iteration. To overcome the problem, the coordinating algorithm provides the sum of nodal power outputs for the other generators and storages in the network. The sum of the previous iteration power values' of all generators at a node $n$ and a timestep $t$ is denoted as $\Theta_{n,t}$ and can be expressed as:
+ 
+ \begin{equation}
+ 	\Theta_{n,t} = \sum_{g\in\mathcal{G}_{n}}P_{g,t}^{v-1}
+ \end{equation}
+ 
+ The same applies to the discharge and charge power values of the storages in the network. $\Phi_{n,t}$ depicts the sum of the previous discharge power values' of all storages at node $n$ and timestep $t$ and $\Psi_{n,t}$ depicts the charging sum respectively. The corresponding equations are as follows:
+ 
+\begin{equation}
+	\Phi_{n,t} = \sum_{s\in\mathcal{S}_n}D_{s,t}^{v-1}
+\end{equation}
+
+\begin{equation}
+	\Psi_{n,t} = \sum_{s\in\mathcal{S}_n}C_{s,t}^{v-1}
+\end{equation}
+ 
+ Using these values prevents the fact that the specific generators needs to know the actual power dispatch of the other participants. Since the power output of the specific generator $g$ is also included in $\Theta_{\breve{n},t}$, one has to subtract the power output from the last iteration of the specific generator from the sum. Thus, the sum of all nodal injections for the specific generator $g$ at node $\breve{n}$ becomes: 
+
+ \begin{align}
+ 	\sum_{n \in \mathcal{N}} I_{n,t} &= P_{g,t}^v + \Theta_{\breve{n},t} - P_{g,t}^{v-1} + \Phi_{\breve{n},t} - \Psi_{\breve{n},t} - d_{\breve{n},t} \\
+ 	& + \sum_{n \in \mathcal{N} \setminus \breve{n}} \Theta_{n,t} + \Phi_{n,t} - \Psi_{n,t} - d_{n,t} \nonumber
+ \end{align}
+ 
+ The optimization model in (\ref{eq:sub:gen}) is further rearranged by summarising the terms including the dual variables $\rho_{l,t}$ and $\mu_{l,t}$. In addition, a penalty terms for the decision variables are introduced. In the optimality point, these penalty terms become zero. Subsequently, they also contribute to a faster convergence. The penalty term for the decision variable $P_{g,t}$ calculates the difference between the current iteration value and the last iteration value. Since the slack variables of the power flow constraint have to be the same for all subproblems at global optimum, the penalty term for these decision variables considers the average of all subporblems of the last iteration. The average value for the upper flow constraint is denoted as $\Upsilon_{l,t}$ and $\Gamma_{l,t}$ respectively. Finally, the generator subproblem becomes:
  
  \begin{subequations}
 	\begin{align}
-		 \min \quad & \sum_{t\in\mathcal{T}} c_g*P_g(v, t) \label{eq:sub:gen-final}\\
-		 & + P_g(v, t) * (\lambda + (\mu - \rho) * PTDF) \nonumber \\ 
-		 & + \frac{\gamma}{2} * \left[P_g(v, t) + \sum P_{\mathcal{G}}(v-1,t) - P_g(v-1, t) \right. \nonumber \\
-		 & \qquad \left. + \sum P_{\mathcal{S}}^d(v-1, t) - \sum P_{\mathcal{S}}^c(v-1, t) - D_n(t)\right]^2 \nonumber \\
-		 & + \frac{\gamma}{2} * \left[PTDF * I_n(v, t) + R^{ref}_l(v, t) - \overline{L_l}\right]^2 \nonumber \\
-		 & + \frac{\gamma}{2} * \left[R^{cref}_l(v, t) - PTDF * I_n(v, t) - \overline{L_l}\right]^2\nonumber \\
-		 & + \frac{\gamma}{2} * \left[R^{ref}_l(v, t) - \overline{R^{ref}_l}(v-1, t)  \right]^2 \nonumber\\
-		 & + \frac{\gamma}{2} * \left[R^{cref}_l(v, t) - \overline{R^{cref}_l}(v-1, t)  \right]^2 \nonumber \\
-		 & + \frac{\gamma}{2} * \left[P_g(v, t) - P_g(v-1, t)\right]^2 \nonumber \\
-		 \text{s.t.} \quad & 0 \leq P_g(v, t) \leq \overline{P_g} && \forall t \in \set{T}
+		 \min \quad & \sum_{t\in\mathcal{T}} mc_g \cdot P_{g,t}^v \label{eq:sub:gen-final}\\
+		 & + P_{g,t}^v \cdot (\lambda_t + (\mu_{l,t} - \rho_{l,t}) \cdot PTDF_{l,n}) \nonumber \\ 
+		 & + \frac{\gamma}{2} \cdot \big\| P_{g,t}^v + \Theta_{\breve{n},t} - P_{g,t}^{v-1} + \Phi_{\breve{n},t} - \Psi_{\breve{n},t} - d_{\breve{n},t} \nonumber \\
+		 & \qquad + \sum_{n \in \mathcal{N} \setminus \breve{n}} \Theta_{n,t} + \Phi_{n,t} - \Psi_{n,t} - d_{n,t} \big\|^2_2 \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\| PTDF_{l,n} \cdot I_{n,t} + U_{l,t}^v - \overline{f_l} \big\|^2_2 \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\|K_{l,t}^v - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l} \big\|^2_2 \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\|U_{l,t}^v - \Upsilon_{l,t}  \big\|^2_2 \nonumber\\
+		 & + \frac{\gamma}{2} \cdot \big\|K_{l,t}^v - \Gamma_{l,t}  \big\|^2_2 \nonumber \\
+		 & + \frac{\gamma}{2} \cdot (P_{g,t}^v - P_{g,t}^{v-1})^2 \nonumber \\
+		 \text{s.t.} \quad & 0 \leq P_{g,t}^v \leq \overline{p_g} && \forall t \in \set{T}
 	\end{align}
 \end{subequations}
 
 \subsubsection*{Storage Subproblem}
 
-This section derives the optimization model for a specific storage $s$. The problem only includes decision variables $P_{s}^d$, $P_{s}^c$ of the storage $s$ and the corresponding slack variables of the power flow constraint. As for the generator subproblem, all other decision variables from the main optimization model are fixed to the values of the previous iteration. Thus, constraints related to generators or ther storages can be removed. \\
+This section derives the optimization model for a specific storage $s$. The problem only includes decision variables $D_{s,t}$, $C_{s,t}$ of the storage $s$ and the corresponding slack variables of the power flow constraint. As for the generator subproblem, all other decision variables from the main optimization model are fixed to the values of the previous iteration. Thus, constraints related to generators or ther storages can be removed. \\
 
 The derivation of the optimization model for the storage subproblem is nearly the same as for the generator. Therefore a detail decsription of the derivation is omitted and the reader is referred to the generator subproblem for further detail. If the previous iteration values for the generators and other storages as well as the penalty terms are added, the storage subproblem yields:
 
  \begin{subequations}
 	\begin{align}
-		 \min \quad & \sum_{t\in\mathcal{T}} c_s*(P_s^d(v, t) + P_s^c(v, t))\label{eq:sub:stor}\\
-		 & + (P_s^d(v, t) - P_s^c(v, t)) * (\lambda + (\mu - \rho) * PTDF) \nonumber \\ 
-		 & + \frac{\gamma}{2} * \left[\sum P_{\mathcal{G}}(v-1,t) \right. \nonumber \\ 
-		 & \qquad \left. + P_s^d(v, t) + \sum P_{\mathcal{S}}^d(v-1, t) - P_s^d(v-1, t) \right. \nonumber \\
-		 & \qquad \left. - P_s^c(v, t) - (\sum P_{\mathcal{S}}^c(v-1, t) -  P_s^c(v-1, t)) - D_n(t)\right]^2 \nonumber \\
-		 & + \frac{\gamma}{2} * \left[PTDF * I_n(v, t) + R^{ref}_l(v, t) - \overline{L_l}\right]^2 \nonumber \\
-		 & + \frac{\gamma}{2} * \left[R^{cref}_l(v, t) - PTDF * I_n(v, t) - \overline{L_l}\right]^2\nonumber \\
-		 & + \frac{\gamma}{2} * \left[R^{ref}_l(v, t) - \overline{R^{ref}_l}(v-1, t)  \right]^2 \nonumber\\
-		 & + \frac{\gamma}{2} * \left[R^{cref}_l(v, t) - \overline{R^{cref}_l}(v-1, t)  \right]^2 \nonumber \\
-		 & + \frac{\gamma}{2} * \left[P_s^d(v, t) - P_s^d(v-1, t)\right]^2 \nonumber \\
-		 & + \frac{\gamma}{2} * \left[P_s^c(v, t) - P_s^c(v-1, t)\right]^2 \nonumber \\
-		 \text{s.t.} \quad & 0 \leq P_s^d(t) \leq \overline{P_s} && \forall t \in \set{T} \\
-		 & 0 \leq P_s^c(t) \leq \overline{P_s} && \forall t \in \set{T}\\
-		 & 0 \leq E_s(t) \leq \overline{E_s} && \forall t \in \set{T}\\
-		 & E_s(t) - E_s(t-1) - P_s^c(t) + P_s^d(t) = 0 && \forall t \in \set{T}
+		 \min \quad & \sum_{t\in\mathcal{T}} mc_s \cdot (D_{s,t}^v + C_{s,t}^v)\label{eq:sub:stor}\\
+		 & + (D_{s,t}^v - C_{s,t}^v) \cdot (\lambda_t + (\mu_{l,t} - \rho_{l,t}) \cdot PTDF_{l,n}) \nonumber \\ 
+		 & + \frac{\gamma}{2} \cdot \big\| \Theta_{\breve{n},t} + D_{s,t}^v + \Phi_{\breve{n},t} - D_{s,t}^{v-1} \nonumber \\
+		 & \qquad \qquad - C_{s,t}^v - (\Psi_{\breve{n},t} - C_{s,t}^{v-1}) - d_{\breve{n},t} \nonumber \\
+		 & \qquad \qquad + \sum_{n \in \mathcal{N} \setminus \breve{n}} \Theta_{n,t} + \Phi_{n,t} - \Psi_{n,t} - d_{n,t} \big\|^2_2 \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\|PTDF_{l,n} * I_{n,t} + U_{l,t}^v - \overline{f_l}\big\|^2_2 \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\|K_{l,t}^v - PTDF * I_n(v, t) - \overline{K_l}\big\|^2_2\nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\|U_{l,t}^v - \Upsilon_{l,t}  \big\|^2_2 \nonumber\\
+		 & + \frac{\gamma}{2} \cdot \big\|K_{l,t}^v - \Gamma_{l,t}  \big\|^2_2 \nonumber \\
+		 & + \frac{\gamma}{2} \cdot (D_{s,t}^v - D_{s,t}^{v-1} )^2 \nonumber \\
+		 & + \frac{\gamma}{2} \cdot (C_{s,t}^v - C_{s,t}^{v-1} )^2 \nonumber \\
+		 \text{s.t.} \quad & 0 \leq D_{s,t}^v \leq \overline{p_s} && \forall t \in \set{T} \\
+		 & 0 \leq C_{s,t}^v \leq \overline{p_s} && \forall t \in \set{T}\\
+		 & 0 \leq E_{s,t}^v \leq \overline{e_s} && \forall t \in \set{T}\\
+		 & E_{s,t}^v - E_{s,t-1}^v - C_{s,t}^v + D_{s,t}^v = 0 && \forall t \in \set{T}
 	\end{align}
 \end{subequations}
 
@@ -204,19 +242,19 @@ It is often common to formulate optimization problems in a matrix notation. With
 
 If applied to the formulations of the previous sections, $f(x)$ would be the generator costs and $g(z)$ the storage costs. The problem in (\ref{eq:admm:gen}) would be extended by the corresponding constraints for generators and storages. In addition, the power flow constraint would be added as another system constraint like equation (\ref{eq:admm:gen:con1}). The matrix notation can also be decomposed by applying the steps described in section (\ref{sec:app:dom}). \\
 
-According to \citet{boyd2010}, \gls{admm} is often written in a shorter, so called scaled form. In this form, the linear and quadratic terms of the objective function are combined and the dual variables are scaled. This yields a much shorter formulation. As an example, the scaled dual variable of the energy balance is derived. First, one defines a residual term of the energy balance constraint.
+According to \citet{boyd2010}, \gls{admm} is often written in a shorter, so called scaled form. In this form, the linear and quadratic terms of the objective function are combined and the dual variables are scaled. This yields a much shorter formulation. As an example, the scaled dual variable of the energy balance constraint is derived. First, one defines a residual term of the energy balance constraint.
 
 \begin{equation}
-	\vb{r} = \vb{N_\mathcal{G}}*\vb{P_\mathcal{G}} + \vb{N_\mathcal{S}}*(\vb{P_\mathcal{S}^d} - \vb{P_\mathcal{S}^c}) - \vb{D_\mathcal{N}} = \vb{I_\mathcal{N}}
+	\vb{r} = \vb{N_\mathcal{G}}*\vb{P} + \vb{N_\mathcal{S}}*(\vb{D} - \vb{C}) - \vb{d} = \vb{I}
 \end{equation}
 
-Here, $\vb{N_\mathcal{G}}$ and $\vb{N_\mathcal{S}}$ are the identity matrices indicating the node location of every generator and storage. Inserting the residual term $r$ into the corresponding part of the optimization problem yields:
+Here, $\vb{N_\mathcal{G}}$ and $\vb{N_\mathcal{S}}$ are the identity matrices indicating the node location of every generator and storage in the network. Inserting the residual term $r$ into the corresponding part of the optimization problem yields:
 
 \begin{equation}
 	\vb{\lambda} * \vb{r} + \frac{\gamma}{2} * || \vb{r} ||^2_2 = \frac{\gamma}{2} || \vb{r} + \frac{1}{\gamma}\vb{\lambda} ||^2_2 - \frac{1}{2\gamma}|| \vb{\lambda} ||^2_2 = \frac{\gamma}{2} || \vb{r} + \vb{\hat{\lambda}} ||^2_2 - \frac{\gamma}{2}|| \vb{\hat{\lambda}} ||^2_2 \label{eq:derivation_lambda_hat}
 \end{equation}
 
-The transformation is not very straight forward but allows to further simplify the  optimization problem. With $\vb{\hat{\lambda}} = \frac{1}{\gamma}*\vb{\lambda}$, one gets the scaled dual variable of $\vb{\lambda}$. Using the scaled dual variable makes the problem formulation much shorter because the last term $- \frac{\gamma}{2}|| \vb{\hat{\lambda}} ||^2_2$ of equation (\ref{eq:derivation_lambda_hat}) does not contain any optimization variable. Hence, this term can be removed. The other dual variables can be replaced respectively. In the following the generator subproblem and the storage subproblem are formulated using the scaled form of the \gls{admm}.
+The transformation is not very straight forward but allows to further simplify the  optimization problem. With $\vb{\hat{\lambda}} = \frac{1}{\gamma}*\vb{\lambda}$, one gets the scaled dual variable of $\vb{\lambda}$. Using the scaled dual variable makes the problem formulation much shorter because the last term $- \frac{\gamma}{2}|| \vb{\hat{\lambda}} ||^2_2$ of equation (\ref{eq:derivation_lambda_hat}) does not contain any optimization variable. Hence, this term can be removed. The other dual variables can be replaced respectively. In the following, the generator subproblem and the storage subproblem are formulated using the scaled form of the \gls{admm}.
 
 \subsubsection*{Generator Subproblem}
 
@@ -224,36 +262,33 @@ The generator costs in matrix notation are formulated as follows:
 
 \begin{subequations}
 	\begin{align}
-		f(x) &= f(\vb{P_\mathcal{G}}) = \vb{P_\mathcal{G}}^T * \vb{c_\mathcal{G}}\\
+		f(x) &= f(\vb{P}) = \vb{P}^T \cdot \vb{mc}\\
 		& = \begin{bmatrix}
-			P_{g_1}(t_1) & \dots & P_{g_n}(t_1) \\
+			P_{g_1,t_1} & \dots & P_{g_n,t_1} \\
 			\vdots & \ddots & \vdots \\
-			P_{g_1}(t_n) & \dots & P_{g_n}(t_n)
-		\end{bmatrix} * \begin{bmatrix}
-			c_{g_1} \\
+			P_{g_1,t_n} & \dots & P_{g_n,t_n}
+		\end{bmatrix} \cdot \begin{bmatrix}
+			mc_{g_1} \\
 			\vdots \\
-			c_{g_n}
+			mc_{g_n}
 		\end{bmatrix}
 	\end{align}
 \end{subequations}
 
-If this formulation is applied to the generator optimization problem of equation (\ref{eq:sub:gen-final}), the matrix notation yields:
+The matrix of the power generation values is transposed to allow matrix multiplication. If this formulation is applied to the generator optimization problem of equation (\ref{eq:sub:gen-final}), the matrix notation yields:
 
  \begin{subequations}
 	\begin{align}
-		 \min \quad & \vb{P_g}^T * \vb{c}_g \\
-		 & + \frac{\gamma}{2} * \big\| \vb{P_g} + \sum \vb{P_\mathcal{G}}(v-1) - \vb{P_g}(v-1) \nonumber \\
-		 & \qquad + \sum \vb{P_\mathcal{S}^d}(v-1) - \sum \vb{P_\mathcal{S}^c}(v-1) - \vb{D_n} + \frac{\vb{\lambda}}{\gamma} \big\|^2_2 \label{eq:dom-matrix:eb} \\
-		 & + \frac{\gamma}{2} * \big\| PTDF * \vb{I_n} + \vb{R^{ref}} - \vb{\overline{L}} + \frac{\vb{\mu}}{\gamma}\big\|^2_2 \nonumber \\
-		 & + \frac{\gamma}{2} * \big\| \vb{R^{cref}} - PTDF * \vb{I_n} - \vb{\overline{L}} + \frac{\vb{\rho}}{\gamma}\big\|^2_2 \nonumber \\
-		 & + \frac{\gamma}{2} * \big\| \vb{R^{ref}} - \vb{\overline{R^{ref}}}(v-1)  \big\|^2_2 \nonumber\\
-		 & + \frac{\gamma}{2} * \big\| \vb{R^{cref}} - \vb{\overline{R^{cref}}}(v-1) \big\|^2_2 \nonumber \\
-		 & + \frac{\gamma}{2} * \big\| \vb{P_g} - \vb{P_g}(v-1) \big\|^2_2 \nonumber \\
-		 \text{s.t.} \quad & \vb{0} \leq \vb{P_g} \leq \vb{\overline{P_g}}
+		 \min \quad & \vb{P} \cdot mc \\
+		 & + \frac{\gamma}{2} \cdot \big\| \vb{P}^v + \vb{\Theta} - \vb{P}^{v-1} + \vb{\Phi} - \vb{\Psi} - \vb{d} + \frac{\vb{\lambda}}{\gamma} \big\|^2_2 \\
+		 & + \frac{\gamma}{2} \cdot \big\| PTDF \cdot \vb{I} + \vb{U} - \vb{\overline{f}} + \frac{\vb{\mu}}{\gamma}\big\|^2_2 \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\| \vb{K} - PTDF \cdot \vb{I} - \vb{\overline{f}} + \frac{\vb{\rho}}{\gamma}\big\|^2_2 \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\| \vb{U} - \vb{\Upsilon}  \big\|^2_2 \nonumber\\
+		 & + \frac{\gamma}{2} \cdot \big\| \vb{K} - \vb{\Gamma} \big\|^2_2 \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\| \vb{P}^v - \vb{P}^{v-1} \big\|^2_2 \nonumber \\
+		 \text{s.t.} \quad & \vb{0} \leq \vb{P} \leq \vb{\overline{p}}
 	\end{align}
 \end{subequations}
-
-Hereby, the matrices of the previous iteration values in equation (\ref{eq:dom-matrix:eb}) are summed up for all generators and storages, making these values only time-dependent. One should also note the norm formulation in the quadratic terms of the formulation. This norm is further examined in the result section of this thesis.
 
 \subsubsection*{Storage Subproblem}
 
@@ -261,20 +296,20 @@ The storage costs in matrix notation are formulated as follows:
 
 \begin{subequations}
 	\begin{align}
-		g(z) &= g(\vb{P_\mathcal{S}^d}, \vb{P_\mathcal{S}^c})\\
-		& = \left(\vb{P_\mathcal{S}^d} + \vb{P_\mathcal{S}^c}\right)^T * \vb{c_\mathcal{S}} \\
+		g(z) &= g(\vb{D}, \vb{C})\\
+		& = \left(\vb{D} + \vb{C}\right)^T \cdot \vb{mc} \\
 		& = \left(\begin{bmatrix}
-			P_{s_1}^d(t_1) & \dots & P_{s_n}^d(t_1) \\
+			P_{s_1,t_1} & \dots & P_{s_n,t_1} \\
 			\vdots & \ddots & \vdots \\
-			P_{s_1}^d(t_n) & \dots & P_{s_n}^d(t_n)
+			P_{s_1,t_n} & \dots & P_{s_n,t_n}
 		\end{bmatrix} + \begin{bmatrix}
-			P_{s_1}^c(t_1) & \dots & P_{s_n}^c(t_1) \\
+			P_{s_1,t_1} & \dots & P_{s_n,t_1} \\
 			\vdots & \ddots & \vdots \\
-			P_{s_1}^c(t_n) & \dots & P_{s_n}^c(t_n)
-		\end{bmatrix} \right) * \begin{bmatrix}
-			c_{s_1} \\
+			P_{s_1,t_n} & \dots & P_{s_n,t_n}
+		\end{bmatrix} \right) \cdot \begin{bmatrix}
+			mc_{s_1} \\
 			\vdots \\
-			c_{s_n}
+			mc_{s_n}
 		\end{bmatrix}
 	\end{align}
 \end{subequations}
@@ -283,20 +318,19 @@ If this formulation is applied to the storage optimization problem of equation (
 
  \begin{subequations}
 	\begin{align}
-		 \min \quad & \left(\vb{P_s^d} + \vb{P_s^c}\right)^T * \vb{c_s}\\
-		 & + \frac{\gamma}{2} * \big\| \sum \vb{P_\mathcal{G}}(v-1) \nonumber \\ 
-		 & \qquad + \vb{P_s^d} + \sum \vb{P_\mathcal{S}^d}(v-1) - \vb{P_s^d}(v-1) \nonumber \\
-		 & \qquad - \vb{P_s^c} - (\sum \vb{P_\mathcal{S}^c}(v-1) -  \vb{P_s^c}(v-1)) - \vb{D_n} + \frac{\vb{\lambda}}{\gamma} \big\|^2_2 \nonumber \\
-		 & + \frac{\gamma}{2} * \big\| PTDF * \vb{I_n} + \vb{R^{ref}} - \vb{\overline{L}} + \frac{\vb{\mu}}{\gamma}\big\|^2_2 \nonumber \\
-		 & + \frac{\gamma}{2} * \big\| \vb{R^{cref}} - PTDF * \vb{I_n} - \vb{\overline{L}} + \frac{\vb{\rho}}{\gamma}\big\|^2_2 \nonumber \\
-		 & + \frac{\gamma}{2} * \big\| \vb{R^{ref}} - \vb{\overline{R^{ref}}}(v-1)  \big\|^2_2 \nonumber\\
-		 & + \frac{\gamma}{2} * \big\| \vb{R^{cref}} - \vb{\overline{R^{cref}}}(v-1) \big\|^2_2 \nonumber \\
-		 & + \frac{\gamma}{2} * \big\| \vb{P_s^d} - \vb{P_s^d}(v-1)\big\|^2_2 \nonumber \\
-		 & + \frac{\gamma}{2} * \big\| \vb{P_s^c} - \vb{P_s^d}(v-1)\big\|^2_2 \nonumber \\
-		 \text{s.t.} \quad & \vb{0} \leq \vb{P_s^d} \leq \vb{\overline{P_s}} \\
-		 & \vb{0} \leq \vb{P_s^c} \leq \vb{\overline{P_s}} \\
-		 & \vb{0} \leq \vb{E_s} \leq \vb{\overline{E_s}}\\
-		 & \vb{0} = \vb{E_s} - \vb{E_s^{t-1}} - \vb{P_s^c} + \vb{P_s^d}
+		 \min \quad & \left(\vb{D}^v + \vb{C}^v\right)^T \cdot mc\\
+		 & + \frac{\gamma}{2} \cdot \big\| \vb{\Theta} + \vb{D}^v + \vb{\Phi} - \vb{D}^{v-1} \nonumber \\
+		 & \qquad \qquad - \vb{C}^v - (\vb{\Psi} - \vb{C}^{v-1}) - \vb{d} + \frac{\vb{\lambda}}{\gamma} \big\|^2_2 \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\| PTDF \cdot \vb{I} + \vb{U} - \vb{\overline{f}} + \frac{\vb{\mu}}{\gamma}\big\|^2_2 \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\| \vb{K} - PTDF \cdot \vb{I} - \vb{\overline{f}} + \frac{\vb{\rho}}{\gamma}\big\|^2_2 \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\| \vb{U} - \vb{\Upsilon} \big\|^2_2 \nonumber\\
+		 & + \frac{\gamma}{2} \cdot \big\| \vb{K} - \vb{\Gamma} \big\|^2_2 \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\| \vb{D}^v - \vb{D}^{v-1}\big\|^2_2 \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\| \vb{C}^v - \vb{C}^{v-1}\big\|^2_2 \nonumber \\
+		 \text{s.t.} \quad & \vb{0} \leq \vb{D} \leq \vb{\overline{p}} \\
+		 & \vb{0} \leq \vb{C} \leq \vb{\overline{p}} \\
+		 & \vb{0} \leq \vb{E} \leq \vb{\overline{e}}\\
+		 & \vb{0} = \vb{E} - \vb{E}_{t-1} - \vb{C} + \vb{D}
 	\end{align}
 \end{subequations}
 

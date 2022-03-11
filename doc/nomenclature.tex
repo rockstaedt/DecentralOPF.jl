@@ -6,25 +6,29 @@
 \nomenclature[S]{\(\mathcal{L}\)}{Set of transmission lines}
 
 %%% Variables %%%
-\nomenclature[V]{$P_g$}{Power generation of generator $g$\nomunit{\SI{1}{\kilo\watt}}}
-\nomenclature[V]{$P_s^d$}{Withdrawal power of storage $s$\nomunit{\SI{1}{\kilo\watt}}}
-\nomenclature[V]{$P_s^c$}{Charging power of storage $s$\nomunit{\SI{1}{\kilo\watt}}}
-\nomenclature[V]{$E_s$}{Storage level of storage $s$\nomunit{\SI{1}{\kilo\watt\hour}}}
-\nomenclature[V]{$D_n$}{Demand at node $n$\nomunit{\SI{1}{\kilo\watt}}}
-\nomenclature[V]{$\lambda$}{Dual variable of the energy balance constraint}
-\nomenclature[V]{$\hat{\lambda}$}{Scaled dual variable of the energy balance constraint}
-\nomenclature[V]{$\mu$}{Dual variable of the upper power flow constraint}
-\nomenclature[V]{$\hat{\mu}$}{Scaled dual variable of the upper power flow constraint}
-\nomenclature[V]{$\rho$}{Dual variable of the lower power flow constraint}
-\nomenclature[V]{$\hat{\rho}$}{Scaled dual variable of the lower power flow constraint}
-\nomenclature[V]{$R^{ref}_l$}{Slack variable for the upper capacity of transmission line $l$}
-\nomenclature[V]{$R^{cref}_l$}{Slack variable for the lower capacity of transmission line $l$}
+\nomenclature[V]{$P_{g,t}$}{Power generation of generator $g$ at timestep $t$\nomunit{\SI{1}{\kilo\watt}}}
+\nomenclature[V]{$D_{s,t}$}{Withdrawal power of storage $s$ at timestep $t$\nomunit{\SI{1}{\kilo\watt}}}
+\nomenclature[V]{$C_{s,t}$}{Charging power of storage $s$ at timestep $t$\nomunit{\SI{1}{\kilo\watt}}}
+\nomenclature[V]{$E_{s,t}$}{Storage level of storage $s$ at timestep $t$\nomunit{\SI{1}{\kilo\watt\hour}}}
+\nomenclature[V]{$\lambda_t$}{Dual variable of the energy balance constraint}
+\nomenclature[V]{$\hat{\lambda}_t$}{Scaled dual variable of the energy balance constraint}
+\nomenclature[V]{$\mu_{l,t}$}{Dual variable of the upper power flow constraint}
+\nomenclature[V]{$\hat{\mu}_{l,t}$}{Scaled dual variable of the upper power flow constraint}
+\nomenclature[V]{$\rho_{l,t}$}{Dual variable of the lower power flow constraint}
+\nomenclature[V]{$\hat{\rho}_{l,t}$}{Scaled dual variable of the lower power flow constraint}
+\nomenclature[V]{$U_{l,t}$}{Slack variable for the upper capacity of transmission line $l$\\ at timestep $t$\nomunit{\SI{1}{\kilo\watt}}}
+\nomenclature[V]{$K_{l,t}$}{Slack variable for the lower capacity of transmission line $l$\\ at timestep $t$\nomunit{\SI{1}{\kilo\watt}}}
 
 %%% Parameters %%%
-\nomenclature[P]{$\overline{P_g}$}{Maximum power of generator $g$\nomunit{\SI{1}{\kilo\watt}}}
-\nomenclature[P]{$\overline{P_s^d}$}{Maximum withdrawal power of storage $s$\nomunit{\SI{1}{\kilo\watt}}}
-\nomenclature[P]{$\overline{P_s^c}$}{Maximum charging power of storage $s$\nomunit{\SI{1}{\kilo\watt}}}
-\nomenclature[P]{$\overline{E_s}$}{Maximum energy level of storage $s$\nomunit{\SI{1}{\kilo\watt\hour}}}
-\nomenclature[P]{$\overline{L_l}$}{Maximum line capacity of transmission line $l$\nomunit{\SI{1}{\kilo\watt}}}
-
-
+\nomenclature[P]{$d_{n,t}$}{Demand at node $n$ and timestep $t$\nomunit{\SI{1}{\kilo\watt}}}
+\nomenclature[P]{$\overline{p_g}$}{Maximum power of generator $g$\nomunit{\SI{1}{\kilo\watt}}}
+\nomenclature[P]{$\overline{p_s}$}{Maximum withdrawal and charging power of storage $s$\nomunit{\SI{1}{\kilo\watt}}}
+\nomenclature[P]{$\overline{e_s}$}{Maximum energy level of storage $s$\nomunit{\SI{1}{\kilo\watt\hour}}}
+\nomenclature[P]{$\overline{f_l}$}{Maximum line capacity of transmission line $l$\nomunit{\SI{1}{\kilo\watt}}}
+\nomenclature[P]{$mc_g$}{Marginal costs of generator $g$ \nomunit{\SI{1}{EUR/\kilo\watt}}}
+\nomenclature[P]{$mc_s$}{Marginal costs of storage $s$ \nomunit{\SI{1}{EUR/\kilo\watt}}}
+\nomenclature[P]{$\Theta_{n,t}$}{Sum of the previous iteration power values' of all \\ generators located at node $n$ and timestep $t$ \nomunit{\SI{1}{\kilo\watt}}}
+\nomenclature[P]{$\Phi_{n,t}$}{Sum of the previous iteration discharge power values' of all\\ storages located at node $n$ and timestep $t$ \nomunit{\SI{1}{\kilo\watt}}}
+\nomenclature[P]{$\Psi_{n,t}$}{Sum of the previous iteration charge values' of all\\ storages located at node $n$ and timestep $t$ \nomunit{\SI{1}{\kilo\watt}}}
+\nomenclature[P]{$\Upsilon_{l,t}$}{Average of slack variable $U_{l,t}$ for the upper limit of the last iteration \nomunit{\SI{1}{\kilo\watt}}}
+\nomenclature[P]{$\Gamma_{l,t}$}{Average of slack variable $K_{l,t}$ for the lower limit of the last iteration \nomunit{\SI{1}{\kilo\watt}}}

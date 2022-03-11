@@ -8,7 +8,6 @@ bmargin={3cm}
 ]{geometry}
 
 %%%%% Character Set, Language, Font %%%%%
-
 \usepackage[utf8]{inputenc}
 \usepackage{setspace}
 \usepackage[T1]{fontenc}
@@ -26,6 +25,8 @@ bmargin={3cm}
 \usepackage{gensymb} % degree symbol
 \usepackage{mathtools}
 \usepackage{siunitx}
+% Set format for fractions
+\sisetup{quotient-mode=fraction}
 \usepackage{physics} % for bold vectors and matrices
 
 %%% Footer and Header %%%
@@ -65,22 +66,8 @@ bmargin={3cm}
 
 %%% Additional formel symbols %%%
 \DeclareMathOperator{\PTDF}{PTDF}
-\DeclareMathOperator{\EX}{EX}
 
 %%% Bibliography %%%
-% WIP-Standards: chicago-authordate
-%\usepackage[style=authoryear, 	% WIP-Standards: chicago-authordate
-%			%style=authoryear, 	
-%            giveninits,					% Vornamen abkürzen
-%			maxbibnames=10,				% in der Bib werden 10 Autoren ausgegeben (bis zu 10)
-%            maxcitenames=2,				% max. 3 Autoren bei \cite
-%            backend=biber,
-%			doi=false,
-%			isbn=false,
-%			url=false,
-%            natbib=true,				% verwendet Natbib 
-%            sorting=nyt					
-%			]{biblatex}
 \usepackage[
     natbib,
     authordate,
@@ -116,7 +103,7 @@ bmargin={3cm}
 % \citep{} when the entire citation id parenthetical
 
 
-%%% Code Snippets %%%
+%%% Code Listing %%%
 \usepackage{listings}
 %\renewcommand{\lstlistingname}{Code Snippet}
 \renewcommand{\lstlistlistingname}{List of \lstlistingname s}
@@ -176,8 +163,12 @@ texcl=true % interpet comments as LaTeX
 \usepackage{url}
 
 %%% Footnotes %%%
-
 \deffootnote[1.5em]{0em}{1.5em}{\textsuperscript{\thefootnotemark}}
 
 \makeatletter
 \def\chfootnote{\xdef\@thefnmark{}\@footnotetext}
+
+
+%%% Currency %%%
+\usepackage{currency}
+\DefineCurrency{EUR}{name={euro}, plural={euros}, symbol={\euro}, iso={EUR}, kind=iso}
