@@ -77,4 +77,5 @@ nodal_price = zeros(length(N), length(T))
 for t in T
     nodal_price[:, t] = lambda[t] .+ sum(mu[l,t] * ptdf[l,:] for l in L)
 end
+# Print nodal price.
 println("Nodal price:\n$(nodal_price)\n")
