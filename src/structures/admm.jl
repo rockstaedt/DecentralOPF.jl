@@ -18,7 +18,7 @@ mutable struct ADMM
     node_id_to_demand::Dict{Int, Vector{Int}}
     node_to_id::Dict{Node, Int}
     node_to_units::Dict{Node, Vector{Union{Generator, Storage}}}
-    L_max::Vector{Float64} 
+    f_max::Vector{Float64} 
 
     function ADMM(gamma::Float64,
                   nodes::Union{Vector{Node}, Nothing},
@@ -38,7 +38,7 @@ mutable struct ADMM
         admm.generators = generators
         admm.storages = storages
         admm.lines = lines
-        admm.L_max = [line.max_capacity for line in admm.lines]
+        admm.f_max = [line.max_capacity for line in admm.lines]
         admm.results = []
         admm.convergence = Convergence()
         admm.ptdf = calculate_ptdf(admm.nodes, admm.lines)

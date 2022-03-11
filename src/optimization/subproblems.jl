@@ -3,14 +3,14 @@ function optimize_subproblem(generator::Generator)
     set_silent(sub)
 
     # Maximum capacity of generator
-    @variable(sub, 0 <= G[t=admm.T] <= generator.max_generation)
+    @variable(sub, 0 <= P[t=admm.T] <= generator.max_generation)
 
     # Slack variables
-    @variable(sub, 0 <= R_ref[line=admm.L, t=admm.T])
-    @variable(sub, 0 <= R_cref[line=admm.L, t=admm.T])
+    @variable(sub, 0 <= U[line=admm.L, t=admm.T])
+    @variable(sub, 0 <= K[line=admm.L, t=admm.T])
 
 
-    prev_G = get_unit_results(generator, admm.iteration - 1)
+    prev_P = get_unit_results(generator, admm.iteration - 1)
 
     prev_node_results = get_node_id_to_result(admm.iteration - 1)
 
@@ -19,7 +19,7 @@ function optimize_subproblem(generator::Generator)
         sub,
         injection[n=admm.N, t=admm.T],
         n == admm.node_to_id[generator.node] ? (
-            G[t] + (prev_node_results[n].generation[t] - prev_G[t])
+            P[t] + (prev_node_results[n].generation[t] - prev_P[t])
             + prev_node_results[n].discharge[t]
             - prev_node_results[n].charge[t]
             - admm.node_id_to_demand[n][t]
@@ -38,8 +38,8 @@ function optimize_subproblem(generator::Generator)
     @objective(
         sub,
         Min,
-        sum(G[t] * generator.marginal_costs
-            + G[t] * (
+        sum(P[t] * generator.marginal_costs
+            + P[t] * (
                 admm.lambdas[admm.iteration][t]
                 + sum(
                     admm.ptdf[l, node_index] * (
@@ -49,11 +49,11 @@ function optimize_subproblem(generator::Generator)
                 )
             )
             + admm.gamma/2 * sub[:penalty_term_eb][t]
-            + 10*sub[:penalty_term_flow1][t]
-            + 10*sub[:penalty_term_flow2][t]
-            + admm.gamma/2 * sub[:penalty_term_R_ref][t]
-            + admm.gamma/2 * sub[:penalty_term_R_cref][t]
-            + 1/2 * (G[t] - prev_G[t])^2
+            + 10*sub[:penalty_term_upper_flow][t]
+            + 10*sub[:penalty_term_lower_flow][t]
+            + admm.gamma/2 * sub[:penalty_term_U][t]
+            + admm.gamma/2 * sub[:penalty_term_K][t]
+            + 1/2 * (P[t] - prev_P[t])^2
             for t in admm.T)
     )
 
@@ -61,16 +61,16 @@ function optimize_subproblem(generator::Generator)
 
     penalty_terms = PenaltyTerm(
         value.(sub[:penalty_term_eb]).data,
-        value.(sub[:penalty_term_flow1]).data,
-        value.(sub[:penalty_term_flow2]).data
+        value.(sub[:penalty_term_upper_flow]).data,
+        value.(sub[:penalty_term_lower_flow]).data
     )
 
     result = ResultGenerator(
         generator,
-        value.(G).data,
+        value.(P).data,
         penalty_terms,
-        value.(R_ref).data,
-        value.(R_cref).data
+        value.(U).data,
+        value.(K).data
     )
 
     return result
@@ -81,16 +81,16 @@ function optimize_subproblem(storage::Storage)
     set_silent(sub)
 
     # Storage variables with maximum bounds
-    @variable(sub, 0 <= G_S_d[t=admm.T] <= storage.max_power)
-    @variable(sub, 0 <= G_S_c[t=admm.T] <= storage.max_power)
-    @variable(sub, 0 <= storage_level[t=admm.T] <= storage.max_level)
+    @variable(sub, 0 <= D[t=admm.T] <= storage.max_power)
+    @variable(sub, 0 <= C[t=admm.T] <= storage.max_power)
+    @variable(sub, 0 <= E[t=admm.T] <= storage.max_level)
 
     # Slack variables
-    @variable(sub, 0 <= R_ref[line=admm.L, t=admm.T])
-    @variable(sub, 0 <= R_cref[line=admm.L, t=admm.T])
+    @variable(sub, 0 <= U[line=admm.L, t=admm.T])
+    @variable(sub, 0 <= K[line=admm.L, t=admm.T])
 
 
-    previous_S_d, previous_S_c = get_unit_results(storage, admm.iteration - 1)
+    prev_D, prev_C = get_unit_results(storage, admm.iteration - 1)
 
     prev_node_results = get_node_id_to_result(admm.iteration - 1)
 
@@ -100,8 +100,8 @@ function optimize_subproblem(storage::Storage)
         injection[n=admm.N, t=admm.T],
         n == admm.node_to_id[storage.node] ? (
             prev_node_results[n].generation[t]
-            + G_S_d[t] + (prev_node_results[n].discharge[t] - previous_S_d[t])
-            - G_S_c[t] - (prev_node_results[n].charge[t] - previous_S_c[t])
+            + D[t] + (prev_node_results[n].discharge[t] - prev_D[t])
+            - C[t] - (prev_node_results[n].charge[t] - prev_C[t])
             - admm.node_id_to_demand[n][t]
         ) : (
             prev_node_results[n].generation[t]
@@ -117,8 +117,8 @@ function optimize_subproblem(storage::Storage)
     @constraint(
         sub,
         StorageBalance[t=admm.T],
-        storage_level[t] == (
-            (t == 1 ? 0 : storage_level[t-1]) + G_S_c[t] - G_S_d[t]
+        E[t] == (
+            (t == 1 ? 0 : E[t-1]) + C[t] - D[t]
         )
     )
 
@@ -127,8 +127,8 @@ function optimize_subproblem(storage::Storage)
     @objective(
         sub,
         Min,
-        sum(storage.marginal_costs * (G_S_d[t] + G_S_c[t])
-            + (G_S_d[t] - G_S_c[t]) * (
+        sum(storage.marginal_costs * (D[t] + C[t])
+            + (D[t] - C[t]) * (
                 admm.lambdas[admm.iteration][t]
                 + sum(
                     admm.ptdf[l, node_index] * (
@@ -138,12 +138,12 @@ function optimize_subproblem(storage::Storage)
                 )
             )
             + admm.gamma/2 * sub[:penalty_term_eb][t]
-            + 10*sub[:penalty_term_flow1][t]
-            + 10*sub[:penalty_term_flow2][t]
-            + admm.gamma/2 * sub[:penalty_term_R_ref][t]
-            + admm.gamma/2 * sub[:penalty_term_R_cref][t]
-            + 1/2 * (G_S_d[t] - previous_S_d[t])^2
-            + 1/2 * (G_S_c[t] - previous_S_c[t])^2
+            + 10*sub[:penalty_term_upper_flow][t]
+            + 10*sub[:penalty_term_lower_flow][t]
+            + admm.gamma/2 * sub[:penalty_term_U][t]
+            + admm.gamma/2 * sub[:penalty_term_K][t]
+            + 1/2 * (D[t] - prev_D[t])^2
+            + 1/2 * (C[t] - prev_C[t])^2
             for t in admm.T)
     )
 
@@ -151,18 +151,18 @@ function optimize_subproblem(storage::Storage)
 
     penalty_terms = PenaltyTerm(
         value.(sub[:penalty_term_eb]).data,
-        value.(sub[:penalty_term_flow1]).data,
-        value.(sub[:penalty_term_flow2]).data
+        value.(sub[:penalty_term_upper_flow]).data,
+        value.(sub[:penalty_term_lower_flow]).data
     )
 
     result = ResultStorage(
         storage,
-        value.(G_S_d).data,
-        value.(G_S_c).data,
-        value.(storage_level).data,
+        value.(D).data,
+        value.(C).data,
+        value.(E).data,
         penalty_terms,
-        value.(R_ref).data,
-        value.(R_cref).data
+        value.(U).data,
+        value.(K).data
     )
 
     return result

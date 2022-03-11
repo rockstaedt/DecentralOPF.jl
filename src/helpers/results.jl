@@ -45,14 +45,14 @@ function get_node_results(iteration::Int, node::Node)
     end
 end
 
-function get_slack_results(iteration::Int)
+function get_average_slack_results(iteration::Int)
     if length(admm.results) == 0
         empty_matrix = zeros(Float64, length(admm.L), length(admm.T))
         return empty_matrix, empty_matrix
     else
         return (
-            admm.results[iteration].avg_R_ref, 
-            admm.results[iteration].avg_R_cref,
+            admm.results[iteration].avg_U, 
+            admm.results[iteration].avg_K,
         )
     end
 end

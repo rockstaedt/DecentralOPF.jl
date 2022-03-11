@@ -60,13 +60,13 @@ function plot_slack_variables(line_id::Int)
     traces = [
         scatter(
             x=1:admm.iteration-1,
-            y=[admm.results[i].avg_R_ref[line_id] for i in 1:admm.iteration-1],
-            name="R_ref for $(line_id)"
+            y=[admm.results[i].avg_U[line_id] for i in 1:admm.iteration-1],
+            name="U for $(line_id)"
         ),
         scatter(
             x=1:admm.iteration-1,
-            y=[admm.results[i].avg_R_cref[line_id] for i in 1:admm.iteration-1],
-            name="R_cref for $(line_id)"
+            y=[admm.results[i].avg_K[line_id] for i in 1:admm.iteration-1],
+            name="K for $(line_id)"
         ),
         ]
     PlotlyJS.plot(traces)

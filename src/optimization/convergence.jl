@@ -13,16 +13,16 @@ function check_convergence()
         s_delta = abs.(
             (
                 admm.ptdf * admm.results[admm.iteration].injection
-                + admm.results[admm.iteration].avg_R_ref
-                .- admm.L_max
+                + admm.results[admm.iteration].avg_U
+                .- admm.f_max
             )
         )
         push!(admm.convergence.mue_res, s_delta)
         t_delta = abs.(
             (
-                admm.results[admm.iteration].avg_R_cref
+                admm.results[admm.iteration].avg_K
                 - admm.ptdf * admm.results[admm.iteration].injection
-                .- admm.L_max
+                .- admm.f_max
             )
         )
         push!(admm.convergence.rho_res, t_delta)

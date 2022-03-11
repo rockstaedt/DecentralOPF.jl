@@ -4,16 +4,16 @@ struct ResultStorage
     charge::Vector{Float64}
     level::Vector{Float64}
     penalty_term::PenaltyTerm
-    R_ref::Matrix{Float64}
-    R_cref::Matrix{Float64}
+    U::Matrix{Float64}
+    K::Matrix{Float64}
 end
 
 struct ResultGenerator
     generator::Generator
     generation::Vector{Float64}
     penalty_term::PenaltyTerm
-    R_ref::Matrix{Float64}
-    R_cref::Matrix{Float64}
+    U::Matrix{Float64}
+    K::Matrix{Float64}
 end
 
 mutable struct ResultNode
@@ -41,8 +41,8 @@ mutable struct Result
     discharge::Vector{Float64}
     charge::Vector{Float64}
     penalty_term::PenaltyTerm
-    avg_R_ref::Matrix{Float64}
-    avg_R_cref::Matrix{Float64}
+    avg_U::Matrix{Float64}
+    avg_K::Matrix{Float64}
     total_costs::Float64
     injection::Matrix{Float64}
     line_utilization::Matrix{Float64}
@@ -56,8 +56,8 @@ mutable struct Result
         result.discharge = zeros(Float64, length(admm.T))
         result.charge = zeros(Float64, length(admm.T))
         result.injection = zeros(Float64, length(admm.N), length(admm.T))
-        result.avg_R_ref = zeros(Float64, length(admm.L), length(admm.T))
-        result.avg_R_cref = zeros(Float64, length(admm.L), length(admm.T))
+        result.avg_U = zeros(Float64, length(admm.L), length(admm.T))
+        result.avg_K = zeros(Float64, length(admm.L), length(admm.T))
 
         result.node_to_result = Dict()
         for (node_id, node) in enumerate(admm.nodes)
@@ -80,8 +80,8 @@ mutable struct Result
                 result_unit
             )
 
-            result.avg_R_ref += result_unit.R_ref
-            result.avg_R_cref += result_unit.R_cref
+            result.avg_U += result_unit.U
+            result.avg_K += result_unit.K
 
             node_id = admm.node_to_id[unit.node]
 
@@ -108,8 +108,8 @@ mutable struct Result
 
         # Calculate average of slack variables
         counter_subproblems = length(admm.generators) + length(admm.storages)
-        result.avg_R_ref = 1/(counter_subproblems) .* result.avg_R_ref
-        result.avg_R_cref = 1/(counter_subproblems) .* result.avg_R_cref
+        result.avg_U = 1/(counter_subproblems) .* result.avg_U
+        result.avg_K = 1/(counter_subproblems) .* result.avg_K
 
         result.line_utilization = admm.ptdf * result.injection
 
