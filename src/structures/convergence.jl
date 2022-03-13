@@ -14,6 +14,7 @@ mutable struct Convergence
         convergence.mue_res = []
         convergence.rho = false
         convergence.rho_res = []
+        convergence.all = false
         return convergence
     end
 end
