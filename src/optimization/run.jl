@@ -1,4 +1,4 @@
-function run!(admm)
+function run!(admm::ADMM)
     while (!admm.convergence.all)
         calculate_iteration()
         
