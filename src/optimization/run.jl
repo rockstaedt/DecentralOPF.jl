@@ -1,3 +1,16 @@
+function run!(admm)
+    while (!admm.convergence.all)
+        calculate_iteration()
+        
+        println("Generation Results: ")
+        print_results(true, true, false, admm.iteration)
+        
+        update_duals()
+        
+        check_convergence()
+    end
+end
+
 function calculate_iteration()
     println("\nIteration: $(admm.iteration)")
     println("###############")
@@ -19,17 +32,4 @@ function calculate_iteration()
 
     push!(admm.results, result)
 
-end
-
-function run!(admm)
-    while (!admm.convergence.all)
-        calculate_iteration()
-        
-        println("Generation Results: ")
-        print_results(true, true, false, admm.iteration)
-        
-        update_duals()
-        
-        check_convergence()
-    end
 end
