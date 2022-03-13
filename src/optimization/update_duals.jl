@@ -1,3 +1,9 @@
+function update_duals!(admm::ADMM)
+    update_lambda!(admm)
+    update_mue!(admm)
+    update_rho!(admm)
+end
+
 function update_lambda!(admm::ADMM)
     lambdas = admm.lambdas[admm.iteration] + admm.gamma * (
         admm.results[admm.iteration].generation
@@ -30,10 +36,4 @@ function update_rho!(admm::ADMM)
     condition = avg_K .<= 1e-2
     rhos .*= condition
     push!(admm.rhos, rhos)
-end
-
-function update_duals!(admm::ADMM)
-    update_lambda!(admm)
-    update_mue!(admm)
-    update_rho!(admm)
 end
