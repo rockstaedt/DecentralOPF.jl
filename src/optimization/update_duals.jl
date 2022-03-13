@@ -1,4 +1,4 @@
-function update_lambda()
+function update_lambda!(admm::ADMM)
     lambdas = admm.lambdas[admm.iteration] + admm.gamma * (
         admm.results[admm.iteration].generation
         + admm.results[admm.iteration].discharge
@@ -8,7 +8,7 @@ function update_lambda()
     push!(admm.lambdas, lambdas)
 end
 
-function update_mue()
+function update_mue!(admm::ADMM)
     injection = admm.results[admm.iteration].injection
     avg_U, _ = get_average_slack_results(admm.iteration)
     mues = (
@@ -20,7 +20,7 @@ function update_mue()
     push!(admm.mues, mues)
 end
 
-function update_rho()
+function update_rho!(admm::ADMM)
     injection = admm.results[admm.iteration].injection
     _, avg_K = get_average_slack_results(admm.iteration)
     rhos = (
@@ -32,8 +32,8 @@ function update_rho()
     push!(admm.rhos, rhos)
 end
 
-function update_duals()
-    update_lambda()
-    update_mue()
-    update_rho()
+function update_duals!(admm::ADMM)
+    update_lambda!(admm)
+    update_mue!(admm)
+    update_rho!(admm)
 end

@@ -1,4 +1,4 @@
-function check_convergence()
+function check_convergence!(admm::ADMM)
     eps = 10^(-3)
     if admm.iteration != 1
         r_delta = abs.(
