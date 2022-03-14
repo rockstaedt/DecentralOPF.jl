@@ -16,17 +16,13 @@ function calculate_iteration!(admm::ADMM)
     println("###############")
     print_duals(admm.iteration)
 
-    if !isnothing(admm.storages)
-        unit_to_result = Dict(zip(
-            vcat(generators, storages),
-            vcat(
-                optimize_subproblem.(generators),
-                optimize_subproblem.(storages)
-            )
-        ))
-    else
-        unit_to_result = Dict(zip(generators, optimize_subproblem.(generators)))
-    end
+    unit_to_result = Dict(zip(
+        vcat(generators, storages),
+        vcat(
+            optimize_subproblem.(generators),
+            optimize_subproblem.(storages)
+        )
+    ))
 
     result = Result(unit_to_result)
 
