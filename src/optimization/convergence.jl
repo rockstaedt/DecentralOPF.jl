@@ -1,7 +1,7 @@
 function check_convergence!(admm::ADMM)
     eps = 10^(-3)
     if admm.iteration != 1
-        r_delta = abs.(
+        lambda_res = abs.(
             (
                 admm.results[admm.iteration].generation
                 + admm.results[admm.iteration].discharge
@@ -9,26 +9,29 @@ function check_convergence!(admm::ADMM)
                 - admm.total_demand
             )
         )
-        push!(admm.convergence.lambda_res, r_delta)
-        s_delta = abs.(
+        push!(admm.convergence.lambda_res, lambda_res)
+
+        mue_res = abs.(
             (
                 admm.ptdf * admm.results[admm.iteration].injection
                 + admm.results[admm.iteration].avg_U
                 .- admm.f_max
             )
         )
-        push!(admm.convergence.mue_res, s_delta)
-        t_delta = abs.(
+        push!(admm.convergence.mue_res, mue_res)
+
+        rho_res = abs.(
             (
                 admm.results[admm.iteration].avg_K
                 - admm.ptdf * admm.results[admm.iteration].injection
                 .- admm.f_max
             )
         )
-        push!(admm.convergence.rho_res, t_delta)
-        admm.convergence.lambda = all(r_delta .< eps)
-        admm.convergence.mue = all(s_delta .< eps)
-        admm.convergence.rho = all(t_delta .< eps)
+        push!(admm.convergence.rho_res, rho_res)
+
+        admm.convergence.lambda = all(lambda_res .< eps)
+        admm.convergence.mue = all(mue_res .< eps)
+        admm.convergence.rho = all(rho_res .< eps)
         
         admm.convergence.all = all([
             admm.convergence.lambda
