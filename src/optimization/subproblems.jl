@@ -1,21 +1,24 @@
 function optimize_subproblem(generator::Generator)
+    # Create model instance.
     sub = Model(with_optimizer(Gurobi.Optimizer, gurobi_env))
     # Omit output in console.
     set_silent(sub)
 
-    # Maximum capacity of generator
+    # Generation variable with maximum bound.
     @variable(sub, 0 <= P[t=admm.T] <= generator.max_generation)
 
-    # Slack variables
+    # Slack variable for upper flow limit.
     @variable(sub, 0 <= U[line=admm.L, t=admm.T])
+    # Slack variable for lower flow limit.
     @variable(sub, 0 <= K[line=admm.L, t=admm.T])
 
-
+    # Get generator results from previous iteration.
     prev_P = get_unit_results(generator, admm.iteration - 1)
 
+    # Get general node results from previous iteration.
     prev_node_results = get_node_id_to_result(admm.iteration - 1)
 
-    # Injection term
+    # Define expression for injection term.
     @expression(
         sub,
         injection[n=admm.N, t=admm.T],
@@ -32,10 +35,13 @@ function optimize_subproblem(generator::Generator)
         )
     )
 
+    # Add all penalty terms to the model.
     add_penalty_terms!(sub)
 
+    # Get current node index.
     node_index = admm.node_to_id[generator.node]
 
+    # Set objective function.
     @objective(
         sub,
         Min,
@@ -58,14 +64,17 @@ function optimize_subproblem(generator::Generator)
             for t in admm.T)
     )
 
+    # Solve optimization problem.
     optimize!(sub)
 
+    # Create penalty term structure.
     penalty_terms = PenaltyTerm(
         value.(sub[:penalty_term_eb]).data,
         value.(sub[:penalty_term_upper_flow]).data,
         value.(sub[:penalty_term_lower_flow]).data
     )
 
+    # Create result structure.
     result = ResultGenerator(
         generator,
         value.(P).data,
@@ -78,25 +87,28 @@ function optimize_subproblem(generator::Generator)
 end
 
 function optimize_subproblem(storage::Storage)
+    # Create model instance.
     sub = Model(with_optimizer(Gurobi.Optimizer, gurobi_env))
     # Omit output in console.
     set_silent(sub)
 
-    # Storage variables with maximum bounds
+    # Storage variables with maximum bounds.
     @variable(sub, 0 <= D[t=admm.T] <= storage.max_power)
     @variable(sub, 0 <= C[t=admm.T] <= storage.max_power)
     @variable(sub, 0 <= E[t=admm.T] <= storage.max_level)
 
-    # Slack variables
+    # Slack variable for upper flow limit.
     @variable(sub, 0 <= U[line=admm.L, t=admm.T])
+    # Slack variable for lower flow limit.
     @variable(sub, 0 <= K[line=admm.L, t=admm.T])
 
-
+    # Get storage results from previous iteration.
     prev_D, prev_C = get_unit_results(storage, admm.iteration - 1)
 
+    # Get general node results from previous iteration.
     prev_node_results = get_node_id_to_result(admm.iteration - 1)
 
-    # Injection term
+    # Define expression for injection term.
     @expression(
         sub,
         injection[n=admm.N, t=admm.T],
@@ -113,9 +125,10 @@ function optimize_subproblem(storage::Storage)
         )
     )
 
+    # Add all penalty terms to the model.
     add_penalty_terms!(sub)
 
-    # Storage level constraint
+    # Define constraint for energy level of storage.
     @constraint(
         sub,
         StorageBalance[t=admm.T],
@@ -124,8 +137,10 @@ function optimize_subproblem(storage::Storage)
         )
     )
 
+    # Get current node index.
     node_index = admm.node_to_id[storage.node]
 
+    # Set objective function.
     @objective(
         sub,
         Min,
@@ -149,14 +164,17 @@ function optimize_subproblem(storage::Storage)
             for t in admm.T)
     )
 
+    # Solve optimization problem.
     optimize!(sub)
 
+    # Create penalty term structure.
     penalty_terms = PenaltyTerm(
         value.(sub[:penalty_term_eb]).data,
         value.(sub[:penalty_term_upper_flow]).data,
         value.(sub[:penalty_term_lower_flow]).data
     )
 
+    # Create result structure.
     result = ResultStorage(
         storage,
         value.(D).data,
