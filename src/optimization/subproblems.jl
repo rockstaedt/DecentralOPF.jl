@@ -1,5 +1,6 @@
 function optimize_subproblem(generator::Generator)
     sub = Model(with_optimizer(Gurobi.Optimizer, gurobi_env))
+    # Omit output in console.
     set_silent(sub)
 
     # Maximum capacity of generator
@@ -78,6 +79,7 @@ end
 
 function optimize_subproblem(storage::Storage)
     sub = Model(with_optimizer(Gurobi.Optimizer, gurobi_env))
+    # Omit output in console.
     set_silent(sub)
 
     # Storage variables with maximum bounds
