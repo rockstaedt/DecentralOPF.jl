@@ -17,6 +17,7 @@ include("helpers/plotting.jl")
 include("helpers/ptdf.jl")
 include("helpers/results.jl")
 include("helpers/logging.jl")
+include("helpers/penalty_terms.jl")
 
 include("optimization/subproblems.jl")
 include("optimization/update_duals.jl")
