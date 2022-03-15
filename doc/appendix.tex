@@ -1,12 +1,40 @@
 \appendix				
 \section{Appendix: Julia Implementations}
 
-\subsection{Structures for network elements}
-\label{sec:appendix:jl:ne}
+\subsection{Structures}
+
+\subsubsection{Network elements}
+\label{sec:appendix:jl:structures:ne}
 
 \lstinputlisting[language=julia, nolol=true]{../src/structures/network_elements.jl}
 
-\subsection{Function to calculate a $PTDF$}
-\label{sec:appendix:jl:ptdf}
+\subsubsection{ADMM}
+\label{sec:appendix:jl:structures:admm}
+
+\lstinputlisting[language=julia, nolol=true]{../src/structures/admm.jl}
+
+\subsubsection{Convergence}
+\label{sec:appendix:jl:structures:convergence}
+
+\lstinputlisting[language=julia, nolol=true]{../src/structures/convergence.jl}
+
+\subsection{Helper Methods}
+
+\subsubsection{Calculate a $PTDF$}
+\label{sec:appendix:jl:helpers:ptdf}
 
 \lstinputlisting[language=julia, nolol=true]{../src/helpers/ptdf.jl}
+
+\subsection{Optimization Methods}
+
+\subsubsection{Calculate an iteration}
+\label{sec:appendix:jl:optimization:calculate-iteration}
+
+\lstinputlisting[language=julia, firstline=14, lastline=34, nolol=true]{../src/optimization/run.jl}
+
+\subsubsection{Add penalty terms to subproblem}
+\label{sec:appendix:jl:optimization:add-penalty-terms}
+
+\lstinputlisting[language=julia, nolol=true]{../src/optimization/penalty_terms.jl}
+
+
