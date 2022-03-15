@@ -1,12 +1,12 @@
 function add_penalty_terms!(sub)
-    # Penalty term energy balance
+    # Penalty term energy balance.
     @expression(
         sub,
         penalty_term_eb[t=admm.T],
         sum(sub[:injection][:, t].data)^2
     )
 
-    # Penalty term flow1
+    # Penalty term upper flow.
     @expression(
         sub,
         penalty_term_upper_flow[t=admm.T],
@@ -19,7 +19,7 @@ function add_penalty_terms!(sub)
         )
     )
 
-    # Penalty term flow2
+    # Penalty term lower flow.
     @expression(
         sub,
         penalty_term_lower_flow[t=admm.T],
@@ -36,7 +36,7 @@ function add_penalty_terms!(sub)
         )
     )
 
-    # Penalty terms for slack variables
+    # Penalty terms for slack variables.
     avg_U, avg_K = get_average_slack_results(admm.iteration - 1)
 
     @expression(
