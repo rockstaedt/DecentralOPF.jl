@@ -80,8 +80,8 @@ The generating units in the centralized optimization problem are not able to opt
 		 & 0 \leq E_{s,t} \leq \overline{e_s} && \forall s \in \set{S}, t \in \set{T} \\
 		 & E_{s,t} - E_{s,t-1} - C_{s,t} + D_{s,t} = 0 && \forall s \in \set{S}, t \in \set{T}\\
 		 & \sum_{n \in \mathcal{N}} I_{n,t} = 0 && \forall t \in \set{T} \\
-		 & PTDF_{l,n} \cdot I_{n,t} + U_{l,t} - \overline{f_l} = 0 && \forall l \in \mathcal{L}, n \in \mathcal{N}, t \in \set{T} \label{eq:dom:con:pf-upper} \\
-		 & K_{l,t} - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l} = 0 && \forall l \in \mathcal{L}, n \in \mathcal{N}, t \in \set{T} \label{eq:dom:con:pf-lower}
+		 & \sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot I_{n,t} + U_{l,t} - \overline{f_l} = 0 && \forall l \in \mathcal{L}, t \in \set{T} \label{eq:dom:con:pf-upper} \\
+		 & \sum_{n \in \mathcal{N}} K_{l,t} - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l} = 0 && \forall l \in \mathcal{L}, t \in \set{T} \label{eq:dom:con:pf-lower}
 	\end{align}
 \end{subequations}
 
@@ -92,13 +92,13 @@ Relaxing the complicating variables is done by implementing a max-min problem us
 \begin{subequations}
 	\begin{align}
 		\max{(\lambda, \mu, \rho)} \label{eq:dom:fixed-duals} \\
-		 & \min \quad \sum_{t\in\mathcal{T}} \quad \sum_{g\in\mathcal{G}}mc_g \cdot P_{g,t} + \sum_{s\in\mathcal{S}}mc_s \cdot (D_{s,t}+C_{s,t}) \nonumber \\
+		 \min \quad \sum_{t\in\mathcal{T}} \quad & \sum_{g\in\mathcal{G}}mc_g \cdot P_{g,t} + \sum_{s\in\mathcal{S}}mc_s \cdot (D_{s,t}+C_{s,t}) \nonumber \\
 		 & + \lambda_t \cdot \sum_{n \in \mathcal{N}} I_{n,t} \nonumber \\
 		 & + \frac{\gamma}{2} \cdot \big\|\sum_{n \in \mathcal{N}} I_{n,t}\big\|^2_2 \nonumber \\
-		 & + \mu_{l,t} \cdot (PTDF_{l,n} \cdot I_{n,t} + U_{l,t} - \overline{f_l}) \nonumber \\
-		 & + \frac{\gamma}{2} \cdot \big\| PTDF_{l,n} \cdot I_{n,t} + U_{l,t} - \overline{f_l} \big\|^2_2 \nonumber \\
-		 & + \rho_{l,t} \cdot (K_{l,t} - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l}) \nonumber \\
-		 & + \frac{\gamma}{2} \cdot \big\|K_{l,t} - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l} \big\|^2_2 \nonumber
+		 & +  \sum_{l \in \mathcal{L}} \quad \mu_{l,t} \cdot (\sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot I_{n,t} + U_{l,t} - \overline{f_l}) \nonumber \\
+		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\| \sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot I_{n,t} + U_{l,t} - \overline{f_l} \big\|^2_2 \nonumber \\
+		 & \qquad \qquad + \rho_{l,t} \cdot (\sum_{n \in \mathcal{N}} K_{l,t} - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l}) \nonumber \\
+		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\|\sum_{n \in \mathcal{N}} K_{l,t} - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l} \big\|^2_2 \nonumber
 	\end{align}
 	\begin{align}
 		 \text{s.t. } \quad & 0 \leq P_{g,t} \leq \overline{p_g} && \forall g \in \set{G}, t \in \set{T}\\
@@ -113,13 +113,13 @@ Variable $\gamma$ is a positive constant and is the only parameter needed for th
 
 \begin{subequations}
 	\begin{align}
-		 \min \quad & \sum_{t\in\mathcal{T}} \quad \sum_{g\in\mathcal{G}}mc_g \cdot P_{g,t} + \sum_{s\in\mathcal{S}}mc_s \cdot (D_{s,t}+C_{s,t}) \label{eq:dom:final} \\
+		 \min \quad \sum_{t\in\mathcal{T}} \quad & \sum_{g\in\mathcal{G}}mc_g \cdot P_{g,t} + \sum_{s\in\mathcal{S}}mc_s \cdot (D_{s,t}+C_{s,t}) \label{eq:dom:final} \\
 		 & + \overline{\lambda}_t \cdot \sum_{n \in \mathcal{N}} I_{n,t} \nonumber \\
 		 & + \frac{\gamma}{2} \cdot \big\|\sum_{n \in \mathcal{N}} I_{n,t}\big\|^2_2 \nonumber \\
-		 & + \overline{\mu}_{l,t} \cdot (PTDF_{l,n} \cdot I_{n,t} + U_{l,t} - \overline{f_l}) \nonumber \\
-		 & + \frac{\gamma}{2} \cdot \big\| PTDF_{l,n} \cdot I_{n,t} + U_{l,t} - \overline{f_l} \big\|^2_2 \nonumber \\
-		 & + \overline{\rho}_{l,t} \cdot (K_{l,t} - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l}) \nonumber \\
-		 & + \frac{\gamma}{2} \cdot \big\|K_{l,t} - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l} \big\|^2_2 \nonumber \\
+		 & +  \sum_{l \in \mathcal{L}} \quad \overline{\mu_{l,t}} \cdot (\sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot I_{n,t} + U_{l,t} - \overline{f_l}) \nonumber \\
+		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\| \sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot I_{n,t} + U_{l,t} - \overline{f_l} \big\|^2_2 \nonumber \\
+		 & \qquad \qquad + \overline{\rho_{l,t}} \cdot (\sum_{n \in \mathcal{N}} K_{l,t} - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l}) \nonumber \\
+		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\|\sum_{n \in \mathcal{N}} K_{l,t} - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l} \big\|^2_2 \nonumber \\
 		 \text{s.t. } \quad & 0 \leq P_{g,t} \leq \overline{p_g} && \forall g \in \set{G}, t \in \set{T}\\
 		 & 0 \leq D_{s,t} \leq \overline{p_s} && \forall s \in \set{S}, t \in \set{T} \\
 		 & 0 \leq C_{s,t} \leq \overline{p_s} && \forall s \in \set{S}, t \in \set{T} \\
@@ -139,12 +139,12 @@ In the following, the optimization model for a specific generator $g$ is derived
 % P_{g,t}^v + \sum_{g'=g\notin\mathcal{G}}P_{g',t}^{v-1}  + \sum_{s\in\mathcal{S}}(D_{s,t}^{v-1} - C_{s,t}^{v-1}) - d_{n,t}
 \begin{subequations}
 	\begin{align}
-		 \min \quad & \sum_{t\in\mathcal{T}} mc_g \cdot P_{g,t}^v + \lambda_t \cdot P_{g,t}^v \label{eq:sub:gen}\\
+		 \min \quad \sum_{t\in\mathcal{T}} \quad & mc_g \cdot P_{g,t}^v + \lambda_t \cdot P_{g,t}^v \label{eq:sub:gen}\\
 		 & + \frac{\gamma}{2} \cdot \big\| \sum_{n \in \mathcal{N}} I_{n,t} \big\|^2_2 \nonumber \\
-		 & + \mu_{l,t} \cdot PTDF_{l,n} \cdot P_{g,t}^v \nonumber \\
-		 & + \frac{\gamma}{2} \cdot \big\| PTDF_{l,n} \cdot I_{n,t} + U_{l,t}^v - \overline{f_l} \big\|^2_2 \nonumber \\
-		 & - \rho_{l,t} \cdot PTDF_{l,n} \cdot P_{g,t}^v \nonumber \\
-		 & + \frac{\gamma}{2} \cdot \big\|K_{l,t}^v - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l} \big\|^2_2 \nonumber \\
+		 & + \sum_{l \in \mathcal{L}} \quad \mu_{l,t} \cdot \sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot P_{g,t}^v \nonumber \\
+		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\| \sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot I_{n,t} + U_{l,t}^v - \overline{f_l} \big\|^2_2 \nonumber \\
+		 & \qquad \qquad - \rho_{l,t} \cdot \sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot P_{g,t}^v \nonumber \\
+		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\| \sum_{n \in \mathcal{N}} K_{l,t}^v - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l} \big\|^2_2 \nonumber \\
 		 \text{s.t.} \quad & 0 \leq P_{g,t}^v \leq \overline{p_g} && \forall t \in \set{T}
 	\end{align}
 \end{subequations}
@@ -189,14 +189,14 @@ The term inside of the brackets in the second line of equation (\ref{eq:sub:gen}
  
  \begin{subequations}
 	\begin{align}
-		 \min \quad & \sum_{t\in\mathcal{T}} mc_g \cdot P_{g,t}^v \label{eq:sub:gen-final}\\
-		 & + P_{g,t}^v \cdot (\lambda_t + (\mu_{l,t} - \rho_{l,t}) \cdot PTDF_{l,n}) \nonumber \\ 
+		 \min \quad \sum_{t\in\mathcal{T}} \quad & mc_g \cdot P_{g,t}^v \label{eq:sub:gen-final}\\
+		 & + P_{g,t}^v \cdot (\lambda_t + \sum_{l \in \mathcal{L}} \sum_{n \in \mathcal{N}} (\mu_{l,t} - \rho_{l,t}) \cdot PTDF_{l,n}) \nonumber \\ 
 		 & + \frac{\gamma}{2} \cdot \big\| P_{g,t}^v + \Theta_{\breve{n},t} - P_{g,t}^{v-1} + \Phi_{\breve{n},t} - \Psi_{\breve{n},t} - d_{\breve{n},t} \nonumber \\
 		 & \qquad + \sum_{n \in \mathcal{N} \setminus \breve{n}} \Theta_{n,t} + \Phi_{n,t} - \Psi_{n,t} - d_{n,t} \big\|^2_2 \nonumber \\
-		 & + \frac{\gamma}{2} \cdot \big\| PTDF_{l,n} \cdot I_{n,t} + U_{l,t}^v - \overline{f_l} \big\|^2_2 \nonumber \\
-		 & + \frac{\gamma}{2} \cdot \big\|K_{l,t}^v - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l} \big\|^2_2 \nonumber \\
-		 & + \frac{\gamma}{2} \cdot \big\|U_{l,t}^v - \Upsilon_{l,t}  \big\|^2_2 \nonumber\\
-		 & + \frac{\gamma}{2} \cdot \big\|K_{l,t}^v - \Gamma_{l,t}  \big\|^2_2 \nonumber \\
+		 & + \sum_{l \in \mathcal{L}} \quad \frac{\gamma}{2} \cdot \big\| \sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot I_{n,t} + U_{l,t}^v - \overline{f_l} \big\|^2_2 \nonumber \\
+		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\| \sum_{n \in \mathcal{N}} K_{l,t}^v - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l} \big\|^2_2 \nonumber \\
+		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\|U_{l,t}^v - \Upsilon_{l,t}  \big\|^2_2 \nonumber\\
+		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\|K_{l,t}^v - \Gamma_{l,t}  \big\|^2_2 \nonumber \\
 		 & + \frac{\gamma}{2} \cdot (P_{g,t}^v - P_{g,t}^{v-1})^2 \nonumber \\
 		 \text{s.t.} \quad & 0 \leq P_{g,t}^v \leq \overline{p_g} && \forall t \in \set{T}
 	\end{align}
@@ -210,15 +210,15 @@ The derivation of the optimization model for the storage subproblem is nearly th
 
  \begin{subequations}
 	\begin{align}
-		 \min \quad & \sum_{t\in\mathcal{T}} mc_s \cdot (D_{s,t}^v + C_{s,t}^v)\label{eq:sub:stor}\\
-		 & + (D_{s,t}^v - C_{s,t}^v) \cdot (\lambda_t + (\mu_{l,t} - \rho_{l,t}) \cdot PTDF_{l,n}) \nonumber \\ 
+		 \min \quad \sum_{t\in\mathcal{T}} \quad & mc_s \cdot (D_{s,t}^v + C_{s,t}^v)\label{eq:sub:stor}\\
+		 & + (D_{s,t}^v - C_{s,t}^v) \cdot (\lambda_t + \sum_{l \in \mathcal{L}} \sum_{n \in \mathcal{N}} (\mu_{l,t} - \rho_{l,t}) \cdot PTDF_{l,n}) \nonumber \\ 
 		 & + \frac{\gamma}{2} \cdot \big\| \Theta_{\breve{n},t} + D_{s,t}^v + \Phi_{\breve{n},t} - D_{s,t}^{v-1} \nonumber \\
 		 & \qquad \qquad - C_{s,t}^v - (\Psi_{\breve{n},t} - C_{s,t}^{v-1}) - d_{\breve{n},t} \nonumber \\
 		 & \qquad \qquad + \sum_{n \in \mathcal{N} \setminus \breve{n}} \Theta_{n,t} + \Phi_{n,t} - \Psi_{n,t} - d_{n,t} \big\|^2_2 \nonumber \\
-		 & + \frac{\gamma}{2} \cdot \big\|PTDF_{l,n} * I_{n,t} + U_{l,t}^v - \overline{f_l}\big\|^2_2 \nonumber \\
-		 & + \frac{\gamma}{2} \cdot \big\|K_{l,t}^v - PTDF * I_n(v, t) - \overline{K_l}\big\|^2_2\nonumber \\
-		 & + \frac{\gamma}{2} \cdot \big\|U_{l,t}^v - \Upsilon_{l,t}  \big\|^2_2 \nonumber\\
-		 & + \frac{\gamma}{2} \cdot \big\|K_{l,t}^v - \Gamma_{l,t}  \big\|^2_2 \nonumber \\
+		 & + \sum_{l \in \mathcal{L}} \quad \frac{\gamma}{2} \cdot \big\| \sum_{n \in \mathcal{N}} PTDF_{l,n} * I_{n,t} + U_{l,t}^v - \overline{f_l}\big\|^2_2 \nonumber \\
+		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\| \sum_{n \in \mathcal{N}} K_{l,t}^v - PTDF * I_n(v, t) - \overline{K_l}\big\|^2_2\nonumber \\
+		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\|U_{l,t}^v - \Upsilon_{l,t}  \big\|^2_2 \nonumber\\
+		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\|K_{l,t}^v - \Gamma_{l,t}  \big\|^2_2 \nonumber \\
 		 & + \frac{\gamma}{2} \cdot (D_{s,t}^v - D_{s,t}^{v-1} )^2 \nonumber \\
 		 & + \frac{\gamma}{2} \cdot (C_{s,t}^v - C_{s,t}^{v-1} )^2 \nonumber \\
 		 \text{s.t.} \quad & 0 \leq D_{s,t}^v \leq \overline{p_s} && \forall t \in \set{T} \\
