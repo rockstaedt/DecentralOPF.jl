@@ -10,17 +10,11 @@ This section introduces the reader to all relevant information about the modelli
 
 \lstinputlisting[language=julia, firstline=7, lastline=13, caption=Structure for a node element]{../src/structures/network_elements.jl}
 
-Another part of the modelling framework is a storage unit. Storages should be able to store a surplus of energy as well as deliver electrical power by discharging their capacity. The power input and output is also limited. In addition, a storage unit should only be able to store a certain amount of energy. This is depicted by the storage level. As generators, storages have specific marginal costs for charging and discharging and are connected to a specific node. A Julia structure was implemented respectively.\\
-
-As written before, generators and storages are located at network nodes. These nodes have a specific demand that should be matched by the output of the generating units. For modelling purposes, it is also crucial to define a slack node to compensate the power flow balance. The node structure was implemented as follows:
+Another part of the modelling framework is a storage unit. Storages should be able to store a surplus of energy as well as deliver electrical power by discharging their capacity. The power input and output is also limited. In addition, a storage unit should only be able to store a certain amount of energy. This is depicted by the storage level. As generators, storages have specific marginal costs for charging and discharging and are connected to a specific node. A Julia structure was implemented respectively. As written before, generators and storages are located at network nodes. These nodes have a specific demand that should be matched by the output of the generating units. For modelling purposes, it is also crucial to define a slack node to compensate the power flow balance. The node structure was implemented as follows:
 
 \lstinputlisting[language=julia, firstline=1, lastline=5, caption=Structure for a generator element]{../src/structures/network_elements.jl}
 
-The last element of the framework is a transmission line. This element connects nodes and enables the exchange of energy. Transmission lines are characterized by their maximum capacity and their susceptance value. A Julia structure was also implemented for this network element.\\
-
-Lastly, the modelling framework has to consider multi-periods. This is crucial since without multi periods, it would not make sense to include storages into the system.\\
-
-All structures are defined in \path{src\structures\network_elements.jl} and can be found in \ref{sec:appendix:jl:structures:ne}.
+The last element of the framework is a transmission line. This element connects nodes and enables the exchange of energy. Transmission lines are characterized by their maximum capacity and their susceptance value. A Julia structure was also implemented for this network element.Lastly, the modelling framework has to consider multi-periods. This is crucial since without multi periods, it would not make sense to include storages into the system. All structures are defined in \path{src\structures\network_elements.jl} and can be found in \ref{sec:appendix:jl:structures:ne}.
 
 
 \subsection{Mathematical Formulations}
