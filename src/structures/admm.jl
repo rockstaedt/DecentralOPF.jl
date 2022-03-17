@@ -7,10 +7,10 @@ mutable struct ADMM
     T::Vector{Int}
     N::Vector{Int}
     L::Vector{Int}
-    nodes::Union{Vector{Node}, Nothing}
+    nodes::Vector{Node}
     generators::Vector{Generator}
-    storages::Union{Vector{Storage}, Nothing}
-    lines::Union{Vector{Line}, Nothing}
+    storages::Vector{Storage}
+    lines::Vector{Line}
     results::Vector{Result}
     convergence::Convergence
     ptdf::Matrix{Float64}
@@ -21,10 +21,10 @@ mutable struct ADMM
     f_max::Vector{Float64} 
 
     function ADMM(gamma::Float64,
-                  nodes::Union{Vector{Node}, Nothing},
+                  nodes::Vector{Node},
                   generators::Vector{Generator},
-                  storages::Union{Vector{Storage}, Nothing},
-                  lines::Union{Vector{Line}, Nothing})
+                  storages::Vector{Storage},
+                  lines::Vector{Line})
         admm = new()
         admm.iteration = 1
         admm.gamma = gamma
@@ -46,12 +46,10 @@ mutable struct ADMM
         admm.node_id_to_demand = Dict()
         admm.node_to_id = Dict()
         admm.node_to_units = Dict()
-        if !isnothing(admm.nodes)
-            for (id, node) in enumerate(admm.nodes)
-                admm.total_demand += node.demand
-                admm.node_id_to_demand[id] = node.demand
-                admm.node_to_id[node] = id
-            end
+        for (id, node) in enumerate(admm.nodes)
+            admm.total_demand += node.demand
+            admm.node_id_to_demand[id] = node.demand
+            admm.node_to_id[node] = id
         end
         for unit in vcat(admm.generators, admm.storages)
             if haskey(admm.node_to_units, unit.node)
