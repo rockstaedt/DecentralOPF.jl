@@ -13,7 +13,7 @@ begin
     ptdf = calculate_ptdf(nodes, lines)
 
     # Create model instance.
-    m = Model(with_optimizer(Gurobi.Optimizer, gurobi_env))
+    m = Model(() ->Gurobi.Optimizer(gurobi_env))
 
     # Define all optimization variables.
 

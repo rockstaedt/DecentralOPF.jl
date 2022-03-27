@@ -1,6 +1,6 @@
 function optimize_subproblem(generator::Generator)
     # Create model instance.
-    sub = Model(with_optimizer(Gurobi.Optimizer, gurobi_env))
+    sub = Model(() ->Gurobi.Optimizer(gurobi_env))
     # Omit output in console.
     set_silent(sub)
 
@@ -88,7 +88,7 @@ end
 
 function optimize_subproblem(storage::Storage)
     # Create model instance.
-    sub = Model(with_optimizer(Gurobi.Optimizer, gurobi_env))
+    sub = Model(() ->Gurobi.Optimizer(gurobi_env))
     # Omit output in console.
     set_silent(sub)
 
