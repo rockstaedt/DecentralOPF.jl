@@ -1,6 +1,8 @@
 using Gurobi
 using JuMP
 using LinearAlgebra
+using DataFrames
+using CSV
 
 
 # Trick to avoid multiple license printing
@@ -18,6 +20,7 @@ include("helpers/ptdf.jl")
 include("helpers/results.jl")
 include("helpers/logging.jl")
 include("helpers/penalty_terms.jl")
+include("helpers/output.jl")
 
 include("optimization/subproblems.jl")
 include("optimization/update_duals.jl")
