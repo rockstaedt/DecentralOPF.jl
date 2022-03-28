@@ -28,7 +28,7 @@ The total system costs of a electrical network are the sum of generation costs o
 
 \begin{subequations}
 	\begin{align}
-		 \min \quad & \sum_{t\in\mathcal{T}} \quad \sum_{g\in\mathcal{G}}mc_g \cdot P_{g,t} + \sum_{s\in\mathcal{S}}mc_s \cdot (D_{s,t}+C_{s,t})\\
+		 \min \quad & \sum_{t\in\mathcal{T}} \quad \sum_{g\in\mathcal{G}}mc_g \cdot P_{g,t} + \sum_{s\in\mathcal{S}}mc_s \cdot (D_{s,t}+C_{s,t})\\[10pt]
 		 \text{s.t. } \quad & 0 \leq P_{g,t} \leq \overline{p_g} && \forall g \in \set{G}, t \in \set{T} \label{eq:com:con:max-g}\\
 		 & 0 \leq D_{s,t} \leq \overline{p_s} && \forall s \in \set{S}, t \in \set{T} \label{eq:com:con:max-sd}\\
 		 & 0 \leq C_{s,t} \leq \overline{p_s} && \forall s \in \set{S}, t \in \set{T} \label{eq:com:con:max-sc}\\
@@ -39,21 +39,21 @@ The total system costs of a electrical network are the sum of generation costs o
 	\end{align}
 \end{subequations}
 
-Hereby, $\mathcal{G}$ represents the set of generators and $\mathcal{S}$ the set of storage respectively. $\mathcal{T}$ includes all considered timesteps. The optimization problem is constrained to meet the requirements described in section (\ref{sec:app:mod-framework}). First of all, equation (\ref{eq:com:con:max-g}) limits the maximum output of all generators where $\overline{p_g}$ is the maximum power generation of the considered generator. Equations (\ref{eq:com:con:max-sd}) and (\ref{eq:com:con:max-sc}) set the power boundaries of all storages respectively. Equation (\ref{eq:com:con:s-level-max}) ensures that the storage level of all storages remains between zero and the maximum storage level $\overline{e_s}$. In addition, this constraint prevents the storage from discharging power more than the energy is stored. The energy level of a storage $s$ at a specific timestep $t$ can be calculated as follows:
+Hereby, $\mathcal{G}$ represents the set of generators and $\mathcal{S}$ the set of storage respectively. $\mathcal{T}$ includes all considered time steps. The optimization problem is constrained to meet the requirements described in section (\ref{sec:app:mod-framework}). First of all, equation (\ref{eq:com:con:max-g}) limits the maximum output of all generators where $\overline{p_g}$ is the maximum power generation of the considered generator. Equations (\ref{eq:com:con:max-sd}) and (\ref{eq:com:con:max-sc}) set the power boundaries of all storages respectively. Equation (\ref{eq:com:con:s-level-max}) ensures that the storage level of all storages remains between zero and the maximum storage level $\overline{e_s}$. In addition, this constraint prevents the storage from discharging power more than the energy is stored. The energy level of a storage $s$ at a specific timestep $t$ can be calculated as follows:
 
 \begin{equation}
 	\label{eq:storage-level}
 	E_{s,t} = E_{s,t-1} + C_{s,t} - D_{s,t}
 \end{equation}
 
-To get a consistent form of all constraints, equation (\ref{eq:storage-level}) is rearranged to equal zero and integrated in the optimization problem as equation (\ref{eq:com:con:s-level}). $C_{s,t}$ denotes the charging output of a storage $s$ at a timestep $t$ and $D_{s,t}$ the discharging power output. Another requirement of the previous section was that the demand at every node and every timestep $d_{n,t}$ is met by the generating units. This is the so called energy balance. Due to the fact that the system allows line flows on the tranmission lines, it can happen that the production at a node exceeds the nodal demand. Thus, to make sure that all nodal demands are met, the sum of all nodal injections has to be zero, see equation (\ref{eq:com:con:eb}). The injection at a node $n$ and at at timestep $t$ yields:
+To get a consistent form of all constraints, equation (\ref{eq:storage-level}) is rearranged to equal zero and integrated in the optimization problem as equation (\ref{eq:com:con:s-level}). $C_{s,t}$ denotes the charging output of a storage $s$ at a time step $t$ and $D_{s,t}$ the discharging power output. Another requirement of the previous section was that the demand at every node and every time step $d_{n,t}$ is met by the generating units. This is the so called energy balance. Due to the fact that the system allows line flows on the transmission lines, it can happen that the production at a node exceeds the nodal demand. Thus, to make sure that all nodal demands are met, the sum of all nodal injections has to be zero, see equation (\ref{eq:com:con:eb}). The injection at a node $n$ and at at time step $t$ yields:
 
 \begin{equation}
 	I_{n,t} = \sum_{g\in\mathcal{G}_n}P_{g,t} + \sum_{s\in\mathcal{S}_n}(D_{s,t}-C_{s,t})-d_{n,t}
 	\label{eq:injection-term}
 \end{equation}
 
-Here, $\mathcal{G}_n$ ($\mathcal{S}_n$) represents a subset of all generators (storages) that are located at node $n$. Hence, the injection is basically the sum of the power values of all generators and storages at that node. This injection term is also used in the last constraint (\ref{eq:com:con:pf}) that establishs the network constraints. Here, the line flows on each transmission line are limited by the maximum line capacity $\overline{f_l}$. The line flow of a transmission line $l$ is calculated by multiplying the power distribution factors of that line with the injection term $I_{n,t}$ of a specific node $n$.\\
+Here, $\mathcal{G}_n$ ($\mathcal{S}_n$) represents a subset of all generators (storages) that are located at node $n$. Hence, the injection is basically the sum of the power values of all generators and storages at that node. This injection term is also used in the last constraint (\ref{eq:com:con:pf}) that establishes the network constraints. Here, the line flows on each transmission line are limited by the maximum line capacity $\overline{f_l}$. The line flow of a transmission line $l$ is calculated by multiplying the power distribution factors of that line with the injection term $I_{n,t}$ of a specific node $n$.\\
 
 	%TODO Explain PTDF, see maybe document from EMOD.
 	
@@ -63,11 +63,11 @@ To solve the optimization problem, all relevant information has to be shared wit
 \label{sec:app:dom}
 
 % TODO Add reference for ADMM explanation
-The generating units in the centralized optimization problem are not able to optimize on their own because a central entity is needed to coordinate the system constraints (\ref{eq:com:con:eb}) and (\ref{eq:com:con:pf}). These constraints prevent that the solution is obtained by optimizing per generating unit because both include all decision variables of the optimization problem. This is the reason why these constraints are called complicating constraints. If resolved, it would be possible to derive the optimal dispatch plan per generating unit and without sharing sensible information like marginal costs. As written in \ref{admm}, the \gls{admm} provides a technique to resolve these constraints, making the problem decomposable and thus enables the path to a decentralized mechanism. \gls{admm} is only working for equality constraints. Thus, the power flow inequality constraint (\ref{eq:com:con:pf}) is transformed into two equality constraints by introducing two slack variables $U_{l,t}$ and $K_{l,t}$ for each tranmission line $l$ and timestep $t$. The optimization problem evolves to the following:
+The generating units in the centralized optimization problem are not able to optimize on their own because a central entity is needed to coordinate the system constraints (\ref{eq:com:con:eb}) and (\ref{eq:com:con:pf}). These constraints prevent that the solution is obtained by optimizing per generating unit because both include all decision variables of the optimization problem. This is the reason why these constraints are called complicating constraints. If resolved, it would be possible to derive the optimal dispatch plan per generating unit and without sharing sensible information like marginal costs. As written in \ref{admm}, the \gls{admm} provides a technique to resolve these constraints, making the problem decomposable and thus enables the path to a decentralized mechanism. \gls{admm} is only working for equality constraints. Thus, the power flow inequality constraint (\ref{eq:com:con:pf}) is transformed into two equality constraints by introducing two slack variables $U_{l,t}$ and $K_{l,t}$ for each transmission line $l$ and time step $t$. The optimization problem evolves to the following:
 
 \begin{subequations}
 	\begin{align}
-		 \min \quad & \sum_{t\in\mathcal{T}} \quad \sum_{g\in\mathcal{G}}mc_g \cdot P_{g,t} + \sum_{s\in\mathcal{S}}mc_s \cdot (D_{s,t}+C_{s,t}) \label{eq:dom:relaxed-constraints}\\
+		 \min \quad & \sum_{t\in\mathcal{T}} \quad \sum_{g\in\mathcal{G}}mc_g \cdot P_{g,t} + \sum_{s\in\mathcal{S}}mc_s \cdot (D_{s,t}+C_{s,t}) \label{eq:dom:relaxed-constraints}\\[10pt]
 		 \text{s.t. } \quad & 0 \leq P_{g,t} \leq \overline{p_g} && \forall g \in \set{G}, t \in \set{T}\\
 		 & 0 \leq D_{s,t} \leq \overline{p_s} && \forall s \in \set{S}, t \in \set{T} \\
 		 & 0 \leq C_{s,t} \leq \overline{p_s} && \forall s \in \set{S}, t \in \set{T} \\
@@ -79,14 +79,14 @@ The generating units in the centralized optimization problem are not able to opt
 	\end{align}
 \end{subequations}
 
-The slack variable $U_{l,t}$ ensures that the upper bound of the transmission line capactiy is kept, while slack variable $K_{l,t}$ ensures the lower limit. Both variables are added as additional decision variables. Instead of two complicating constraints, one has to handle three complicating constraints. If these constraints are relaxed, the main problem decomposes into a generator and a storage subproblem.\\
+The slack variable $U_{l,t}$ ensures that the upper bound of the transmission line capacity is kept, while slack variable $K_{l,t}$ ensures the lower limit. Both variables are added as additional decision variables. Instead of two complicating constraints, one has to handle three complicating constraints. If these constraints are relaxed, the main problem decomposes into a generator and a storage subproblem.\\
 
 Relaxing the complicating variables is done by implementing a max-min problem using the dual variables of the complicated constraints. Hereby, $\lambda$ is the dual of the energy balance constraint, $\mu$ and $\rho$ are the duals of the upper and lower power flow constraint respectively. Since the objective function is a linear cost function, \gls{lr} is not applicable. Thus, the complicated constraints are relaxed by applying \gls{alr}. A penalty term for each dual variable is introduced. The penalty terms equal zero in the optimality point and contribute to a faster convergence. The optimization problem of (\ref{eq:dom:relaxed-constraints}) derives to:
 
 \begin{subequations}
 	\begin{align}
 		\max{(\lambda, \mu, \rho)} \label{eq:dom:fixed-duals} \\
-		 \min \quad \sum_{t\in\mathcal{T}} \quad & \sum_{g\in\mathcal{G}}mc_g \cdot P_{g,t} + \sum_{s\in\mathcal{S}}mc_s \cdot (D_{s,t}+C_{s,t}) \nonumber \\
+		\min \quad \sum_{t\in\mathcal{T}} \quad & \sum_{g\in\mathcal{G}}mc_g \cdot P_{g,t} + \sum_{s\in\mathcal{S}}mc_s \cdot (D_{s,t}+C_{s,t}) \nonumber \\
 		 & + \lambda_t \cdot \sum_{n \in \mathcal{N}} I_{n,t} \nonumber \\
 		 & + \frac{\gamma}{2} \cdot \big\|\sum_{n \in \mathcal{N}} I_{n,t}\big\|^2_2 \nonumber \\
 		 & +  \sum_{l \in \mathcal{L}} \quad \mu_{l,t} \cdot (\sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot I_{n,t} + U_{l,t} - \overline{f_l}) \nonumber \\
@@ -111,9 +111,9 @@ Variable $\gamma$ is a positive constant and is the only parameter needed for th
 		 & + \overline{\lambda}_t \cdot \sum_{n \in \mathcal{N}} I_{n,t} \nonumber \\
 		 & + \frac{\gamma}{2} \cdot \big\|\sum_{n \in \mathcal{N}} I_{n,t}\big\|^2_2 \nonumber \\
 		 & +  \sum_{l \in \mathcal{L}} \quad \overline{\mu_{l,t}} \cdot (\sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot I_{n,t} + U_{l,t} - \overline{f_l}) \nonumber \\
-		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\| \sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot I_{n,t} + U_{l,t} - \overline{f_l} \big\|^2_2 \nonumber \\
-		 & \qquad \qquad + \overline{\rho_{l,t}} \cdot (\sum_{n \in \mathcal{N}} K_{l,t} - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l}) \nonumber \\
-		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\|\sum_{n \in \mathcal{N}} K_{l,t} - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l} \big\|^2_2 \nonumber \\
+		 & \quad \qquad + \frac{\gamma}{2} \cdot \big\| \sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot I_{n,t} + U_{l,t} - \overline{f_l} \big\|^2_2 \nonumber \\
+		 & \quad \qquad + \overline{\rho_{l,t}} \cdot (\sum_{n \in \mathcal{N}} K_{l,t} - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l}) \nonumber \\
+		 & \quad \qquad + \frac{\gamma}{2} \cdot \big\|\sum_{n \in \mathcal{N}} K_{l,t} - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l} \big\|^2_2 \nonumber \\[10pt]
 		 \text{s.t. } \quad & 0 \leq P_{g,t} \leq \overline{p_g} && \forall g \in \set{G}, t \in \set{T}\\
 		 & 0 \leq D_{s,t} \leq \overline{p_s} && \forall s \in \set{S}, t \in \set{T} \\
 		 & 0 \leq C_{s,t} \leq \overline{p_s} && \forall s \in \set{S}, t \in \set{T} \\
@@ -123,7 +123,7 @@ Variable $\gamma$ is a positive constant and is the only parameter needed for th
 \end{subequations}
 
 % TODO Add reference for ADMM explanation
-Because of the product of the decision variable $P_{\mathcal{G},\mathcal{T}}$, $D_{\mathcal{S},\mathcal{T}}$ and $C_{\mathcal{S},\mathcal{T}}$ in all penalty terms, the optimization model is still not decomposable. At this step, the \gls{admm} comes into action and provides a possibility to solve the problem in a decomposable way. As written in \ref{admm}, \gls{admm} fixes each decision variable to the previous iteration value. Thus, one is finally able to derive the generator and storage subproblem. Out of simplicity, the overline symbol on the dual variables is omitted in the next equations.
+Because of the product of the decision variable $P_{\mathcal{G},\mathcal{T}}$, $D_{\mathcal{S},\mathcal{T}}$ and $C_{\mathcal{S},\mathcal{T}}$ in all penalty terms, the optimization model is still not decomposable. At this step, the \gls{admm} comes into action and provides a possibility to solve the problem in a decomposable way. As written in \ref{admm}, \gls{admm} fixes each decision variable to the previous iteration value. Thus, one is finally able to derive the generator and storage subproblem. Out of simplicity, the over-line symbol on the dual variables is omitted in the next equations.
 
 
 \subsubsection*{Generator Subproblem}
@@ -138,7 +138,7 @@ In the following, the optimization model for a specific generator $g$ is derived
 		 & + \sum_{l \in \mathcal{L}} \quad \mu_{l,t} \cdot \sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot P_{g,t}^v \nonumber \\
 		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\| \sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot I_{n,t} + U_{l,t}^v - \overline{f_l} \big\|^2_2 \nonumber \\
 		 & \qquad \qquad - \rho_{l,t} \cdot \sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot P_{g,t}^v \nonumber \\
-		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\| \sum_{n \in \mathcal{N}} K_{l,t}^v - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l} \big\|^2_2 \nonumber \\
+		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\| \sum_{n \in \mathcal{N}} K_{l,t}^v - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l} \big\|^2_2 \nonumber \\[10pt]
 		 \text{s.t.} \quad & 0 \leq P_{g,t}^v \leq \overline{p_g} && \forall t \in \set{T}
 	\end{align}
 \end{subequations}
@@ -150,19 +150,19 @@ The term inside of the brackets in the second line of equation (\ref{eq:sub:gen}
 	\label{eq:injection:decentralized}
 \end{equation} 
  
- The power generation terms of the other units are written in lower case to match the notation of parameters. Be aware that $d_{s,t}^{v-1}$ and $d_{\breve{n},t}$ are not the same. The first term depicts the discharge power output of a storage at node $\breve{n}$. The latter stands for the nodal demand of node $\breve{n}$. Equation (\ref{eq:injection:decentralized}) can be then inserted in the sum of all nodal injections for a specific timestep $t$:
+ The power generation terms of the other units are written in lower case to match the notation of parameters. Be aware that $d_{s,t}^{v-1}$ and $d_{\breve{n},t}$ are not the same. The first term depicts the discharge power output of a storage at node $\breve{n}$. The latter stands for the nodal demand of node $\breve{n}$. Equation (\ref{eq:injection:decentralized}) can be then inserted in the sum of all nodal injections for a specific time step $t$:
  
  \begin{equation}
  	\sum_{n \in \mathcal{N}} I_{n,t} = I_{\breve{n},t} + \sum_{n \in \mathcal{N} \setminus \breve{n}} \quad \sum_{g\in\mathcal{G}_n}p_{g',t}^{v-1} + \sum_{s\in\mathcal{S}_n}(d_{s,t}^{v-1}-c_{s,t}^{v-1})-d_{n,t}
  \end{equation}
  
- As for now, the specific generator needs to know the previous dispatch of all other units to compute the injection. This is in contradiction to the aim of this thesis to create a decentralized framework in which sensitive information is not shared with other participants. That includes the power dispatch of the previous iteration. To overcome the problem, the coordinating algorithm provides the sum of nodal power outputs for the other generators and storages in the network. The sum of the previous iteration power values' of all generators at a node $n$ and a timestep $t$ is denoted as $\Theta_{n,t}$ and can be expressed as:
+ As for now, the specific generator needs to know the previous dispatch of all other units to compute the injection. This is in contradiction to the aim of this thesis to create a decentralized framework in which sensitive information is not shared with other participants. That includes the power dispatch of the previous iteration. To overcome the problem, the coordinating algorithm provides the sum of nodal power outputs for the other generators and storages in the network. The sum of the previous iteration power values' of all generators at a node $n$ and a time step $t$ is denoted as $\Theta_{n,t}$ and can be expressed as:
  
  \begin{equation}
  	\Theta_{n,t} = \sum_{g\in\mathcal{G}_{n}}P_{g,t}^{v-1}
  \end{equation}
  
- The same applies to the discharge and charge power values of the storages in the network. $\Phi_{n,t}$ depicts the sum of the previous discharge power values' of all storages at node $n$ and timestep $t$ and $\Psi_{n,t}$ depicts the charging sum respectively. The corresponding equations are as follows:
+ The same applies to the discharge and charge power values of the storages in the network. $\Phi_{n,t}$ depicts the sum of the previous discharge power values' of all storages at node $n$ and time step $t$ and $\Psi_{n,t}$ depicts the charging sum respectively. The corresponding equations are as follows:
  
 \begin{equation}
 	\Phi_{n,t} = \sum_{s\in\mathcal{S}_n}D_{s,t}^{v-1}
@@ -179,7 +179,7 @@ The term inside of the brackets in the second line of equation (\ref{eq:sub:gen}
  	& + \sum_{n \in \mathcal{N} \setminus \breve{n}} \Theta_{n,t} + \Phi_{n,t} - \Psi_{n,t} - d_{n,t} \nonumber
  \end{align}
  
- The optimization model in (\ref{eq:sub:gen}) is further rearranged by summarising the terms including the dual variables $\rho_{l,t}$ and $\mu_{l,t}$. In addition, a penalty terms for the decision variables are introduced. In the optimality point, these penalty terms become zero. Subsequently, they also contribute to a faster convergence. The penalty term for the decision variable $P_{g,t}$ calculates the difference between the current iteration value and the last iteration value. Since the slack variables of the power flow constraint have to be the same for all subproblems at global optimum, the penalty term for these decision variables considers the average of all subporblems of the last iteration. The average value for the upper flow constraint is denoted as $\Upsilon_{l,t}$ and $\Gamma_{l,t}$ respectively. Finally, the generator subproblem becomes:
+ The optimization model in (\ref{eq:sub:gen}) is further rearranged by summarizing the terms including the dual variables $\rho_{l,t}$ and $\mu_{l,t}$. In addition, a penalty terms for the decision variables are introduced. In the optimality point, these penalty terms become zero. Subsequently, they also contribute to a faster convergence. The penalty term for the decision variable $P_{g,t}$ calculates the difference between the current iteration value and the last iteration value. Since the slack variables of the power flow constraint have to be the same for all subproblems at global optimum, the penalty term for these decision variables considers the average of all subproblems of the last iteration. The average value for the upper flow constraint is denoted as $\Upsilon_{l,t}$ and $\Gamma_{l,t}$ respectively. Finally, the generator subproblem becomes:
  
  \begin{subequations}
 	\begin{align}
@@ -191,16 +191,16 @@ The term inside of the brackets in the second line of equation (\ref{eq:sub:gen}
 		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\| \sum_{n \in \mathcal{N}} K_{l,t}^v - PTDF_{l,n} \cdot I_{n,t} - \overline{f_l} \big\|^2_2 \nonumber \\
 		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\|U_{l,t}^v - \Upsilon_{l,t}  \big\|^2_2 \nonumber\\
 		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\|K_{l,t}^v - \Gamma_{l,t}  \big\|^2_2 \nonumber \\
-		 & + \frac{\gamma}{2} \cdot (P_{g,t}^v - P_{g,t}^{v-1})^2 \nonumber \\
+		 & + \frac{\gamma}{2} \cdot (P_{g,t}^v - P_{g,t}^{v-1})^2 \nonumber \\[10pt]
 		 \text{s.t.} \quad & 0 \leq P_{g,t}^v \leq \overline{p_g} && \forall t \in \set{T}
 	\end{align}
 \end{subequations}
 
 \subsubsection*{Storage Subproblem}
 
-This section derives the optimization model for a specific storage $s$. The problem only includes decision variables $D_{s,t}$, $C_{s,t}$ of the storage $s$ and the corresponding slack variables of the power flow constraint. As for the generator subproblem, all other decision variables from the main optimization model are fixed to the values of the previous iteration. Thus, constraints related to generators or ther storages can be removed. \\
+This section derives the optimization model for a specific storage $s$. The problem only includes decision variables $D_{s,t}$, $C_{s,t}$ of the storage $s$ and the corresponding slack variables of the power flow constraint. As for the generator subproblem, all other decision variables from the main optimization model are fixed to the values of the previous iteration. Thus, constraints related to generators or storages can be removed. \\
 
-The derivation of the optimization model for the storage subproblem is nearly the same as for the generator. Therefore a detail decsription of the derivation is omitted and the reader is referred to the generator subproblem for further detail. If the previous iteration values for the generators and other storages as well as the penalty terms are added, the storage subproblem yields:
+The derivation of the optimization model for the storage subproblem is nearly the same as for the generator. Therefore a detail description of the derivation is omitted and the reader is referred to the generator subproblem for further detail. If the previous iteration values for the generators and other storages as well as the penalty terms are added, the storage subproblem yields:
 
  \begin{subequations}
 	\begin{align}
@@ -209,12 +209,12 @@ The derivation of the optimization model for the storage subproblem is nearly th
 		 & + \frac{\gamma}{2} \cdot \big\| \Theta_{\breve{n},t} + D_{s,t}^v + \Phi_{\breve{n},t} - D_{s,t}^{v-1} \nonumber \\
 		 & \qquad \qquad - C_{s,t}^v - (\Psi_{\breve{n},t} - C_{s,t}^{v-1}) - d_{\breve{n},t} \nonumber \\
 		 & \qquad \qquad + \sum_{n \in \mathcal{N} \setminus \breve{n}} \Theta_{n,t} + \Phi_{n,t} - \Psi_{n,t} - d_{n,t} \big\|^2_2 \nonumber \\
-		 & + \sum_{l \in \mathcal{L}} \quad \frac{\gamma}{2} \cdot \big\| \sum_{n \in \mathcal{N}} PTDF_{l,n} * I_{n,t} + U_{l,t}^v - \overline{f_l}\big\|^2_2 \nonumber \\
-		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\| \sum_{n \in \mathcal{N}} K_{l,t}^v - PTDF * I_n(v, t) - \overline{K_l}\big\|^2_2\nonumber \\
+		 & + \sum_{l \in \mathcal{L}} \quad \frac{\gamma}{2} \cdot \big\| \sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot I_{n,t} + U_{l,t}^v - \overline{f_l}\big\|^2_2 \nonumber \\
+		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\| \sum_{n \in \mathcal{N}} K_{l,t}^v - PTDF \cdot I_{n,t} - \overline{K_l}\big\|^2_2\nonumber \\
 		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\|U_{l,t}^v - \Upsilon_{l,t}  \big\|^2_2 \nonumber\\
 		 & \qquad \qquad + \frac{\gamma}{2} \cdot \big\|K_{l,t}^v - \Gamma_{l,t}  \big\|^2_2 \nonumber \\
 		 & + \frac{\gamma}{2} \cdot (D_{s,t}^v - D_{s,t}^{v-1} )^2 \nonumber \\
-		 & + \frac{\gamma}{2} \cdot (C_{s,t}^v - C_{s,t}^{v-1} )^2 \nonumber \\
+		 & + \frac{\gamma}{2} \cdot (C_{s,t}^v - C_{s,t}^{v-1} )^2 \nonumber \\[10pt]
 		 \text{s.t.} \quad & 0 \leq D_{s,t}^v \leq \overline{p_s} && \forall t \in \set{T} \\
 		 & 0 \leq C_{s,t}^v \leq \overline{p_s} && \forall t \in \set{T}\\
 		 & 0 \leq E_{s,t}^v \leq \overline{e_s} && \forall t \in \set{T}\\
@@ -222,14 +222,31 @@ The derivation of the optimization model for the storage subproblem is nearly th
 	\end{align}
 \end{subequations}
 
+\subsubsection*{Update Dual Variables}
+
+% TODO Write section
+TODO! Write section
+
+\begin{equation}
+	\lambda_t^{v+1} = \lambda_t^{v} + \gamma \cdot (\sum_{g\in\mathcal{G}}P_{g,t}^{v} + \sum_{s\in\mathcal{S}}D_{s,t}^{v} - \sum_{s\in\mathcal{S}}D_{s,t}^{v} - d_{n,t})
+\end{equation}
+
+\begin{equation}
+	\rho_{l,t}^{v+1} = \rho_{l,t}^{v} + \gamma \cdot (\sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot I_{n,t}^v + \Upsilon_{l,t}^v - \overline{f_l})
+\end{equation}
+
+\begin{equation}
+	\mu_{l,t}^{v+1} = \mu_{l,t}^{v} + \gamma \cdot (\Gamma_{l,t}^v - \sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot I_{n,t}^v - \overline{f_l})
+\end{equation}
+
 \subsubsection{Matrix Notation}
 \label{sec:app:matrix}
 
-It is often common to formulate optimization problems in a matrix notation. With this notation it is much easier to understand multidimensional optimization problems. As for this thesis, several dimensions like time, nodes, lines are included. Thus, it would be benificial for the reader to refer to the matrix notation if anything is unclear. In addition, \citet{boyd2010} also uses matrix notation to explain the \gls{admm}. Typically, \gls{admm} solves optimization problems in the form of:
+It is often common to formulate optimization problems in a matrix notation. With this notation it is much easier to understand multidimensional optimization problems. As for this thesis, several dimensions like time, nodes, lines are included. Thus, it would be beneficial for the reader to refer to the matrix notation if anything is unclear. In addition, \citet{boyd2010} also uses matrix notation to explain the \gls{admm}. Typically, \gls{admm} solves optimization problems in the form of:
 
 \begin{subequations}
 	\begin{align}
-		\min{(x, z)} \quad & f(x) + g(z) \label{eq:admm:gen}\\
+		\min{(x, z)} \quad & f(x) + g(z) \label{eq:admm:gen}\\[10pt]
 		\text{s.t. } \quad & \vb{A}x + \vb{B}z = c \label{eq:admm:gen:con1}
 	\end{align}
 \end{subequations}
@@ -273,13 +290,13 @@ The matrix of the power generation values is transposed to allow matrix multipli
 
  \begin{subequations}
 	\begin{align}
-		 \min \quad & \vb{P} \cdot mc \\
+		 \min \quad & \vb{P}^v \cdot mc \\
 		 & + \frac{\gamma}{2} \cdot \big\| \vb{P}^v + \vb{\Theta} - \vb{P}^{v-1} + \vb{\Phi} - \vb{\Psi} - \vb{d} + \frac{\vb{\lambda}}{\gamma} \big\|^2_2 \\
 		 & + \frac{\gamma}{2} \cdot \big\| PTDF \cdot \vb{I} + \vb{U} - \vb{\overline{f}} + \frac{\vb{\mu}}{\gamma}\big\|^2_2 \nonumber \\
 		 & + \frac{\gamma}{2} \cdot \big\| \vb{K} - PTDF \cdot \vb{I} - \vb{\overline{f}} + \frac{\vb{\rho}}{\gamma}\big\|^2_2 \nonumber \\
 		 & + \frac{\gamma}{2} \cdot \big\| \vb{U} - \vb{\Upsilon}  \big\|^2_2 \nonumber\\
 		 & + \frac{\gamma}{2} \cdot \big\| \vb{K} - \vb{\Gamma} \big\|^2_2 \nonumber \\
-		 & + \frac{\gamma}{2} \cdot \big\| \vb{P}^v - \vb{P}^{v-1} \big\|^2_2 \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\| \vb{P}^v - \vb{P}^{v-1} \big\|^2_2 \nonumber \\[10pt]
 		 \text{s.t.} \quad & \vb{0} \leq \vb{P} \leq \vb{\overline{p}}
 	\end{align}
 \end{subequations}
@@ -320,7 +337,7 @@ If this formulation is applied to the storage optimization problem of equation (
 		 & + \frac{\gamma}{2} \cdot \big\| \vb{U} - \vb{\Upsilon} \big\|^2_2 \nonumber\\
 		 & + \frac{\gamma}{2} \cdot \big\| \vb{K} - \vb{\Gamma} \big\|^2_2 \nonumber \\
 		 & + \frac{\gamma}{2} \cdot \big\| \vb{D}^v - \vb{D}^{v-1}\big\|^2_2 \nonumber \\
-		 & + \frac{\gamma}{2} \cdot \big\| \vb{C}^v - \vb{C}^{v-1}\big\|^2_2 \nonumber \\
+		 & + \frac{\gamma}{2} \cdot \big\| \vb{C}^v - \vb{C}^{v-1}\big\|^2_2 \nonumber \\[10pt]
 		 \text{s.t.} \quad & \vb{0} \leq \vb{D} \leq \vb{\overline{p}} \\
 		 & \vb{0} \leq \vb{C} \leq \vb{\overline{p}} \\
 		 & \vb{0} \leq \vb{E} \leq \vb{\overline{e}}\\
@@ -341,9 +358,9 @@ Rather than defining everything in one Julia script, the approach was followed t
 
 All Julia files are placed into the directory \path{src} that contains several subdirectories. Each of them has a different purpose. There is the \path{src/cases} directory that contains the Julia scripts for setting up a case study system. This directory can contain different case studies, making it possible to easily switch between different scenarios. Inside of \path{src/helpers} several helper scripts are defined that are used while running the decentralized optimization model. This includes methods to print results, calculating the $PTDF$ or several plotting functions to visualize the optimization results. All Julia scripts related to the decentralized optimization model are located in \path{src/optimization}. This compromises for example the modeling of the subproblems or functions to check the convergence of the problem. Lastly, all defined structures that are utilized in the source code are placed in \path{src/structures}. The structures scripts are also separated in corresponding categories, e.g. network elements like generators or penalty terms. There is one main script for running the centralized optimization model \path{src/opf_central_reference.jl} and one for the decentral optimization model using the \gls{admm} named \path{src/opf_admm_decentral.jl}. Both scripts include a case study from the before mentioned directory and the Julia script \path{src/imports.jl} that manages all imports from the subdirectories and the needed Julia packages.\\
 
-All open-source packages that are used within the project are listed in the file \path{Project.toml}. This file is also used to create a reproducable environment for every user. To activate the environment, open the Julia package manager in the root directory of the project and run the command \lstinline[language=sh]{activate ADMM}. All necessary packages are then installed.\\
+All open-source packages that are used within the project are listed in the file \path{Project.toml}. This file is also used to create a reproducible environment for every user. To activate the environment, open the Julia package manager in the root directory of the project and run the command \lstinline[language=sh]{activate ADMM}. All necessary packages are then installed.\\
 
-Gurobi is utilized as a solver as it is the fastest solver for optimization problems world-wide and provides with the Julia package Gurobi\footnote{~\url{www.juliapackages.com/p/gurobi}} an easy-to-use interface. The solver is used in combination with the Julia package JuMP that presents a modelling language for mathematical optimization problems and is introduced by \citet{dunning2017}. The package equips the user with several helper methods to formulate and solve optimization models. Another advantage of JuMP is that one can easily switch between solvers. Thus, it is possible to replace Gurobi with an open-source solver like Clp\footnote{~\url{www.github.com/coin-or/Clp}}. Lastly, the  Julia package PlotlyJS is used to create interactive plots.
+Gurobi is utilized as a solver as it is the fastest solver for optimization problems world-wide and provides with the Julia package Gurobi\footnote{~\url{www.juliapackages.com/p/gurobi}} an easy-to-use interface. The solver is used in combination with the Julia package JuMP that presents a modeling language for mathematical optimization problems and is introduced by \citet{dunning2017}. The package equips the user with several helper methods to formulate and solve optimization models. Another advantage of JuMP is that one can easily switch between solvers. Thus, it is possible to replace Gurobi with an open-source solver like Clp\footnote{~\url{www.github.com/coin-or/Clp}}. Lastly, the  Julia package PlotlyJS is used to create interactive plots.
 
 \subsubsection{Centralized Optimization Problem}
 
@@ -351,7 +368,7 @@ This section illustrates the implementation of the centralized optimization mode
 
 \lstinputlisting[language=julia, caption=Implementation of the centralized optimization model, label=jl:com]{../src/opf_central_reference.jl}
 
-First, the necessary packages and Julia scripts are imported in line \texttt{1}. Then the case study is included, providing all elements of the network with the relevant parameters. The code block between line \texttt{5} and \texttt{54} creates the optimization model. In the beginning of the block, helper indexes for all network elements are created. These are used in the later model equations. Afterwards, the $PTDF$ of the network is calculated using the helper function \lstinline[language=julia]{calculate_ptdf()} that is defined in \path{src/helpers/ptdf.jl} and is listed in \ref{sec:appendix:jl:helpers:ptdf} for further reference.  As a next step, the JuMP model object \lstinline[language=julia]{m} is initiated and the solver is set to Gurobi in line \texttt{16}. The variable \lstinline[language=julia]{gurobi_env} is defined in the import script \path{src/imports.jl} and suppresses multiple Gurobi license printings. Afterwards, the opimization variables are attached to the JuMP model. The created indexes are used to access the network elements that are stored in an array. The first dimension of all variables represents always the network element as shown in the matrix formulation of section (\ref{sec:app:matrix}). The second dimension represents the time index. The naming convention of the optimization variables reflect the variable names in the optimization equations from section (\ref{sec:app:math-form}). While declaring the variables, the corresponding bounds are set too. Hereby, one can make use of the implemented structures to access the corresponding paramters, e.g. setting the upper bound of the generator power output with the help of attribute \lstinline[language=julia]{max_generation}. This allows to reduce the number of constraints, making the optimization model more simple and faster. In lines \texttt{34} to \texttt{38} an expression is added to the model that calculates the injection at every timestep and node according to equation (\ref{eq:injection-term}) from section (\ref{sec:app:math-form}). The generation from either a generator or storage is included in the injection formulation of a specific timestep and node, if the node is equal to the node of the generating unit. This was implemented by using the ternary operator \lstinline[language=julia]{?:} and the attribute \lstinline[language=julia]{node} of the network element. The ternary operator serves as a short if-else-condition. Next, the objective function of the problem is defined in line \texttt{41} to \texttt{44}. This function sums up the product of the generation decision variables and marginal costs for all network elements and timesteps. For storage network elements both discharging power and charging power are considered in the costs. The last part of the model setup introduces all constraints. Line \texttt{17} attaches the energy balance constraint to the model. This constraint uses the before defined expression for the injection term and makes sure that the sum of all node injections at a specific timestep equals zero. Afterwards, the upper and lower line constraint limit is implemented. As explained in the previous section, this constraint was transformed into two equality constraints by introducing two slack variables respectively. Due to a Julia type error, the dot product between the $PTDF$ of one line and the inejection term for one timestep had to be calculated by summing up the single values of the dot product. Lastly, the energy level constraint of the storages is added to the model. This constraint makes sure that the current energy level consists of the energy level of the previous timestep and the charging power minus the power that is withdrawn. The ternary operator is utilized again to set the initial energy level to zero for every storage in the network. In line \texttt{57}, the command is run to solve the optimization model \lstinline[language=julia]{m}. The rest of the implementation covers the output of the optimization variables and additional information like the system price or the line utilization.
+First, the necessary packages and Julia scripts are imported in line \texttt{1}. Then the case study is included, providing all elements of the network with the relevant parameters. The code block between line \texttt{5} and \texttt{54} creates the optimization model. In the beginning of the block, helper indexes for all network elements are created. These are used in the later model equations. Afterwards, the $PTDF$ of the network is calculated using the helper function \lstinline[language=julia]{calculate_ptdf()} that is defined in \path{src/helpers/ptdf.jl} and is listed in \ref{sec:appendix:jl:helpers:ptdf} for further reference.  As a next step, the JuMP model object \lstinline[language=julia]{m} is initiated and the solver is set to Gurobi in line \texttt{16}. The variable \lstinline[language=julia]{gurobi_env} is defined in the import script \path{src/imports.jl} and suppresses multiple Gurobi license printings. Afterwards, the optimization variables are attached to the JuMP model. The created indexes are used to access the network elements that are stored in an array. The first dimension of all variables represents always the network element as shown in the matrix formulation of section (\ref{sec:app:matrix}). The second dimension represents the time index. The naming convention of the optimization variables reflect the variable names in the optimization equations from section (\ref{sec:app:math-form}). While declaring the variables, the corresponding bounds are set too. Hereby, one can make use of the implemented structures to access the corresponding parameters, e.g. setting the upper bound of the generator power output with the help of attribute \lstinline[language=julia]{max_generation}. This allows to reduce the number of constraints, making the optimization model more simple and faster. In lines \texttt{34} to \texttt{38} an expression is added to the model that calculates the injection at every timestep and node according to equation (\ref{eq:injection-term}) from section (\ref{sec:app:math-form}). The generation from either a generator or storage is included in the injection formulation of a specific timestep and node, if the node is equal to the node of the generating unit. This was implemented by using the ternary operator \lstinline[language=julia]{?:} and the attribute \lstinline[language=julia]{node} of the network element. The ternary operator serves as a short if-else-condition. Next, the objective function of the problem is defined in line \texttt{41} to \texttt{44}. This function sums up the product of the generation decision variables and marginal costs for all network elements and time steps. For storage network elements both discharging power and charging power are considered in the costs. The last part of the model setup introduces all constraints. Line \texttt{17} attaches the energy balance constraint to the model. This constraint uses the before defined expression for the injection term and makes sure that the sum of all node injections at a specific time step equals zero. Afterwards, the upper and lower line constraint limit is implemented. As explained in the previous section, this constraint was transformed into two equality constraints by introducing two slack variables respectively. Due to a Julia type error, the dot product between the $PTDF$ of one line and the injection term for one time step had to be calculated by summing up the single values of the dot product. Lastly, the energy level constraint of the storages is added to the model. This constraint makes sure that the current energy level consists of the energy level of the previous time step and the charging power minus the power that is withdrawn. The ternary operator is utilized again to set the initial energy level to zero for every storage in the network. In line \texttt{57}, the command is run to solve the optimization model \lstinline[language=julia]{m}. The rest of the implementation covers the output of the optimization variables and additional information like the system price or the line utilization.
 
 
 \subsubsection{Decentralized Optimization Problem}
@@ -360,9 +377,9 @@ In the following, the implementations for the decentralized optimization model a
 
 \lstinputlisting[language=julia, caption=Implementation of the decentralized optimization model]{../src/opf_admm_decentral.jl}
 
-This is the top-level file that imports all scripts and the desired case study. Then, the \lstinline[language=julia]{admm} object is created using the structure defined in \path{src/helpers/admm.jl} that is also listed in \ref{sec:appendix:jl:structures:admm}. A custom constructor was written because the majority of the attributes are initialized with default values. See line \texttt{23} to \texttt{63} in \ref{sec:appendix:jl:structures:admm} for further reference. Only the network elements and the damping parameter $\gamma$ are necessary for the initialization of the \lstinline[language=julia]{admm} object. The whole optimization algorithm is started  in line \texttt{7} with a single command called \lstinline[language=julia]{run!(admm)}.\\
+This is the top-level file that imports all scripts and the desired case study. Then, the \lstinline[language=julia]{admm} object is created using the structure defined in \path{src/helpers/admm.jl} that is also listed in \ref{sec:appendix:jl:structures:admm}. A custom constructor was written for this structure because the majority of the attributes are initialized with default values. The constructur also calculates the $PTDF$ that is then accessible through the corresponding attribute. See line \texttt{23} to \texttt{63} in \ref{sec:appendix:jl:structures:admm} for further reference. Only the network elements and the damping parameter $\gamma$ are necessary for the initialization of the \lstinline[language=julia]{admm} object. The whole optimization algorithm is started  in line \texttt{7} with a single command called \lstinline[language=julia]{run!(admm)}.\\
 
-All files related to the optimization implementations are located in the directory \path{src/optimization}. Thus, the implementation of the \lstinline[language=julia]{run!(...)} method is defined in the file \path{src/optimization/run.jl} and represents the entrypoint into the decentralized algorithm framework. The method is shown in listing (\ref{jl:run}). It orchestrates the whole optimization algorithm that runs as long as the algorithm is not converged. Hence, in line \texttt{2} a while loop is established that checks the convergence of the algorithm.
+All files related to the optimization implementations are located in the directory \path{src/optimization}. Thus, the implementation of the \lstinline[language=julia]{run!(...)} method is defined in the file \path{src/optimization/run.jl} and represents the entry point into the decentralized algorithm framework. The method is shown in listing (\ref{jl:run}). It orchestrates the whole optimization algorithm that runs as long as the algorithm is not converged. Hence, in line \texttt{2} a while loop is established that checks the convergence of the algorithm.
 
 \lstinputlisting[language=julia, firstline=1, lastline=12, caption=Top-level method to orchestrate the decentralized algorithm, label=jl:run]{../src/optimization/run.jl}
 
@@ -372,27 +389,14 @@ The attribute \lstinline[language=julia]{convergence} is of type \lstinline[lang
 
 The method \lstinline[language=julia]{calculate_iteration!(...)} is defined in the file \path{src/optimization/run.jl} and can be found in \ref{sec:appendix:jl:optimization:calculate-iteration}. It does two things. First, it optimizes all storage and generator subproblems and concatenates the results into a dictionary. Then, this dictionary is used to create the \lstinline[language=julia]{result} object that is attached to the \lstinline[language=julia]{admm} object. Both optimization methods for the subproblems are defined in \path{src/optimization/subproblems.jl}. Be aware that both methods can have the same name since the arguments of the methods are different. This is also a design pattern to shorten method names in Julia. The optimization method to solve a generator subproblem is covered first. The corresponding implementation is listed in (\ref{jl:sub_gen}).
 
-\lstinputlisting[language=julia, firstline=1, lastline=77, caption=Method to optimize a single generator subproblem,label=jl:sub_gen]{../src/optimization/subproblems.jl}
+\lstinputlisting[language=julia, firstline=1, lastline=87, caption=Method to optimize a single generator subproblem,label=jl:sub_gen]{../src/optimization/subproblems.jl}
 
-The layout of the function is similiar to the implementation of the centralized problem in listing (\ref{jl:com}). First, the JuMP model instance \lstinline[language=julia]{sub} is initiated. Hereby, the name refers to the fact that the optimization problem is a subproblem of the whole decentralized optimal power flow. Next, the optimization variables are created. The names resemble once again the terms in the equations of section \ref{sec:app:math-form}. In comparison to the implementation of the centralized algorithm, the decision variable $P$ only depends on the time index. Before the injection expression is added to the model instance, the results from the previous iteration are retrieved from the \lstinline[language=julia]{admm} object in line \texttt{16} and \texttt{19}. This is done with the help of two functions that are defined in the file \path{src/helpers/results.jl}. Both functions make sure that in the first iteration, in which no previous results exist, an empty vector for the corresponding variables is returned. Otherwise, one could easily access the previous iteration results from the \lstinline[language=julia]{admm} object itself. The created variables are then used in the injection expression. As for the centralized problem, the ternary operator is used to determine if the node of the injection term equals the node at which the generator is located. If so, the generation decision variable is added to the injection term and the previous generation result is substracted from the generation node result as written in section \ref{sec:app:dom}. The \lstinline[language=julia]{admm} object includes a dictionary attribute \lstinline[language=julia]{node_id_to_demand} that is utilized in the injection expression to access the nodal demand by the id of the node. As a next step, the penalty terms for the complicated constraints and the slack variables are added to the JuMP model in line \texttt{39}. Since both the generator and storage subproblem have the same penalty terms, a method called \lstinline[language=julia]{add_penalty_terms!(...)} was created that can be found in the file \path{src/optimization/penalty_terms.jl} and is listed in \ref{sec:appendix:jl:optimization:add-penalty-terms}. The method attaches the penalty terms as expressions to the model instance \lstinline[language=julia]{sub}. Hereby, the norm formulation from section \ref{sec:app:dom} is applied. Thus, the penalty term expression only depend on the time index. As for the slack decision variables of the subproblems, the average value from all subproblems is included in the penalty term. Similiar to the method for the generation and node results from the previous iteration, a function is used to get the average value for the slack variables from the previous iteration. This function is defined in the result helper file that was mentioned before.
+The layout of the function is similar to the implementation of the centralized problem in listing (\ref{jl:com}). First, the JuMP model instance \lstinline[language=julia]{sub} is initiated. Hereby, the name refers to the fact that the optimization problem is a subproblem of the whole decentralized optimal power flow. Next, the optimization variables are created. The names resemble once again the terms in the equations of section \ref{sec:app:math-form}. In comparison to the implementation of the centralized algorithm, the decision variable $P$ only depends on the time index. Before the injection expression is added to the model instance, the results from the previous iteration are retrieved from the \lstinline[language=julia]{admm} object in line \texttt{16} and \texttt{19}. This is done with the help of two functions that are defined in the file \path{src/helpers/results.jl}. Both functions make sure that in the first iteration, in which no previous results exist, an empty vector for the corresponding variables is returned. Otherwise, one could easily access the previous iteration results from the \lstinline[language=julia]{admm} object itself. The created variables are then used in the injection expression. As for the centralized problem, the ternary operator is used to determine if the node of the injection term equals the node at which the generator is located. If so, the generation decision variable is added to the injection term and the previous generation result is subtracted from the generation node result as written in section \ref{sec:app:dom}. The \lstinline[language=julia]{admm} object includes a dictionary attribute \lstinline[language=julia]{node_id_to_demand} that is utilized in the injection expression to access the nodal demand by the id of the node. As a next step, the penalty terms for the complicated constraints and the slack variables are added to the JuMP model in line \texttt{39}. Since both the generator and storage subproblem have the same penalty terms, a method called \lstinline[language=julia]{add_penalty_terms!(...)} was created that can be found in the file \path{src/optimization/penalty_terms.jl} and is listed in \ref{sec:appendix:jl:optimization:add-penalty-terms}. The method attaches the penalty terms as expressions to the model instance \lstinline[language=julia]{sub}. Hereby, the norm formulation from section \ref{sec:app:dom} is applied. Thus, the penalty term expression only depends on the time index. As for the slack decision variables of the subproblems, the average value from all subproblems is included in the penalty term. Similar to the method for the generation and node results from the previous iteration, a function is used to get the average value for the slack variables from the previous iteration. This function is defined in the result helper file that was mentioned before. The objective function of the generator problem is attached to the model instance in line \texttt{45} of listing (\ref{jl:sub_gen}). This equation reflects equation (\ref{eq:sub:gen-final}) of section \ref{sec:app:dom} with one exception. The factors before the penalty terms are different, see for example line \texttt{59}. This is due to the fact that equation (\ref{eq:sub:gen-final}) represents a general problem, whereas the objective function of the model instance \lstinline[language=julia]{sub} stands for a specific implementation. See the section \ref{sec:res} for further reference. Once again, the dot product between the $PTDF$ and the dual variables of the power flow constraint is implemented by summing up the entries of the vector due to a Julia type error. Adding the objective function to the model instance concludes the model setup and the model can be optimized in line \texttt{68}. After solving the problem, the values for the penalty terms are clustered in a corresponding structure that is defined in the file \path{src/structures/penalty_terms.jl}. Lastly, the result object of the generator is created. The advantage here is that one can easily access the optimization results from the generator with the help of the structure \lstinline[language=julia]{ResultGenerator} that is defined in the file \path{src/structures/results.jl}. See \ref{sec:appendix:jl:structures:results} for further reference. Returning the result object concludes the method and the optimization of a single generator subproblem is finished.\\
 
+Since the storage subproblem is implemented in the same fashion as the generator subproblem, a detailed description is omitted here. The only difference between the two implementations are the decision variables and the fact that the storage problem includes another constraint to ensure the consistence of the energy level. The implementation of the \lstinline[language=julia]{optimize_subproblem(storage::Storage)} method can be found in \ref{sec:appendix:jl:optimization:sub-storage} for further detail.\\
 
+The last step of the iteration calculation is the concatenation of all subproblem results. The returned result objects are stored in a dictionary that is then used to create the result object of the algorithm. See line \texttt{6} to \texttt{14} in \ref{sec:appendix:jl:optimization:calculate-iteration}. The corresponding structure \lstinline[language=julia]{Result} can be found in \path{src/structures/results.jl}. Once again a custom constructor was written whose only parameter is a dictionary containing all subproblem results indexed by the network element. The constructor then calculates all relevant information for the iteration like the overall sum of generation, discharge and charge values or the line utilization. It also sets up a dictionary in which the results for each node are stored that are represented by the structure \lstinline[language=julia]{ResultNode}. This structure is also defined in the file mentioned above. With the help of the result structure one can also access information about the total costs of the iteration or the injection. Another important information are the average values for the slack variables that are needed to set up the penalty terms.
 
+\subsubsection*{Update Dual Variables}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+\subsubsection*{Check Convergence Status}

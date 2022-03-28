@@ -43,6 +43,23 @@ Typically, \gls{admm} solves problems in the form:
 \begin{subequations}
 	\begin{align}
 		\min{(x, z)} \quad & f(x) + g(z) \\
-		\text{s.t. } \quad & \vb{A}x + \vb{B}z = c
+		\text{s.t.} \quad & \vb{A}x + \vb{B}z = c
 	\end{align}
 \end{subequations}
+
+\begin{equation}
+	L_p(x,y, \lambda) = f(x) + g(z) + \lambda^T(\vb{A}x + \vb{B}z - c) + \frac{\gamma}{2}\big\| \vb{A}x + \vb{B}z - c \big\|^2_2 
+\end{equation}
+
+
+\begin{equation}
+	x^{v+1} := \min{(x)} \quad f(x) + g(z^{v}) + (\lambda^v)^T(\vb{A}x + \vb{B}z^v - c) + \frac{\gamma}{2}\big\| \vb{A}x + \vb{B}z^v - c \big\|^2_2 
+\end{equation}
+
+\begin{equation}
+	z^{v+1} := \min{(z)} \quad f(x^v) + g(z) + (\lambda^v)^T(\vb{A}x^v + \vb{B}z - c) + \frac{\gamma}{2}\big\| \vb{A}x^v + \vb{B}z - c \big\|^2_2 
+\end{equation}
+
+\begin{equation}
+	\lambda^{v+1} :=  \lambda^{v} + \gamma(\vb{A}x^{v+1} + \vb{B}z^{v+1} - c)
+\end{equation}
