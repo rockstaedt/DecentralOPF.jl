@@ -1,30 +1,16 @@
 function run!(admm::ADMM)
     while (!admm.convergence.all)
         calculate_iteration!(admm)
-        
-        println("Generation Results: ")
-        print_results(true, true, false, admm.iteration)
-        
-        update_duals!(admm)
-        
-        check_convergence!(admm)
     end
 end
 
 function calculate_iteration!(admm::ADMM)
-    println("\nIteration: $(admm.iteration)")
-    println("###############")
-    print_duals(admm.iteration)
+    optimize_all_subproblems!(admm)
 
-    unit_to_result = Dict(zip(
-        vcat(generators, storages),
-        vcat(
-            optimize_subproblem.(generators),
-            optimize_subproblem.(storages)
-        )
-    ))
-
-    result = Result(unit_to_result)
-
-    push!(admm.results, result)
+    println("Generation Results: ")
+    print_results(true, true, false, admm.iteration)
+    
+    update_duals!(admm)
+    
+    check_convergence!(admm)
 end
