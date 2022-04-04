@@ -1,3 +1,21 @@
+function optimize_all_subproblems!(admm::ADMM)
+    println("\nIteration: $(admm.iteration)")
+    println("###############")
+    print_duals(admm.iteration)
+
+    unit_to_result = Dict(zip(
+        vcat(generators, storages),
+        vcat(
+            optimize_subproblem.(generators),
+            optimize_subproblem.(storages)
+        )
+    ))
+
+    result = Result(unit_to_result)
+
+    push!(admm.results, result)
+end
+
 function optimize_subproblem(generator::Generator)
     # Create model instance.
     sub = Model(() ->Gurobi.Optimizer(gurobi_env))
