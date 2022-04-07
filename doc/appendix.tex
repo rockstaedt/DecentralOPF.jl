@@ -32,18 +32,23 @@
 
 \subsection{Optimization Methods}
 
-\subsubsection{Calculate an iteration}
+\subsubsection{Calculate an Iteration}
 \label{sec:appendix:jl:optimization:calculate-iteration}
 
-\lstinputlisting[language=julia, firstline=14, lastline=34, nolol=true]{../src/optimization/run.jl}
+\lstinputlisting[language=julia, firstline=7, lastline=16, nolol=true]{../src/optimization/run.jl}
 
-\subsubsection{Add penalty terms to subproblem}
+\subsubsection{Optimize all Subproblems}
+\label{sec:appendix:jl:optimization:optimize-all-subproblems}
+
+\lstinputlisting[language=julia, firstline=1, lastline=17, nolol=true]{../src/optimization/subproblems.jl}
+
+\subsubsection{Add Penalty Terms to Subproblem}
 \label{sec:appendix:jl:optimization:add-penalty-terms}
 
 \lstinputlisting[language=julia, nolol=true]{../src/optimization/penalty_terms.jl}
 
 
-\subsubsection{Method to optimize a single storage subproblem}
+\subsubsection{Optimize a Single Storage Subproblem}
 \label{sec:appendix:jl:optimization:sub-storage}
 
 \lstinputlisting[language=julia, firstline=89, lastline=189, nolol=true]{../src/optimization/subproblems.jl}
