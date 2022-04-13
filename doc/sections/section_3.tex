@@ -357,6 +357,7 @@ The equations to update the dual variables in matrix notation are as follows:
 
 
 \subsection{Documentation of the Implementation in Julia}
+\label{sec:app:implementation}
 
 This section provides the reader with a detailed description of how the previously stated optimization models are implemented in the programming language Julia\footnote{~\url{www.julialang.org}}. Hereby, Julia is used for this thesis because of its extremely fast execution times of scripts. Speed was one of the core design patterns when Julia was developed. Execution times are faster in comparison to other scripting languages like Python\footnote{~\url{www.python.org}} because Julia code is compiled to efficient native code with the help of the Low Level Virtual Machine. In addition, Julia is dynamically typed. This means that the programmer can define types, accelerating the execution time even more. The syntax of the language is easy to understand, making it possible for beginners to get started quickly. With over a thousand contributors, Julia has a large open-source community from which one can expect even more improvements in future times. Lastly, Julia provides a lot of interfaces to open-source and commercial optimization solvers like Gurobi\footnote{~\url{www.gurobi.com}}. These features supported the decision to implement the optimization models in Julia. \\
 
