@@ -172,3 +172,19 @@ texcl=true % interpet comments as LaTeX
 %%% Currency %%%
 \usepackage{currency}
 \DefineCurrency{EUR}{name={euro}, plural={euros}, symbol={\euro}, iso={EUR}, kind=iso}
+
+%%%%% Tables %%%%%
+
+\usepackage{array}
+\usepackage{tabularx} % tables: automatic width
+	\newcolumntype{R}{>{\raggedleft\arraybackslash}X}
+	\newcolumntype{C}{>{\centering\arraybackslash}X}
+	\newcolumntype{Z}[1]{>{\centering\arraybackslash}p{#1}}
+\usepackage{longtable} % tables: tables over multipe pages
+\usepackage{multirow} % tables: cells over multiple rows
+\usepackage{booktabs} % tables: style for horizontal lines
+\usepackage{arydshln} % tables: dashed lines
+\usepackage{dcolumn} % tables: align numbers along decimal point
+	\makeatletter
+	\newcolumntype{T}[3]{>{\textfont0=\the\font\DC@{#1}{#2}{#3}}c<{\DC@end}}
+	\makeatother
