@@ -24,7 +24,7 @@ lambdas = df_duals.loc[
 
 ax.plot(iterations, lambdas)
 
-ax.set_ylabel('Lambda')
+ax.set_ylabel('Lambda for t=1')
 ax.set_xlabel('Iterations')
 ax.grid(True)
 
@@ -53,7 +53,7 @@ for dual_flow in ['mue', 'rho']:
             label=f'L{l}'
         )
 
-    ax.set_ylabel(dual_flow.capitalize())
+    ax.set_ylabel(dual_flow.capitalize() + ' for t=1')
     ax.set_xlabel('Iterations')
     ax.legend()
     ax.grid(True)
