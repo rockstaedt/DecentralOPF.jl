@@ -22,7 +22,7 @@ for case in ['wrong_weight', 'big_gamma']:
 
     ax.plot(iterations, lambdas)
 
-    ax.set_ylabel('Lambda')
+    ax.set_ylabel('Lambda for t=1')
     ax.set_xlabel('Iterations')
     ax.grid(True)
 
@@ -34,7 +34,7 @@ for case in ['wrong_weight', 'big_gamma']:
 
         ax.plot(iterations[50:70], lambdas[50:70])
 
-        ax.set_ylabel('Lambda')
+        ax.set_ylabel('Lambda for t=1')
         ax.set_xlabel('Iterations')
         ax.grid(True)
 
@@ -55,7 +55,7 @@ for case in ['wrong_weight', 'big_gamma']:
 
         ax.plot(iterations, rhos)
 
-        ax.set_ylabel('Rho')
+        ax.set_ylabel('Rho for t=1 and l=2')
         ax.set_xlabel('Iterations')
         ax.grid(True)
 
