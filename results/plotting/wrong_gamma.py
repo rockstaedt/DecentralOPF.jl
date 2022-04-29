@@ -28,3 +28,15 @@ for case in ['wrong_weight', 'big_gamma']:
 
     plt.tight_layout()
     fig.savefig(OUTPUT_DIR + f'{case}_lambda_t1.png', dpi=DPI)
+
+    if case == 'big_gamma':
+        fig, ax = plt.subplots()
+
+        ax.plot(iterations[50:70], lambdas[50:70])
+
+        ax.set_ylabel('Lambda')
+        ax.set_xlabel('Iterations')
+        ax.grid(True)
+
+        plt.tight_layout()
+        fig.savefig(OUTPUT_DIR + f'{case}_lambda_t1_i_50-70.png', dpi=DPI)
