@@ -18,6 +18,5 @@ gas = Generator("gas", 50, 120, "grey", node1)
 generators = [pv, wind, coal, gas]
 
 battery = Storage("battery", 1, 10, 20, "purple", node1)
-ps = Storage("ps", 2, 15, 30, "blue", node1)
 
 storages = [battery]
