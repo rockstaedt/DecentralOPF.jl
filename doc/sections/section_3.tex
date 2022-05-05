@@ -229,8 +229,8 @@ After solving every subproblem, the dual variables of the complicating constrain
 \begin{subequations}
 	\begin{align}
 		\lambda_t^{v+1} &= \lambda_t^{v} + \gamma \cdot (\sum_{g\in\mathcal{G}}P_{g,t}^{v} + \sum_{s\in\mathcal{S}}D_{s,t}^{v} - \sum_{s\in\mathcal{S}}D_{s,t}^{v} - d_{n,t}) \label{eq:update-duals:lambda} \\
-		\rho_{l,t}^{v+1} &= \rho_{l,t}^{v} + \gamma \cdot (\sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot I_{n,t} + \overline{\Upsilon_{l,t}^v} - \overline{f_l}) \\
-		\mu_{l,t}^{v+1} &= \mu_{l,t}^{v} + \gamma \cdot (\overline{\Gamma_{l,t}^v} - \sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot I_{n,t} - \overline{f_l}) \label{eq:update-duals:mu}
+		\mu_{l,t}^{v+1} &= \mu_{l,t}^{v} + \gamma \cdot (\overline{\Gamma_{l,t}^v} - \sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot I_{n,t} - \overline{f_l}) \label{eq:update-duals:mu} \\
+		\rho_{l,t}^{v+1} &= \rho_{l,t}^{v} + \gamma \cdot (\sum_{n \in \mathcal{N}} PTDF_{l,n} \cdot I_{n,t} + \overline{\Upsilon_{l,t}^v} - \overline{f_l})
 	\end{align}
 \end{subequations}
 
@@ -350,8 +350,8 @@ The equations to update the dual variables in matrix notation are as follows:
 \begin{subequations}
 	\begin{align}
 		\lambda^{v+1} &= \lambda^{v} + \gamma \cdot (\vb{P}^v + \vb{D}^{v} - \vb{C}^v - \vb{d}) \\
-		\rho^{v+1} &= \rho^{v} + \gamma \cdot (PTDF \cdot \vb{I} + \vb{\overline{\Upsilon^v}} - \vb{\overline{f}}) \\
-		\mu^{v+1} &= \mu^{v} + \gamma \cdot (\vb{\overline{\Gamma^v}} - PTDF \cdot \vb{I} - \vb{\overline{f}})
+		\mu^{v+1} &= \mu^{v} + \gamma \cdot (\vb{\overline{\Gamma^v}} - PTDF \cdot \vb{I} - \vb{\overline{f}}) \\
+		\rho^{v+1} &= \rho^{v} + \gamma \cdot (PTDF \cdot \vb{I} + \vb{\overline{\Upsilon^v}} - \vb{\overline{f}})
 	\end{align}
 \end{subequations}
 
