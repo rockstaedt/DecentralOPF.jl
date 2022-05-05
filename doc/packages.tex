@@ -180,11 +180,5 @@ texcl=true % interpet comments as LaTeX
 	\newcolumntype{R}{>{\raggedleft\arraybackslash}X}
 	\newcolumntype{C}{>{\centering\arraybackslash}X}
 	\newcolumntype{Z}[1]{>{\centering\arraybackslash}p{#1}}
-\usepackage{longtable} % tables: tables over multipe pages
 \usepackage{multirow} % tables: cells over multiple rows
 \usepackage{booktabs} % tables: style for horizontal lines
-\usepackage{arydshln} % tables: dashed lines
-\usepackage{dcolumn} % tables: align numbers along decimal point
-	\makeatletter
-	\newcolumntype{T}[3]{>{\textfont0=\the\font\DC@{#1}{#2}{#3}}c<{\DC@end}}
-	\makeatother
