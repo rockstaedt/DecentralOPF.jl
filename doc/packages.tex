@@ -78,17 +78,13 @@ bmargin={3cm}
     cmsdate=full,
     doi=false,
     isbn=false,
-    url=false,
+    url=true,
     clearlang=true,
     backend=bibtex
     ]{biblatex-chicago}
     \AtEveryBibitem{
         \clearfield{doi}
         \clearfield{publisher}
-        \clearfield{url}
-        \clearfield{urldate}
-        \clearfield{urlyear}
-        \clearfield{urlmonth}
     }
     
 	\DeclareRedundantLanguages{en,de,fr}{english,ngerman,french}
