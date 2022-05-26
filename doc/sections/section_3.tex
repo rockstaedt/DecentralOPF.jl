@@ -54,7 +54,7 @@ To get a consistent form of all constraints, equation (\ref{eq:storage-level}) i
 	\label{eq:injection-term}
 \end{equation}
 
-Here, $\mathcal{G}_n$ ($\mathcal{S}_n$) represents a subset of all generators (storages) that are located at node $n$. Hence, the injection is basically the sum of the power values of all generators and storages at that node. This injection term is also used in the last constraint (\ref{eq:com:con:pf}) that establishes the network constraints. Here, the line flows on each transmission line are limited by the maximum line capacity $\overline{f_l}$. The line flow of a transmission line $l$ is calculated by multiplying the power distribution factors of that line with the injection term $I_{n,t}$ of a specific node $n$.\\
+Here, $\mathcal{G}_n$ ($\mathcal{S}_n$) represents a subset of all generators (storages) that are located at node $n$. Hence, the injection is basically the sum of the power values of all generators and storages at that node subtracted by the nodal demand. This injection term is also used in the last constraint (\ref{eq:com:con:pf}) that establishes the network constraints. Here, the line flows on each transmission line are limited by the maximum line capacity $\overline{f_l}$. The line flow of a transmission line $l$ is calculated by multiplying the power distribution factors of that line with the injection term $I_{n,t}$ of a specific node $n$.\\
 
 	%TODO Explain PTDF, see maybe document from EMOD.
 	
