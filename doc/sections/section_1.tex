@@ -11,7 +11,7 @@ A centralized market schema has a lot of disadvantages, according to \citet{ahlq
 A decentralized market schema would reduce the coordination work of the \glspl{tso} and would smooth the pathway to incorporate even more renewable energy resources into the transmission grid system. Based on the current state of research, there is a lack of decentralized algorithms that can be used to solve an optimal power flow in a transmission grid system. An optimal power flow optimization is a typical, probably daily task that a \gls{tso} has to conduct to ensure the supply of electricity in its control area. Existing papers that investigate a decentralized optimal power flow often miss a detailed description of the derivation and implementation of the algorithm or ignore new technologies like energy storage resources. Unfortunately, there is not even one paper that published the algorithm's source code. Hence, there was a motivation to establish a decentralized algorithm that solves an optimal power flow and publish the implementation as an open-source package that others can use and extend. This led to the following research questions:
 
 \begin{enumerate}
-	\item Is it possible to implement a decentralized algorithm with the help of \gls{admm} that can optimize an optimal power flow without sharing sensitive cost details?
+	\item Is it possible to implement a decentralized algorithm with the help of the \gls{admm} that can optimize an optimal power flow without sharing sensitive cost details?
 	\item Can the algorithm be extended by energy storage resources that introduce an intertemporal component into the framework?
 	\item Does the decentralized algorithm yield the same results as a centralized algorithm on a case study system?
 \end{enumerate}
