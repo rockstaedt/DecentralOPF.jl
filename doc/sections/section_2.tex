@@ -140,6 +140,7 @@ The optimization problem in (\ref{eq:theo:ed}) has to be extended by an addition
 		 \min \quad & \sum_{g\in\mathcal{G}}mc_g \cdot P_{g} \label{eq:theo:opf} \\[10pt]
 		 \text{s.t. } \quad & 0 \leq P_{g} \leq \overline{p_g} && \forall g \in \set{G} \\
 		 & \sum_{n \in \mathcal{N}} I_n = 0 \label{eq:theo:opf:balance} \\
+		 & I_n = \sum_{g\in\mathcal{G}_n} P_g - d_n \label{eq:theo:opf:injection}  \\
 		 & -\overline{f_l} \leq PTDF_{l,n} \cdot I_n \leq \overline{f_l} && \forall l \in \set{L}, n \in \set{N} \label{eq:theo:opf:flow}
 	\end{align}
 \end{subequations}
@@ -170,12 +171,7 @@ Subsequently, the $PTDF$ can be calculated as:
 	\end{bmatrix}
 \end{equation}
 
-In addition, constraint (\ref{eq:theo:opf:balance}) makes sure that each nodal demand is still satisfied. The nodal injection $I_n$ used in this constraint is calculated by subtracting the nodal demand from the sum of all of the generators located at that node, see equation (\ref{eq:theo:injection}) for further reference.
-
-\begin{equation}
-	I_n = \sum_{g\in\mathcal{G}_n} P_g - d_n
-	\label{eq:theo:injection}
-\end{equation}
+In addition, constraint (\ref{eq:theo:opf:balance}) makes sure that each nodal demand is still satisfied. The nodal injection $I_n$ used in this constraint is calculated by subtracting the nodal demand from the sum of all of the generators located at that node, see equation (\ref{eq:theo:opf:injection}) for further reference.
 
 \begin{table}[h!]
     \centering

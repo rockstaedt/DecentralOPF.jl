@@ -36,6 +36,7 @@ The total system costs of an electrical network are the sum of generation costs 
 		 & 0 \leq E_{s,t} \leq \overline{e_s} && \forall s \in \set{S}, t \in \set{T} \label{eq:com:con:s-level-max}\\
 		 & E_{s,t} - E_{s,t-1} - C_{s,t} + D_{s,t} = 0 && \forall s \in \set{S}, t \in \set{T} \label{eq:com:con:s-level}\\
 		 & \sum_{n \in \mathcal{N}} I_{n,t} = 0 && \forall t \in \set{T} \label{eq:com:con:eb}\\
+		 & 	I_{n,t} = \sum_{g\in\mathcal{G}_n}P_{g,t} + \sum_{s\in\mathcal{S}_n}(D_{s,t}-C_{s,t})-d_{n,t} \label{eq:com:con:injection-term} \\
 		 & -\overline{f_l} \leq PTDF_{l,n} \cdot I_{n,t} \leq \overline{f_l} && \forall l \in \set{L}, t \in \set{T}, n \in \set{N} \label{eq:com:con:pf}
 	\end{align}
 \end{subequations}
@@ -47,14 +48,7 @@ Hereby, $\mathcal{G}$ represents the set of generators and $\mathcal{S}$ the set
 	E_{s,t} = E_{s,t-1} + C_{s,t} - D_{s,t}
 \end{equation}
 
-To get a consistent form of all constraints, equation (\ref{eq:storage-level}) is rearranged to equal zero and integrated in the optimization problem as equation (\ref{eq:com:con:s-level}). $C_{s,t}$ denotes the charging power of a storage $s$ at a time step $t$ and $D_{s,t}$ the discharging power. Another requirement of the previous section was that the demand at every node and every time step $d_{n,t}$ is met by the generating units. This is the so-called system balance. Because the system allows line flows on the transmission lines, the production at a node may exceed the nodal demand. Thus, to ensure that all nodal demands are met, the sum of all nodal injections has to be zero, see equation (\ref{eq:com:con:eb}). The injection at a node $n$ and at time step $t$ yields:
-
-\begin{equation}
-	I_{n,t} = \sum_{g\in\mathcal{G}_n}P_{g,t} + \sum_{s\in\mathcal{S}_n}(D_{s,t}-C_{s,t})-d_{n,t}
-	\label{eq:injection-term}
-\end{equation}
-
-Here, $\mathcal{G}_n$ ($\mathcal{S}_n$) represents a subset of all generators (storages) that are located at node $n$. Hence, the injection is the sum of the power values of all generators and storages at that node subtracted by the nodal demand. This injection term is also used in the last constraint (\ref{eq:com:con:pf}) that establishes the network constraints. Here, the line flows on each transmission line are limited by the maximum line capacity $\overline{f_l}$. The line flow of a transmission line $l$ is calculated by multiplying the power distribution factors of that line with the injection term $I_{n,t}$ of a specific node $n$.\\
+To get a consistent form of all constraints, equation (\ref{eq:storage-level}) is rearranged to equal zero and integrated in the optimization problem as equation (\ref{eq:com:con:s-level}). $C_{s,t}$ denotes the charging power of a storage $s$ at a time step $t$ and $D_{s,t}$ the discharging power. Another requirement of the previous section was that the demand at every node and every time step $d_{n,t}$ is met by the generating units. This is the so-called system balance. Because the system allows line flows on the transmission lines, the production at a node may exceed the nodal demand. Thus, to ensure that all nodal demands are met, the sum of all nodal injections has to be zero, see equation (\ref{eq:com:con:eb}). The injection at a node $n$ and at time step $t$ yields equation (\ref{eq:com:con:injection-term}). Here, $\mathcal{G}_n$ ($\mathcal{S}_n$) represents a subset of all generators (storages) that are located at node $n$. Hence, the injection is the sum of the power values of all generators and storages at that node subtracted by the nodal demand. This injection term is also used in the last constraint (\ref{eq:com:con:pf}) that establishes the network constraints. Here, the line flows on each transmission line are limited by the maximum line capacity $\overline{f_l}$. The line flow of a transmission line $l$ is calculated by multiplying the power distribution factors of that line with the injection term $I_{n,t}$ of a specific node $n$.\\
 	
 To solve the optimization problem, all relevant information must be shared with the central entity. In the example above, this includes marginal costs and the maximal capacities of the generating units. The central entity can then derive the optimal dispatch plan that minimizes the total system costs and informs the generating units about their generation schedule. Thus, the generating units cannot optimize their decision on their own because the central entity is needed for coordination.	
 
