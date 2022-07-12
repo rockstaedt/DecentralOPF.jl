@@ -301,13 +301,13 @@ The storage costs in matrix notation are formulated as follows:
 		g(z) &= g(\vb{D}, \vb{C})\\
 		& = \left(\vb{D} + \vb{C}\right)^T \cdot \vb{mc} \\
 		& = \left(\begin{bmatrix}
-			P_{s_1,t_1} & \dots & P_{s_n,t_1} \\
+			D_{s_1,t_1} & \dots & D_{s_n,t_1} \\
 			\vdots & \ddots & \vdots \\
-			P_{s_1,t_n} & \dots & P_{s_n,t_n}
+			D_{s_1,t_n} & \dots & D_{s_n,t_n}
 		\end{bmatrix} + \begin{bmatrix}
-			P_{s_1,t_1} & \dots & P_{s_n,t_1} \\
+			C_{s_1,t_1} & \dots & C_{s_n,t_1} \\
 			\vdots & \ddots & \vdots \\
-			P_{s_1,t_n} & \dots & P_{s_n,t_n}
+			C_{s_1,t_n} & \dots & C_{s_n,t_n}
 		\end{bmatrix} \right) \cdot \begin{bmatrix}
 			mc_{s_1} \\
 			\vdots \\
