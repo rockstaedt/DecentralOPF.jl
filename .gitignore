@@ -23,11 +23,5 @@ docs/site/
 # environment.
 Manifest.toml
 
-# Temporary TeX files
-*/.texpadtmp
-
-# Main PDF file
-doc/main.pdf
-
-# Progress files
-doc/progress
+# Doc files
+doc/*
